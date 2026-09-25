@@ -1,0 +1,21 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.90"
+license = "MIT"
+repository = "https://github.com/OWNER/oxido"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Small, fast release binary for `oxido`.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

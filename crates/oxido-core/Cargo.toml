@@ -1,0 +1,13 @@
+[package]
+name = "oxido-core"
+version = "0.0.0"
+description = "Pure platform logic for oxido: no I/O, no server (diagnostics, content, grading)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
