@@ -1,0 +1,287 @@
+/*
+ * Oxidō theme: the one global stylesheet (components.json → tailwind.css).
+ *
+ * Two themes built from a dojo and a forge:
+ *   Dojo (light): unbleached gi cotton, tatami straw, sumi ink, indigo-dyed
+ *   cloth (aizome) and iron-oxide rust.
+ *   Forge (dark): a night dojo lit by the forge, with charcoal, cooled iron,
+ *   ember orange and moonlit indigo.
+ *
+ * Variables use shadcn/ui's names (`name` for a surface, `name-foreground` for
+ * text on it), so components added with `shadcn add` pick up these colors.
+ * Our indigo is `--info` (and `--ring`); shadcn's `--accent` is the hover
+ * surface. The rail uses the `--sidebar-*` set, and its tatami edge is
+ * `--sidebar-primary`: the rust. Every text/background pair used in the UI
+ * meets WCAG AA; docs/design.md has the table.
+ *
+ * Dark mode is the `.dark` class on <html>, set by src/lib/theme/theme.ts and,
+ * before first paint, by its PRE_PAINT_SCRIPT in src/root.tsx. tokens.test.ts
+ * checks that both themes define the same variables and that Tailwind knows
+ * all of them.
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --radius: 0.75rem;
+
+  --background: #f4f1e8;
+  --foreground: #1a1916;
+  --card: #fffdf8;
+  --card-foreground: #1a1916;
+  --popover: #fffdf8;
+  --popover-foreground: #1a1916;
+  --primary: #c04218;
+  --primary-foreground: #ffffff;
+  --primary-muted: #fbddd4;
+  --primary-muted-foreground: #832d11;
+  --secondary: #e9e3d0;
+  --secondary-foreground: #1a1916;
+  --muted: #e9e3d0;
+  --muted-foreground: #57534a;
+  --subtle-foreground: #6b665c;
+  --accent: #e9e3d0;
+  --accent-foreground: #1a1916;
+  --destructive: #a11d2e;
+  --destructive-foreground: #ffffff;
+  --destructive-muted: #f6e0e2;
+  --info: #243f6b;
+  --info-foreground: #ffffff;
+  --info-muted: #e1e7f1;
+  --success: #2f6a3b;
+  --success-foreground: #ffffff;
+  --success-muted: #dfecdc;
+  --warning: #7a5200;
+  --warning-foreground: #ffffff;
+  --warning-muted: #f5e8c6;
+  --border: #d9d1bc;
+  --border-strong: #bdb29a;
+  --input: #bdb29a;
+  --ring: #243f6b;
+
+  --sidebar: #e9e3d0;
+  --sidebar-foreground: #1a1916;
+  --sidebar-primary: #c04218;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fffdf8;
+  --sidebar-accent-foreground: #1a1916;
+  --sidebar-border: #d9d1bc;
+  --sidebar-ring: #243f6b;
+
+  /* Code: VS Code's Light Modern with rust-analyzer's colors (decision D21).
+     Syntax colors go on --code only; --code-panel holds terminal output. */
+  --code: #ffffff;
+  --code-foreground: #3b3b3b;
+  --code-border: #e5e5e5;
+  --code-panel: #f8f8f8;
+  --code-muted-foreground: #616161;
+  --code-gutter: #6e7681;
+  --code-keyword: #0000ff;
+  --code-control: #af00db;
+  --code-type: #267f99;
+  --code-function: #795e26;
+  --code-variable: #001080;
+  --code-constant: #0070c1;
+  --code-string: #a31515;
+  --code-number: #098658;
+  --code-comment: #008000;
+  --code-pass: #008000;
+  --code-fail: #cd3131;
+  --code-warning: #bf8803;
+
+  --belt-white: #ffffff;
+  --belt-yellow: #e9c046;
+  --belt-orange: #e07b2f;
+  --belt-green: #3c8a45;
+  --belt-blue: #2c68b0;
+  --belt-purple: #7650ae;
+  --belt-brown: #7a4e2d;
+  --belt-black: #141312;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #121110;
+  --foreground: #efebe3;
+  --card: #1b1a18;
+  --card-foreground: #efebe3;
+  --popover: #1b1a18;
+  --popover-foreground: #efebe3;
+  --primary: #ec6a44;
+  --primary-foreground: #1a0d06;
+  --primary-muted: #3b1d14;
+  --primary-muted-foreground: #feb29c;
+  --secondary: #23211e;
+  --secondary-foreground: #efebe3;
+  --muted: #23211e;
+  --muted-foreground: #aba49a;
+  --subtle-foreground: #958e84;
+  --accent: #23211e;
+  --accent-foreground: #efebe3;
+  --destructive: #f2868f;
+  --destructive-foreground: #121110;
+  --destructive-muted: #3a1519;
+  --info: #9db4e0;
+  --info-foreground: #0e1522;
+  --info-muted: #1c2638;
+  --success: #7cc08a;
+  --success-foreground: #121110;
+  --success-muted: #16281a;
+  --warning: #e5b45a;
+  --warning-foreground: #121110;
+  --warning-muted: #33270f;
+  --border: #34312c;
+  --border-strong: #4a463f;
+  --input: #4a463f;
+  --ring: #9db4e0;
+
+  --sidebar: #23211e;
+  --sidebar-foreground: #efebe3;
+  --sidebar-primary: #ec6a44;
+  --sidebar-primary-foreground: #1a0d06;
+  --sidebar-accent: #1b1a18;
+  --sidebar-accent-foreground: #efebe3;
+  --sidebar-border: #34312c;
+  --sidebar-ring: #9db4e0;
+
+  /* Code: VS Code's Dark Modern with rust-analyzer's colors (decision D21). */
+  --code: #1f1f1f;
+  --code-foreground: #cccccc;
+  --code-border: #2b2b2b;
+  --code-panel: #181818;
+  --code-muted-foreground: #9d9d9d;
+  --code-gutter: #6e7681;
+  --code-keyword: #569cd6;
+  --code-control: #c586c0;
+  --code-type: #4ec9b0;
+  --code-function: #dcdcaa;
+  --code-variable: #9cdcfe;
+  --code-constant: #4fc1ff;
+  --code-string: #ce9178;
+  --code-number: #b5cea8;
+  --code-comment: #6a9955;
+  --code-pass: #0dbc79;
+  --code-fail: #f14c4c;
+  --code-warning: #cca700;
+
+  --belt-white: #f4f1e8;
+  --belt-yellow: #e9c046;
+  --belt-orange: #e07b2f;
+  --belt-green: #4f9e58;
+  --belt-blue: #4a82c8;
+  --belt-purple: #8f6cc4;
+  --belt-brown: #9a6a45;
+  --belt-black: #000000;
+}
+
+@theme {
+  --font-sans: "Zen Kaku Gothic New", "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Shippori Mincho B1", "Iowan Old Style", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-muted-foreground: var(--primary-muted-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-muted: var(--destructive-muted);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-muted: var(--info-muted);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+  --color-code-border: var(--code-border);
+  --color-code-panel: var(--code-panel);
+  --color-code-muted-foreground: var(--code-muted-foreground);
+  --color-code-gutter: var(--code-gutter);
+  --color-code-keyword: var(--code-keyword);
+  --color-code-control: var(--code-control);
+  --color-code-type: var(--code-type);
+  --color-code-function: var(--code-function);
+  --color-code-variable: var(--code-variable);
+  --color-code-constant: var(--code-constant);
+  --color-code-string: var(--code-string);
+  --color-code-number: var(--code-number);
+  --color-code-comment: var(--code-comment);
+  --color-code-pass: var(--code-pass);
+  --color-code-fail: var(--code-fail);
+  --color-code-warning: var(--code-warning);
+
+  --color-belt-white: var(--belt-white);
+  --color-belt-yellow: var(--belt-yellow);
+  --color-belt-orange: var(--belt-orange);
+  --color-belt-green: var(--belt-green);
+  --color-belt-blue: var(--belt-blue);
+  --color-belt-purple: var(--belt-purple);
+  --color-belt-brown: var(--belt-brown);
+  --color-belt-black: var(--belt-black);
+}
+
+@layer base {
+  /* Solid ring, not shadcn's default ring/50: a focus outline needs 3:1 against the page. */
+  * {
+    @apply border-border outline-ring;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  a {
+    @apply text-info;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif leading-tight;
+  }
+  /* shadcn/ui's CardTitle is a div; this gives it the heading face, so no
+     component needs a typography class. */
+  [data-slot="card-title"] {
+    @apply font-serif;
+  }
+}
