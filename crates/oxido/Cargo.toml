@@ -1,0 +1,31 @@
+[package]
+name = "oxido"
+version = "0.0.0"
+description = "The Oxidō course app: a local server that runs your minisql tests and serves the course in your browser"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+# Published in platform phase P11 (see docs/release.md).
+publish = false
+
+[dependencies]
+oxido-core = { path = "../oxido-core" }
+anyhow = "1"
+axum = "0.8"
+clap = { version = "4.6", features = ["derive"] }
+getrandom = "0.4"
+rusqlite = { version = "0.40", features = ["bundled"] }
+rust-embed = { version = "8", features = ["mime-guess"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+webbrowser = "1"
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3"
+tower = { version = "0.5", features = ["util"] }
