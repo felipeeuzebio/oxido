@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules
+/build
+
+/package
+/target
+/test-results
+/playwright-report
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Course source material: reference only, never committed (see docs/roadmap-course.md)
+/transcripts
+
+# OS and editors
+.DS_Store
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# React Router generated types
+/.react-router
+
+# Python bytecode
+__pycache__/
