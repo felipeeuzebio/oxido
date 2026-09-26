@@ -1,0 +1,33 @@
+# cargo-deny: checks the Rust dependency tree in CI (the `Rust dependencies` job).
+# Run it locally with `cargo install --locked cargo-deny`, then `cargo deny check`.
+# Reference: https://embarkstudios.github.io/cargo-deny/
+
+# Security advisories from the RustSec database (https://rustsec.org).
+# Vulnerabilities always fail. If one doesn't affect oxido and there's no fixed
+# version yet, add it to `ignore` with a reason, e.g.
+# { id = "RUSTSEC-2026-0000", reason = "only affects X, which oxido doesn't use" }
+[advisories]
+# Crates marked unmaintained fail only when we depend on them directly; for
+# deeper ones, the crate that pulls them in has to move first.
+unmaintained = "workspace"
+ignore = []
+
+# Every license must be one we can ship inside an MIT binary. A crate with
+# several licenses to choose from ("MIT OR Apache-2.0") passes if one is here.
+[licenses]
+allow = ["Apache-2.0", "BSD-3-Clause", "MIT", "Unicode-3.0", "Zlib"]
+confidence-threshold = 0.9
+
+[bans]
+# Two versions of one crate make builds slower and bigger, but usually wait on
+# upstream updates, so they're reported and don't fail.
+multiple-versions = "warn"
+# `*` versions can change under us. Path dependencies inside the workspace
+# are fine while the crate is unpublished.
+wildcards = "deny"
+allow-wildcard-paths = true
+
+# Crates come from crates.io only: no other registries, no git dependencies.
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

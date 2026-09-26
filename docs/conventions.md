@@ -62,7 +62,7 @@ Commits written with Claude keep the `Co-Authored-By: Claude <noreply@anthropic.
 
 - Rust: rustfmt defaults, clippy with `-D warnings`, edition 2024. No `unwrap()` outside tests; `expect()` with a reason when a failure is truly impossible.
 - TypeScript and React: Biome's formatter and recommended rules (with the React domain), strict TypeScript, function components and hooks. The React Compiler memoizes, so don't add `useMemo`/`useCallback` by hand unless a profiler says so.
-- Keep the app light: justify every new runtime dependency in the PR description.
+- Keep the app light: justify every new runtime dependency in the PR description. CI's cargo-deny job checks a new Rust dependency's license, advisories and source (`deny.toml`).
 
 ## Writing style
 
