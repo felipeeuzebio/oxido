@@ -27,5 +27,5 @@ Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and
 
 - It runs on every non-draft PR. Draft PRs are skipped until marked ready.
 - The review job passes once Claude has posted its review; it doesn't fail on findings. Treat blocking findings like a human reviewer's "request changes": fix them or explain why not before merging.
-- PRs from forks don't get repository secrets, so the automatic review can't run there. A maintainer can comment `@claude review this PR` to trigger it through `claude.yml`.
+- PRs from forks and from Dependabot don't get the repository's secrets, so the automatic review can't run there. The review job is skipped for them, which GitHub counts as passed for the required check, so they aren't blocked. A maintainer can comment `@claude review this PR` to review one through `claude.yml`. To review Dependabot PRs automatically as well, add the Claude secret under Settings > Secrets and variables > Dependabot and remove the Dependabot condition in `claude-review.yml`.
 - The review prompt lives in `claude-review.yml`. It points Claude at `CLAUDE.md`, `docs/testing.md` and `docs/conventions.md`, so updating those docs updates what the review checks.

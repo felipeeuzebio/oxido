@@ -4,7 +4,13 @@ name: Claude Code Review
 # required in the main branch ruleset so nothing merges without it.
 # Auth: set ONE of the secrets CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY
 # (`claude /install-github-app` sets this up). See docs/workflows.md.
-# Fork PRs don't receive secrets; a maintainer can comment "@claude review" instead.
+#
+# PRs from forks and from Dependabot don't receive the repository's secrets, so
+# the review can't run there. The job is skipped for them instead of failing,
+# and GitHub counts a skipped job as passed for a required check. A maintainer
+# can still ask for a review by commenting "@claude review this PR" (claude.yml).
+# To review Dependabot PRs automatically too, add the same secret under
+# Settings > Secrets and variables > Dependabot and drop the Dependabot line below.
 
 on:
   pull_request:
@@ -17,7 +23,10 @@ concurrency:
 jobs:
   review:
     name: Claude review
-    if: github.event.pull_request.draft == false
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,8 +53,9 @@ jobs:
             1. Correctness: bugs, edge cases, error handling, panics in Rust code.
             2. Tests: every behavior change comes with tests, written first (TDD).
                Flag behavior changes without a test that would have failed before.
-            3. Security: Tauri capabilities and CSP, anything that runs student code,
-               anything that fetches remote content.
+            3. Security: oxido's host, session and origin checks (CLAUDE.md rule 5),
+               anything that runs cargo or student code, anything that fetches
+               remote content.
             4. Performance: the app must stay light (no heavy dependency without a reason,
                lazy-load the editor and the video player).
             5. Course rules, when content/ or course/ changed: text lessons follow the
