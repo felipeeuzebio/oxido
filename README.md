@@ -58,10 +58,10 @@ You need [Rust](https://rustup.rs) and [Bun](https://bun.sh).
 
 ```sh
 bun install                          # also installs the git hooks
-bun run build && cargo run -p oxido  # the app as students get it, at http://127.0.0.1:7878
+bun run build && cargo run -p oxido -- serve --project dev/sandbox  # the app as students get it
 ```
 
-For frontend work with hot reload, run `cargo run -p oxido -- serve --dev --no-open` in one terminal and open the link it prints, which starts a session. Then run `bun run dev` in a second terminal and use http://127.0.0.1:5173.
+For frontend work with hot reload, run `cargo run -p oxido -- serve --dev --no-open --project dev/sandbox` in one terminal and open the link it prints, which starts a session. Then run `bun run dev` in a second terminal and use http://127.0.0.1:5173.
 
 | Task | Command |
 |---|---|

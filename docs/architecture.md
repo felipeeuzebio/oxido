@@ -37,7 +37,7 @@ Both serve the same frontend build. The page asks `/api/health` at startup: if `
 
 ## The `oxido` server
 
-`oxido` (or `oxido serve`) opens `<project>/.oxido/oxido.db`, binds `127.0.0.1:7878`, prints a launch link and opens the browser. Ctrl+C stops it.
+`oxido` (or `oxido serve`) first finds the course project: the folder it starts in, or the nearest folder above it, that holds `oxido.toml`, the way cargo finds `Cargo.toml`. `oxido init` writes that file (P8). Outside a project it stops and says to `cd` into one or run `oxido init`, so it never starts a course in whatever folder it happens to run in. It then opens `<project>/.oxido/oxido.db`, binds `127.0.0.1:7878`, prints a launch link and opens the browser. Ctrl+C stops it. For working on `oxido` itself, `dev/sandbox/` is a ready-made project.
 
 | Part | Crate | Notes |
 |---|---|---|

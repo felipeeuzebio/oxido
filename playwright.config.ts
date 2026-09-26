@@ -18,6 +18,7 @@ export default defineConfig({
   webServer: {
     command:
       "bun run build && rm -rf target/e2e-project && mkdir -p target/e2e-project && " +
+      "echo 'course = \"minisql\"' > target/e2e-project/oxido.toml && " +
       "cargo run --quiet -p oxido -- serve --port 4173 --no-open --project target/e2e-project",
     url: "http://127.0.0.1:4173/api/health",
     env: { OXIDO_TOKEN: E2E_TOKEN },

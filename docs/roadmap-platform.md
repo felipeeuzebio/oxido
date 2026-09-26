@@ -102,7 +102,7 @@ Tests first: runner integration test against a real crate (CI); unit tests for t
 
 Done when:
 - `course/minisql/` has a starter, a reference solution and a stripe test file per stripe (`tests/stripe_NN.rs`) for each belt.
-- `oxido init` creates the starter in a new folder, runs `git init` with a first commit, and offers to put it on GitHub, public or private (decision D17). `oxido check` runs the current stripe in the terminal.
+- `oxido init` creates the starter in a new folder with an `oxido.toml` (the file `oxido` looks for to find the project), runs `git init` with a first commit, and offers to put it on GitHub, public or private (decision D17). `oxido check` runs the current stripe in the terminal.
 - `oxido` watches the student's files, reruns the current stripe's tests and `cargo clippy` on save (stale runs cancelled), parses the output, records stripe passes, and pushes results to the page with server-sent events.
 - The build step page shows Tests, Problems (clippy) and Output tabs. File and line references are `vscode://file/<path>:<line>` links, so the browser opens VS Code and `oxido` starts no process for it.
 - CI proves every reference solution passes its stripe tests and every starter fails them.

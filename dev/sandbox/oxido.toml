@@ -1,0 +1,4 @@
+# A course project for trying oxido while working on it: `bun run dev:all`, or
+# `cargo run -p oxido -- serve --project dev/sandbox`. Progress goes to .oxido/
+# in this folder, which git ignores.
+course = "minisql"

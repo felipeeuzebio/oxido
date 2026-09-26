@@ -6,6 +6,7 @@ This folder is filled in during platform phase P8. Planned layout:
 
 ```
 course/minisql/
+├── oxido.toml       copied into every student project; marks it for oxido
 ├── belts/
 │   ├── 01-white/
 │   │   ├── starter/     code the student starts this belt from

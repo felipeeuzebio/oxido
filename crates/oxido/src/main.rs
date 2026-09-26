@@ -26,7 +26,8 @@ struct ServeArgs {
     /// Port on 127.0.0.1. Keep the default so your browser remembers settings.
     #[arg(long, default_value_t = 7878)]
     port: u16,
-    /// Your minisql project folder. Progress is saved in its .oxido/ folder.
+    /// Your minisql project folder, or any folder inside it (the one with
+    /// oxido.toml). Progress is saved in its .oxido/ folder.
     #[arg(long, default_value = ".")]
     project: PathBuf,
     /// Don't open the browser.
@@ -65,7 +66,8 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn serve(args: ServeArgs) -> anyhow::Result<()> {
-    let store = open_store(&args.project)?;
+    let project = oxido::project::find(&args.project)?;
+    let store = open_store(&project)?;
     // OXIDO_TOKEN fixes the launch token for automated tests; students never need it.
     let launch_token = match std::env::var("OXIDO_TOKEN") {
         Ok(token) if !token.is_empty() => token,
@@ -119,9 +121,6 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
 
 /// Opens `<project>/.oxido/oxido.db`, creating the folder (git-ignored) if needed.
 fn open_store(project: &Path) -> anyhow::Result<Store> {
-    let project = project
-        .canonicalize()
-        .with_context(|| format!("can't find the project folder {}", project.display()))?;
     let dir = project.join(".oxido");
     std::fs::create_dir_all(&dir).with_context(|| format!("can't create {}", dir.display()))?;
     let ignore = dir.join(".gitignore");

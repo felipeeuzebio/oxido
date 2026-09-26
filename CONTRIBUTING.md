@@ -6,7 +6,7 @@ Thanks for helping. This page is the short version; details are linked.
 
 1. Install [Rust](https://rustup.rs) and [Bun](https://bun.sh).
 2. `bun install`. This also installs the git hooks.
-3. `bun run build && cargo run -p oxido` to run the app, or see the README for hot reload.
+3. `bun run build && cargo run -p oxido -- serve --project dev/sandbox` to run the app on the sandbox project, or see the README for hot reload.
 
 ## Workflow
 

@@ -4,6 +4,7 @@
 //!
 //! Pure logic that doesn't touch files or the network lives in `oxido-core`.
 
+pub mod project;
 pub mod server;
 pub mod store;
 pub mod ui;
