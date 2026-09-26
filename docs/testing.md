@@ -23,6 +23,7 @@ The project is built test first (see the TDD rule in [roadmap-platform.md](roadm
 - Server tests never open a port: they build the router with an in-memory store and in-memory UI files (`MemoryAssets`) and send requests with `oneshot`. The real port, cookie and browser behavior are covered once in `e2e/session.test.ts`.
 - Fixtures come from real output where possible. `crates/oxido-core/tests/fixtures/` holds clippy JSON captured from a real crate, with paths normalized to `/workspace`.
 - Every store query runs in at least one store test (there's no ORM to check SQL at compile time, decision D19). Each migration has a test that starts from a frozen copy of the previous schema, `crates/oxido/tests/fixtures/schema-N.sql`, with rows in it.
+- The `oxido` binary is also tested the way students run it (`crates/oxido/tests/cli.rs` and `doctor.rs`, helpers in `tests/common/`). The `oxido doctor` tests put fake `rustc`, `cargo` and `git` scripts on the PATH, so the result doesn't depend on the tools installed where the tests run; that makes them Unix-only.
 - Test names describe behavior (`a_stripe_remembers_when_it_first_passed`), not functions.
 - A bug fix starts with a test that reproduces the bug.
 - Don't test framework behavior (that React renders, that serde parses JSON).

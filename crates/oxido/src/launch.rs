@@ -61,29 +61,35 @@ impl Launch {
     /// Whether the `oxido` that wrote this still answers on its port. Asks its
     /// `/api/health` and compares the instance. Blocks for at most a second or so.
     pub fn is_running(&self) -> bool {
-        self.health_instance().as_deref() == Some(self.instance.as_str())
+        health(self.port).is_some_and(|health| health.instance == self.instance)
     }
+}
 
-    fn health_instance(&self) -> Option<String> {
-        let address = SocketAddr::from((Ipv4Addr::LOCALHOST, self.port));
-        let mut stream = TcpStream::connect_timeout(&address, Duration::from_millis(500)).ok()?;
-        stream.set_read_timeout(Some(Duration::from_secs(1))).ok()?;
-        stream
-            .set_write_timeout(Some(Duration::from_secs(1)))
-            .ok()?;
-        let request = format!(
-            "GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{}\r\nConnection: close\r\n\r\n",
-            self.port
-        );
-        stream.write_all(request.as_bytes()).ok()?;
-        let mut response = Vec::new();
-        stream.take(64 * 1024).read_to_end(&mut response).ok()?;
-        let response = String::from_utf8_lossy(&response);
-        let (head, body) = response.split_once("\r\n\r\n")?;
-        if !head.starts_with("HTTP/1.1 200") {
-            return None;
-        }
-        let health: serde_json::Value = serde_json::from_str(body).ok()?;
-        health["instance"].as_str().map(str::to_owned)
+/// What an `oxido`'s `/api/health` reports. The route needs no session.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct Health {
+    pub version: String,
+    pub instance: String,
+}
+
+/// Asks `127.0.0.1:port` for `/api/health`. `None` if nothing answers there,
+/// or what answers isn't an `oxido`. Blocks for at most a second or so.
+pub fn health(port: u16) -> Option<Health> {
+    let address = SocketAddr::from((Ipv4Addr::LOCALHOST, port));
+    let mut stream = TcpStream::connect_timeout(&address, Duration::from_millis(500)).ok()?;
+    stream.set_read_timeout(Some(Duration::from_secs(1))).ok()?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(1)))
+        .ok()?;
+    let request =
+        format!("GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: close\r\n\r\n");
+    stream.write_all(request.as_bytes()).ok()?;
+    let mut response = Vec::new();
+    stream.take(64 * 1024).read_to_end(&mut response).ok()?;
+    let response = String::from_utf8_lossy(&response);
+    let (head, body) = response.split_once("\r\n\r\n")?;
+    if !head.starts_with("HTTP/1.1 200") {
+        return None;
     }
+    serde_json::from_str(body).ok()
 }

@@ -39,9 +39,11 @@ Both serve the same frontend build. The page asks `/api/health` at startup: if `
 
 `oxido` (or `oxido serve`) first finds the course project: the folder it starts in, or the nearest folder above it, that holds `oxido.toml`, the way cargo finds `Cargo.toml`. `oxido init` writes that file (P8). Outside a project it stops and says to `cd` into one or run `oxido init`, so it never starts a course in whatever folder it happens to run in. It then opens `<project>/.oxido/oxido.db`, binds `127.0.0.1:7878`, prints a launch link and opens the browser. Ctrl+C stops it. For working on `oxido` itself, `dev/sandbox/` is a ready-made project.
 
+`oxido doctor` checks what the course needs and prints one line per check, with the fix under each problem: Rust (`rustc` and `cargo` on the PATH, from the same install, no older than the workspace's `rust-version`), clippy, Git, the project, the progress file (its schema version and SQLite's quick check) and the server (running for this project, or who holds the port; skipped outside a project, where there's no telling whose `oxido` is on it). It exits with 1 only when something fails; a missing clippy or Git, or a busy port, is a warning. It tells a tool that isn't installed from one that's installed but won't run (rustup with no default toolchain), and a damaged database from one the student can't open. It only looks: it never creates `.oxido/` or starts anything, and it opens the database read-only, so even a journal left by a crash waits for the next `oxido` run. The report may end up pasted into an issue, so it never prints the launch link and shows paths in the home folder as `~/...`. The rules live in `oxido-core` (`doctor.rs`), the lookups in `oxido`.
+
 | Part | Crate | Notes |
 |---|---|---|
-| Command line | `clap` | `serve` today; `init` (create the minisql starter) and `check` (run the current stripe) come with P8 |
+| Command line | `clap` | `serve` and `doctor` today; `init` (create the minisql starter) and `check` (run the current stripe) come with P8 |
 | HTTP | `axum` on `tokio` | JSON API under `/api`, the UI everywhere else |
 | UI files | `rust-embed` | release builds embed `build/client`; debug builds read it from disk |
 | Storage | `rusqlite` (bundled SQLite) | see below |

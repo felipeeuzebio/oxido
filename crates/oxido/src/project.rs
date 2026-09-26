@@ -9,13 +9,17 @@ use std::path::{Path, PathBuf};
 /// The file that marks a course project's root folder.
 pub const MARKER: &str = "oxido.toml";
 
+/// What to do when `oxido` runs outside a project.
+pub const HOW_TO_START: &str =
+    "Go to your minisql folder first (cd minisql), or create a project with `oxido init`.";
+
 #[derive(Debug, thiserror::Error)]
 pub enum ProjectError {
     #[error("can't find the folder {0}")]
     Missing(PathBuf),
     #[error(
         "{0} isn't inside an Oxidō project: there's no {MARKER} in it or in any folder above.\n\
-         Go to your minisql folder first (cd minisql), or create a project with `oxido init`."
+         {HOW_TO_START}"
     )]
     NotAProject(PathBuf),
 }

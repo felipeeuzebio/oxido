@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 
 use anyhow::Context;
 use clap::{Parser, Subcommand};
@@ -15,16 +16,22 @@ struct Cli {
     command: Option<Command>,
 }
 
+/// The port `oxido` starts on unless told otherwise.
+const DEFAULT_PORT: u16 = 7878;
+
 #[derive(Subcommand)]
 enum Command {
     /// Start the course in your browser (the default). Ctrl+C stops it.
     Serve(ServeArgs),
+    /// Check that everything the course needs is in place, and say how to fix
+    /// what isn't. Changes nothing.
+    Doctor(DoctorArgs),
 }
 
 #[derive(clap::Args)]
 struct ServeArgs {
     /// Port on 127.0.0.1. Keep the default so your browser remembers settings.
-    #[arg(long, default_value_t = 7878)]
+    #[arg(long, default_value_t = DEFAULT_PORT)]
     port: u16,
     /// Your minisql project folder, or any folder inside it (the one with
     /// oxido.toml). Progress is saved in its .oxido/ folder.
@@ -38,10 +45,20 @@ struct ServeArgs {
     dev: bool,
 }
 
+#[derive(clap::Args)]
+struct DoctorArgs {
+    /// Your minisql project folder, or any folder inside it.
+    #[arg(long, default_value = ".")]
+    project: PathBuf,
+    /// The port you start oxido on.
+    #[arg(long, default_value_t = DEFAULT_PORT)]
+    port: u16,
+}
+
 impl Default for ServeArgs {
     fn default() -> Self {
         Self {
-            port: 7878,
+            port: DEFAULT_PORT,
             project: PathBuf::from("."),
             no_open: false,
             dev: false,
@@ -50,7 +67,7 @@ impl Default for ServeArgs {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> anyhow::Result<ExitCode> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -60,8 +77,25 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     match Cli::parse().command {
-        Some(Command::Serve(args)) => serve(args).await,
-        None => serve(ServeArgs::default()).await,
+        Some(Command::Serve(args)) => serve(args).await.map(|()| ExitCode::SUCCESS),
+        Some(Command::Doctor(args)) => Ok(doctor(&args)),
+        None => serve(ServeArgs::default())
+            .await
+            .map(|()| ExitCode::SUCCESS),
+    }
+}
+
+/// Prints the report. Fails (exit code 1) only when something must be fixed.
+fn doctor(args: &DoctorArgs) -> ExitCode {
+    // The header first: asking rustc can take a while when rustup has to
+    // install the toolchain a project asks for.
+    println!("Oxidō doctor, oxido {}\n", env!("CARGO_PKG_VERSION"));
+    let checks = oxido::doctor::run(&args.project, args.port);
+    print!("{}", oxido_core::doctor::render(&checks));
+    if oxido_core::doctor::passed(&checks) {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }
 

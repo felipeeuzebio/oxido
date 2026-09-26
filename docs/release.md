@@ -24,7 +24,7 @@ The version lives in `package.json` and `crates/oxido/Cargo.toml` (the `oxido` p
 - clippy's `incompatible_msrv` lint, on in every clippy run, flags standard library functions newer than `rust-version`.
 - Cargo's resolver picks dependency versions that support `rust-version` when it updates `Cargo.lock`. Today the most demanding dependencies need 1.85.
 
-Raise it on purpose, in its own PR, when there's a reason to.
+`oxido doctor` holds the student's own Rust to the same number, so the course and `oxido` never disagree about the minimum. Raise it on purpose, in its own PR, when there's a reason to.
 
 ## How students will install `oxido` (P11)
 

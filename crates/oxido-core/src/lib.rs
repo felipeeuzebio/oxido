@@ -1,7 +1,8 @@
-//! Platform logic for oxido that doesn't depend on Tauri.
+//! Platform logic for oxido that does no I/O: no files, processes or network.
 //!
-//! Keeping this crate free of UI and Tauri types means it can be tested with a
-//! plain `cargo test` on any machine, and reused by the desktop app, build
+//! Everything here takes plain values and returns plain values, so it's tested
+//! with a plain `cargo test` on any machine and reused by `oxido`, build
 //! scripts and CI tools.
 
 pub mod diagnostics;
+pub mod doctor;

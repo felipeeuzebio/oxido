@@ -12,7 +12,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
 
 /// Migrations, oldest first. `MIGRATIONS[n]` upgrades version `n` to `n + 1`.
@@ -64,6 +64,8 @@ pub enum StoreError {
          {supported}); update oxido with `cargo install --locked oxido`"
     )]
     NewerSchema { found: u32, supported: u32 },
+    #[error("the database is damaged: {0}")]
+    Damaged(String),
     #[error("note {0} doesn't exist")]
     NoteNotFound(i64),
     #[error("{0}")]
@@ -389,6 +391,42 @@ impl Store {
             )
             .optional()?
             .ok_or(StoreError::NoteNotFound(id))
+    }
+}
+
+/// The schema version of the database at `path`, after SQLite's quick
+/// integrity check. For `oxido doctor`: it opens the file read-only, so it
+/// never creates, migrates or writes it, not even to merge in a journal a
+/// crash left behind; it reports a newer schema instead of refusing it; and
+/// it's safe while `oxido` has the file open. SQLite may leave its `-shm` and
+/// `-wal` files next to the database, which the next `oxido` run tidies up.
+///
+/// A file SQLite finds damaged, or that isn't a database, is
+/// [`StoreError::Damaged`]; one it can't open (permissions) is not.
+pub fn inspect(path: &Path) -> Result<u32, StoreError> {
+    let conn = Connection::open_with_flags(
+        path,
+        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )?;
+    conn.busy_timeout(std::time::Duration::from_secs(2))?;
+    let check: String = conn
+        .pragma_query_value(None, "quick_check", |row| row.get(0))
+        .map_err(damaged)?;
+    if check != "ok" {
+        return Err(StoreError::Damaged(check));
+    }
+    conn.pragma_query_value(None, "user_version", |row| row.get(0))
+        .map_err(damaged)
+}
+
+/// SQLite's "not a database" and "malformed" errors mean the file itself is
+/// broken; other errors don't.
+fn damaged(error: rusqlite::Error) -> StoreError {
+    match error.sqlite_error_code() {
+        Some(rusqlite::ErrorCode::NotADatabase | rusqlite::ErrorCode::DatabaseCorrupt) => {
+            StoreError::Damaged(error.to_string())
+        }
+        _ => StoreError::Sqlite(error),
     }
 }
 

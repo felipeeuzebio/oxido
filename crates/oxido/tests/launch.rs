@@ -90,3 +90,28 @@ async fn nothing_listening_means_not_running() {
     };
     assert!(!is_running(sample(port)).await);
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn health_names_the_oxido_on_a_port() {
+    let port = running_oxido().await;
+    let health = tokio::task::spawn_blocking(move || oxido::launch::health(port))
+        .await
+        .unwrap()
+        .expect("oxido answers");
+    assert_eq!(health.instance, INSTANCE);
+    assert_eq!(health.version, env!("CARGO_PKG_VERSION"));
+}
+
+#[test]
+fn another_program_on_the_port_has_no_health() {
+    let listener = std::net::TcpListener::bind(("127.0.0.1", 0)).unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let other = std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        let (mut stream, _) = listener.accept().unwrap();
+        let _ = stream.read(&mut [0; 1024]);
+        let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n<h1>hello</h1>");
+    });
+    assert_eq!(oxido::launch::health(port), None);
+    other.join().unwrap();
+}

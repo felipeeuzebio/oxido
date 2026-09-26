@@ -213,3 +213,127 @@ fn rejects_empty_notes_and_malformed_ids() {
         Err(StoreError::Invalid(_))
     ));
 }
+
+// `oxido doctor` looks at the database with `inspect`, which only reads.
+
+#[test]
+fn inspecting_reads_the_schema_version_and_never_writes_the_database() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    Store::open(&path)
+        .unwrap()
+        .save_video_position("3.4", 391)
+        .unwrap();
+    let before = std::fs::read(&path).unwrap();
+    assert_eq!(oxido::store::inspect(&path).unwrap(), SCHEMA_VERSION);
+    assert_eq!(std::fs::read(&path).unwrap(), before);
+}
+
+#[test]
+fn inspecting_after_a_crash_leaves_the_unsaved_journal_alone() {
+    // A crashed oxido leaves recent writes in oxido.db-wal, not yet merged
+    // into oxido.db. The next oxido run merges them; doctor must not.
+    let live = tempfile::tempdir().unwrap();
+    let store = Store::open(&live.path().join("oxido.db")).unwrap();
+    store.save_video_position("3.4", 391).unwrap();
+    let crashed = tempfile::tempdir().unwrap();
+    for name in ["oxido.db", "oxido.db-wal"] {
+        std::fs::copy(live.path().join(name), crashed.path().join(name)).unwrap();
+    }
+    let path = crashed.path().join("oxido.db");
+    let (db, wal) = (
+        std::fs::read(&path).unwrap(),
+        std::fs::read(crashed.path().join("oxido.db-wal")).unwrap(),
+    );
+    assert!(
+        !wal.is_empty(),
+        "the journal should hold the unmerged writes"
+    );
+
+    assert_eq!(oxido::store::inspect(&path).unwrap(), SCHEMA_VERSION);
+    assert_eq!(std::fs::read(&path).unwrap(), db);
+    assert_eq!(
+        std::fs::read(crashed.path().join("oxido.db-wal")).unwrap(),
+        wal
+    );
+    drop(store);
+}
+
+#[test]
+fn inspecting_works_while_oxido_has_the_database_open() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    let store = Store::open(&path).unwrap();
+    store.save_video_position("3.4", 391).unwrap();
+    assert_eq!(oxido::store::inspect(&path).unwrap(), SCHEMA_VERSION);
+    store.save_video_position("3.4", 400).unwrap();
+}
+
+#[test]
+fn inspecting_reports_a_newer_schema_instead_of_refusing_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    rusqlite::Connection::open(&path)
+        .unwrap()
+        .pragma_update(None, "user_version", SCHEMA_VERSION + 1)
+        .unwrap();
+    assert_eq!(oxido::store::inspect(&path).unwrap(), SCHEMA_VERSION + 1);
+}
+
+#[test]
+fn a_file_that_isnt_a_database_is_damaged() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    std::fs::write(&path, "these are my notes, not a database".repeat(100)).unwrap();
+    match oxido::store::inspect(&path) {
+        Err(error @ StoreError::Damaged(_)) => {
+            assert!(error.to_string().contains("not a database"), "{error}");
+        }
+        other => panic!("expected Damaged, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_database_with_wrecked_pages_is_damaged() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    {
+        let store = Store::open(&path).unwrap();
+        for class in 0..200 {
+            store.save_video_position(&format!("c{class}"), 1).unwrap();
+        }
+    }
+    // Wreck everything after the first page (the header stays readable).
+    let mut bytes = std::fs::read(&path).unwrap();
+    let page_size = u16::from_be_bytes([bytes[16], bytes[17]]) as usize;
+    for byte in &mut bytes[page_size..] {
+        *byte = 0xAB;
+    }
+    std::fs::write(&path, bytes).unwrap();
+    assert!(matches!(
+        oxido::store::inspect(&path),
+        Err(StoreError::Damaged(_))
+    ));
+}
+
+#[test]
+fn a_database_that_cant_be_opened_is_not_called_damaged() {
+    // Advice for a damaged file is to start fresh; for a file the student
+    // can't open (a folder here, usually permissions), that would be wrong.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    std::fs::create_dir(&path).unwrap();
+    match oxido::store::inspect(&path) {
+        Err(StoreError::Damaged(detail)) => panic!("called damaged: {detail}"),
+        Err(_) => {}
+        Ok(version) => panic!("opened a folder as schema {version}"),
+    }
+}
+
+#[test]
+fn inspecting_never_creates_a_database() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    assert!(oxido::store::inspect(&path).is_err());
+    assert!(!path.exists());
+}
