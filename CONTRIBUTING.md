@@ -24,7 +24,7 @@ Installed by lefthook when you run `bun install`:
 
 | Hook | Runs |
 |---|---|
-| pre-commit | Biome on staged files, `cargo fmt` (fixes are re-staged) |
+| pre-commit | Biome on the staged files; rustfmt on the staged Rust files and the modules they declare with `mod x;` (fixes to staged files are re-staged) |
 | commit-msg | commitlint |
 | pre-push | Rust tests and clippy, Vitest, the type check |
 

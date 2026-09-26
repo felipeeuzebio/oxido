@@ -9,9 +9,13 @@ pre-commit:
       glob: "*.{js,ts,tsx,json,jsonc,css,html}"
       run: bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       stage_fixed: true
+    # The staged files, not the whole workspace, so other work in progress is
+    # left alone. rustfmt also formats the modules a staged file declares with
+    # `mod x;` (stable rustfmt can't skip them); fixes there stay unstaged.
+    # The edition must match Cargo.toml (tooling.test.ts checks).
     rustfmt:
       glob: "*.rs"
-      run: cargo fmt --all
+      run: rustfmt --edition 2024 {staged_files}
       stage_fixed: true
 
 commit-msg:

@@ -33,3 +33,16 @@ describe("GitHub workflows", () => {
     expect(read(".github/dependabot.yml")).toMatch(/package-ecosystem:\s*github-actions/);
   });
 });
+
+describe("git hooks", () => {
+  it("format only the staged Rust files, in the workspace's edition", () => {
+    // rustfmt called directly doesn't read Cargo.toml, so the hook names the
+    // edition. If it drifted, the hook and CI's `cargo fmt --check` would
+    // disagree about the same file.
+    const edition = read("Cargo.toml").match(/^edition = "(\d+)"$/m)?.[1];
+    expect(edition, "Cargo.toml sets [workspace.package] edition").toBeTruthy();
+    const hook = read("lefthook.yml").match(/^ {4}rustfmt:\n((?: {6}.*\n)+)/m)?.[1] ?? "";
+    expect(hook).toMatch(new RegExp(`run: rustfmt --edition ${edition} \\{staged_files\\}$`, "m"));
+    expect(hook).toMatch(/stage_fixed: true/);
+  });
+});
