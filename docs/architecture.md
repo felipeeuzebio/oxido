@@ -89,7 +89,7 @@ Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies
 
 React 19 with React Router 8 in framework mode, `ssr: false`: a static single-page app whose pages are pre-rendered to HTML at build time. Vite 8 builds it (Rolldown and Oxc), with the React Compiler handling memoization. `BASE_PATH` sets the path prefix for GitHub Pages; the local server uses `/`.
 
-During development, `bun run dev` serves the UI on port 5173 and proxies `/api` to `oxido serve --dev` on 7878.
+During development, `bun run dev:all` (`scripts/dev.ts`) runs `oxido serve --dev` on the sandbox project and `bun run dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878.
 
 ## Theme
 

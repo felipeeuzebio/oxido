@@ -12,8 +12,8 @@ Oxidō is a course platform. Students run `oxido`, a small Rust server, in their
 bun install                      # deps + git hooks (lefthook)
 bun run build                    # frontend → build/client (oxido serves it)
 cargo run -p oxido -- serve --project dev/sandbox   # the app on the sandbox project (open the printed link)
-bun run dev                      # frontend with hot reload on :5173; pair with
-cargo run -p oxido -- serve --dev --no-open --project dev/sandbox
+bun run dev:all                  # oxido + Vite with hot reload: open the link oxido prints
+                                 # once, then work on http://127.0.0.1:5173 (Ctrl+C stops both)
 bun run test                     # Vitest (unit + component)
 bun run test:e2e                 # Playwright against the real oxido binary
 bun run check                    # React Router typegen + TypeScript 7
