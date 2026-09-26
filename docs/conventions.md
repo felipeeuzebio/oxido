@@ -16,6 +16,8 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`
 
 `feat` bumps the minor version and `fix` the patch version (release-please). A `!` after the scope or a `BREAKING CHANGE:` footer marks a breaking change.
 
+Automated PRs follow the same rules: release-please titles its PRs `chore(release): release x.y.z`, and Dependabot's are `chore(deps): bump ...`, development dependencies included.
+
 The scope is optional. When present, it must be one of these (enforced by `commitlint.config.js`):
 
 | Scope | Covers |

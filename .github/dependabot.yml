@@ -1,33 +1,31 @@
 version: 2
+# Commit messages and PR titles come out as "chore(deps): bump ...", for
+# development dependencies too, so they pass commitlint's scope list.
 updates:
   - package-ecosystem: cargo
     directory: /
     schedule:
       interval: weekly
     commit-message:
-      prefix: chore
-      include: scope
-    groups:
-      tauri:
-        patterns: ["tauri*"]
+      prefix: chore(deps)
 
   - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
     commit-message:
-      prefix: chore
-      include: scope
+      prefix: chore(deps)
     groups:
-      svelte:
-        patterns: ["svelte*", "@sveltejs/*"]
-      tauri:
-        patterns: ["@tauri-apps/*"]
+      react:
+        patterns: ["react", "react-dom", "react-router", "@react-router/*", "@types/react*"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+      vite:
+        patterns: ["vite", "vitest", "@vitejs/*", "@rolldown/*"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     commit-message:
-      prefix: chore
-      include: scope
+      prefix: chore(deps)

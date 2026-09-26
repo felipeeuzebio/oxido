@@ -13,7 +13,7 @@ The version lives in `package.json` and `crates/oxido/Cargo.toml` (the `oxido` p
 ## Flow today
 
 1. Merge PRs into `main` as usual.
-2. release-please opens or updates a PR named `chore(main): release x.y.z` with the changelog.
+2. release-please opens or updates a PR named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
 3. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
 
 ## How students will install `oxido` (P11)
