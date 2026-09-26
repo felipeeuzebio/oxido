@@ -1,0 +1,89 @@
+# Decisions
+
+Short records of choices already made, so nobody (human or agent) re-opens them by accident. To change one, open a PR that edits this file and explains why.
+
+## D1. Course project: Mini SQL database (2026-09-25)
+
+One project grows through the whole course, from white belt to black belt. The Mini SQL database was chosen over a log analyzer, a ray tracer, an autograd engine, an interpreter and a chat server because every chapter has a natural job in it, including `Weak` pointers (schema catalog) and threads (parallel import, shared sessions), and it ends with a satisfying server. Trade-off: a real B-tree is too much, so the index is a simple binary tree.
+
+## D2. Own app instead of mdBook (2026-09-25)
+
+Progress tracking, notes, video syncing and the editor would all be scripts bolted onto an mdBook theme. We render content ourselves but keep it in Markdown and TOML, and borrow mdbook-quiz's question kinds so content stays portable.
+
+## D3. Tauri 2 desktop app plus a static web build (2026-09-25, replaced by D11)
+
+Live clippy needs a real Rust toolchain, which students install in class 1 anyway. The same frontend is published as a static site for reading and watching; there, code runs through the Rust Playground.
+
+## D4. Svelte 5 + SvelteKit (adapter-static), Biome, Bun (2026-09-25, frontend part replaced by D12)
+
+Small runtime, documented Tauri setup. Biome handles formatting and linting for TS, Svelte, JSON and CSS. Bun is the package manager and script runner; it doesn't affect the published files.
+
+## D5. Build-time AI translation of prose only (2026-09-25)
+
+No AI in the app. Code blocks are never sent to the translator; comments are translated only when the code stays identical and parses. Reviewed in PRs like any other content.
+
+## D6. Text lessons follow the video, in new words (2026-09-25)
+
+Lessons keep Bogdan's teachings exactly (order, claims, including mistakes) but are written fresh, with new examples. No transcript text in the repository.
+
+## D7. Hosting: GitHub Pages first (2026-09-25)
+
+The web build is static. GitHub Pages is free and lives with the repo. Move to Cloudflare Workers static assets if we need PR previews, custom headers, more traffic, or commercial use (Pages and Vercel Hobby don't allow it).
+
+## D8. Every PR is reviewed by Claude (2026-09-25)
+
+`claude-review.yml` runs on every non-draft PR and is a required check on `main`.
+
+## D9. Stripes inside belts, sized by the material (2026-09-25)
+
+Belts stay as the big milestones, and each one gets stripes (as in Brazilian jiu-jitsu). A stripe is one group of belt tests. Counts follow the material: 4 to 6 per belt, 40 in all, roughly one per video. The dense later belts (purple, brown, black) get 6 so there's never a long stretch without a visible step, and each stripe lines up with one red-to-green test cycle. See [roadmap-course.md](roadmap-course.md#belts-and-stripes).
+
+## D10. shadcn-svelte on Tailwind v4, in the Dojo and Forge colors (2026-09-25, replaced by D12)
+
+UI is built from shadcn-svelte components (style Vega, Lucide icons) so we don't hand-roll buttons, dialogs, tabs and toggles. The theme variables were renamed to shadcn-svelte's names with the same hex values, so added components come out in Dojo and Forge without restyling. Dark mode moved from a `data-theme` attribute and our own controller to mode-watcher and the `.dark` class, the setup shadcn-svelte documents; saved choices keep working because the storage key didn't change. The navigation stays our own rail instead of shadcn's `Sidebar`, to keep the icon-over-label look. See [design.md](design.md#components).
+
+## D11. A local web app instead of a desktop app (2026-09-25)
+
+A course platform that installs like a desktop program felt out of place, like Udemy as a desktop app. Students now run `oxido`, a small Rust server, in their minisql folder, and take the course in the browser they already have open, the way rustlings works but with a web UI. It still runs cargo locally, works offline except for videos, and uses less memory than a second copy of a web engine. Rust over Go or Bun for the server: every student has cargo after class 1 (Go and Bun would be extra installs), and a minimal Rust server measured 4 MB of memory against 10 MB for Go and 42 MB for Bun ([sources.md](sources.md#measurements)). The same frontend is also published on GitHub Pages for reading, watching and quizzes.
+
+## D12. React with Vite 8 and React Router; shadcn/ui (2026-09-25)
+
+The maintainer is a React developer and most of the code is written with an AI agent, so review matters more than syntax: React bugs are the ones he can spot. React also brings the original shadcn/ui, MDX, and wrappers for editors and players. Svelte's smaller bundle doesn't matter for an app served from the student's own machine (measured: about half a megabyte of memory difference). Next.js was ruled out because its strengths need a server; React Router's framework mode pre-renders pages without one. Build: Vite 8 (Rolldown, Oxc), the React Compiler, TypeScript 7 for type checks, Biome with its React rules (Oxlint kept as an option). The Dojo and Forge colors carry over unchanged under shadcn/ui's variable names; dark mode is the `.dark` class set by our own small, tested theme controller.
+
+## D13. Progress and notes in SQLite (2026-09-25)
+
+`oxido` stores progress and notes in `<project>/.oxido/oxido.db` (rusqlite, bundled SQLite). Plain files were considered (readable, git-friendly), but SQLite was chosen for durable, transactional storage that can grow into history, statistics and note search. The folder is git-ignored because the file is binary and holds personal notes; an export file covers backups and moving between machines. Schema versions use SQLite's `user_version` with append-only migrations, and a database from a newer `oxido` is refused. The website keeps using browser storage.
+
+## D14. The built-in editor is for quizzes only (2026-09-25)
+
+Students write minisql in their own editor (VS Code with rust-analyzer already gives them better feedback than anything we'd build). `oxido` watches their files and reruns the current stripe's tests on save. A small CodeMirror editor stays, but only for quiz questions with code, checked by `oxido` in a scratch crate.
+
+## D15. The name: Oxidō (2026-09-25)
+
+The project was "LGR Redux". It's now Oxidō: *oxide* (rust) plus *-dō*, "the way," as in judo, aikido and kendo, which fits both the language and the belt system. It also drops the Let's Get Rusty initials from the product name, so nobody takes it for an official LGR product (the course still credits Bogdan everywhere). The display name keeps the macron; identifiers use `oxido`, which was free on crates.io when checked.
+
+## D16. No video player library: YouTube's own player (2026-09-25)
+
+Every video is Bogdan's, on YouTube, so the lesson page embeds YouTube's player: a facade (thumbnail and play button) until the student presses play, then the IFrame API through our own small typed wrapper for the current time, seeking and "watched". YouTube's own controls stay. Its rules for embeds forbid drawing anything in front of the player, controls included, so our additions (the saved position and note markers) sit in a strip under it. That same rule is why the libraries we looked at don't fit: Video.js v10 and Kibo UI (media-chrome) are worth having for their themed control bars, which sit over the video; react-player supports many sites we don't need, and its one useful piece here, the click-to-load facade, is what we build anyway. Video.js v10's YouTube support was still a release candidate on this date (rc.3 fixed the current time not updating during YouTube playback). Revisit Video.js v10 once it's stable if Oxidō ever hosts its own video files: its shadcn-style skins would fit this design. Sources in [sources.md](sources.md#platform).
+
+## D17. The student's repo: plain git, GitHub optional (2026-09-26)
+
+`oxido init` creates the minisql starter, runs `git init` and makes the first commit. It then asks whether to put the repo on GitHub and, if so, public or private: that's the student's choice, and nothing else in Oxidō depends on it. With the GitHub CLI installed and signed in, `oxido init` runs `gh repo create minisql --public|--private --source . --push`; otherwise it prints that command. Oxidō has no GitHub login and never holds GitHub credentials. Progress and notes never go into the repo (`.oxido/` is git-ignored, D13), so a public repo stays a clean minisql project.
+
+## D18. Moving between machines: the export file only (2026-09-26)
+
+Progress and notes stay in SQLite on each machine (D13), and the only way to move them is to export a file and import it elsewhere, including between the website and `oxido`. Automatic sync was considered and dropped: through the student's repo (a public repo would publish notes and quiz scores, and progress would land in their commits), through a second private repo, Notion, Google Drive's app folder, an encrypted secret gist, or a cloud-synced folder (syncing the live database file can corrupt it). Each needed an account, an app registered with a provider, or a server, for a convenience the export file mostly covers.
+
+The export file is a copy of the database (`VACUUM INTO`), marked with Oxidō's `application_id`. Import merges instead of replacing, so importing an older file never loses newer work: for each value the newer change wins, except that a quiz's best score only goes up and a stripe keeps its earliest pass (whether it passes now still comes from the tests). That needs schema version 2: a global ID for each note, a marker for deleted notes so an import doesn't bring them back, and a timestamp per value where one row holds several. The imported file is untrusted input: size-limited, its schema compared with ours before any row is read, a newer schema refused, and SQLite's defensive settings on. The website reads and writes the same file with SQLite's WebAssembly build, loaded only when the student imports or exports.
+
+## D19. No ORM: plain SQL through rusqlite (2026-09-26)
+
+The store stays rusqlite with hand-written SQL and our own `user_version` migrations. Its hard queries are SQLite-specific (the best-score upsert with `CASE` and `max()`, the import merge through `ATTACH`, `PRAGMA`s, full-text search later), so they'd be raw SQL under any ORM, which would only take over a handful of easy queries on four tables. Plain SQL is also one less dialect to review in agent-written code. We measured the alternatives ([sources.md](sources.md#measurements)): every one adds to the student's `cargo install` (Diesel +10 s, SQLx +23 s, SeaORM +36 s); Diesel needed SQLite's `max()` and `strftime()` declared by hand, doubled the rebuild after an edit and printed 80 to 100 lines of trait errors for a type mistake; the async ones (SQLx, SeaORM, ormlite, welds, toasty) bring connection pools to one file behind a lock; welds' sync mode pins an older rusqlite; toasty has no migrations; ormx doesn't support SQLite. What we take instead: rows are read by column name, tables created or rebuilt from schema version 2 on are `STRICT`, every query runs in a store test, and each migration is tested from a frozen copy of the previous schema with rows in it. Revisit if the store grows to many related tables or needs queries built from optional filters.
+
+## D20. The rail and one long belt (2026-09-26)
+
+Navigation stays the tatami rail with the M2 notch (icon over label, the rust edge thickening beside the current page). The other structures sketched, a syllabus sidebar, the rail plus a class outline, and a belt path, were set aside; shadcn's `Sidebar` isn't used. The Roadmap shows progress as one long belt (P2): the eight belts joined in one strip, each as wide as its stripe count, with stripe bars, seals and a "You are here" mark. It was picked over ranked belt cards, a phase ladder and a stripe grid. Both are drawn on the design canvas, and the details are in [design.md](design.md#belts).
+
+## D21. Code in VS Code's colors (2026-09-26)
+
+Code used to be a dark slab in the app's own warm colors in both themes. It now looks like VS Code, where most students write minisql (D14): Light Modern in the light theme and Dark Modern in the dark, with the colors rust-analyzer gives Rust (control flow in purple, types in teal, functions and macros in yellow). RustRover's New UI colors were the other option; they mark more Rust detail (fields, lifetimes, italic doc comments), but several of their defaults miss WCAG AA (comments at 3.4:1 in light and 4.0:1 in dark) and would have needed changing. Both are on the design canvas, and the variables are in [design.md](design.md#code).
