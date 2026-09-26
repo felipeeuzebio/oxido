@@ -12,6 +12,8 @@
 
 Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and GitHub Actions, titled `chore(deps): ...`.
 
+Every action is pinned to a commit SHA, with its version in a comment (`actions/checkout@d234...f30af803 # v6.1.0`). A tag like `@v6` can be moved to other code at any time, so a compromised action would run in our CI with our secrets; a commit can't change. Dependabot updates the SHA and the comment together. `dtolnay/rust-toolchain` has a single tag, `v1`, that follows its `master` branch; it's pinned like the others and takes the toolchain as an input. `tooling.test.ts` fails on any `uses:` that isn't pinned this way.
+
 ## One-time setup
 
 1. **Default branch.** The repository's default branch is `main`.
