@@ -1,0 +1,68 @@
+# Conventions
+
+## Branches
+
+- `main` is the only long-lived branch. It is protected: changes land through pull requests.
+- Work branches: `<type>/<short-description>`, e.g. `feat/quiz-page`, `fix/notes-anchor`.
+- PRs are squash-merged, so the PR title becomes the commit message on `main`.
+
+## Commits: Conventional Commits
+
+```
+<type>(<scope>): <summary in lower case, no period>
+```
+
+Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`, `style`, `revert`.
+
+`feat` bumps the minor version and `fix` the patch version (release-please). A `!` after the scope or a `BREAKING CHANGE:` footer marks a breaking change.
+
+The scope is optional. When present, it must be one of these (enforced by `commitlint.config.js`):
+
+| Scope | Covers |
+|---|---|
+| `server` | `crates/oxido`: the `oxido` binary, its HTTP API and CLI |
+| `core` | `crates/oxido-core` |
+| `ui` | shared React components, layout, theming |
+| `roadmap` | home screen: belts, phases, "Continue" |
+| `lesson` | lesson page: video player and text lesson |
+| `quiz` | quiz engine and results page |
+| `notes` | video and paragraph notes |
+| `progress` | progress tracking, export and import |
+| `storage` | the SQLite store in `oxido` and browser storage on the website |
+| `editor` | CodeMirror editor and the clippy runner |
+| `grader` | build steps and belt tests in the app |
+| `i18n` | translation pipeline and language switching |
+| `web` | the hosted website (GitHub Pages) |
+| `content` | lessons, quizzes, `course.toml` |
+| `minisql` | the Mini SQL project: starters, solutions, belt tests |
+| `ci` | GitHub workflows |
+| `release` | release-please, bundling, signing |
+| `deps` | dependency updates (Dependabot uses it) |
+| `hooks` | lefthook and commitlint setup |
+| `agents` | `CLAUDE.md` and agent-facing docs in `docs/` |
+| `config` | tool configuration (Biome, Vite, TypeScript, Cargo) |
+
+Examples:
+
+```
+feat(quiz): reveal the correct answer on the results page
+fix(editor): cancel a clippy run when the code changes
+test(core): cover clippy messages without spans
+feat(content): add lesson 4.1 on ownership
+feat(minisql): add yellow belt tests
+docs(agents): explain the content rules in CLAUDE.md
+chore(deps): bump axum to 0.8.10
+```
+
+Commits written with Claude keep the `Co-Authored-By: Claude <noreply@anthropic.com>` trailer.
+
+## Code style
+
+- Rust: rustfmt defaults, clippy with `-D warnings`, edition 2024. No `unwrap()` outside tests; `expect()` with a reason when a failure is truly impossible.
+- TypeScript and React: Biome's formatter and recommended rules (with the React domain), strict TypeScript, function components and hooks. The React Compiler memoizes, so don't add `useMemo`/`useCallback` by hand unless a profiler says so.
+- Keep the app light: justify every new runtime dependency in the PR description.
+
+## Writing style
+
+- Docs and lessons: plain, direct sentences. Lessons go through the Humanizer skill before review.
+- Lesson content follows the rules in [roadmap-course.md](roadmap-course.md#class-format).
