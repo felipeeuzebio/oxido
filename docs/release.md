@@ -16,6 +16,16 @@ The version lives in `package.json` and `crates/oxido/Cargo.toml` (the `oxido` p
 2. release-please opens or updates a PR named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
 3. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
 
+## Minimum Rust
+
+`rust-version` in the root `Cargo.toml` (1.90) is the oldest Rust that `oxido` builds with; with an older one, `cargo install` stops with a message naming the version it needs. Three things keep that promise true:
+
+- CI's `Rust minimum version` job runs `cargo check` on the whole workspace with exactly that version. Dependabot doesn't know our minimum, so this job is what stops an update that needs a newer Rust.
+- clippy's `incompatible_msrv` lint, on in every clippy run, flags standard library functions newer than `rust-version`.
+- Cargo's resolver picks dependency versions that support `rust-version` when it updates `Cargo.lock`. Today the most demanding dependencies need 1.85.
+
+Raise it on purpose, in its own PR, when there's a reason to.
+
 ## How students will install `oxido` (P11)
 
 | Path | Command | Notes |
