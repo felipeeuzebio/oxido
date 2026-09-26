@@ -16,6 +16,8 @@
         "@biomejs/biome": "^2",
         "@commitlint/cli": "^21",
         "@commitlint/config-conventional": "^21",
+        "@commitlint/lint": "^21",
+        "@commitlint/load": "^21",
         "@playwright/test": "^1",
         "@react-router/dev": "^8.4.0",
         "@rolldown/plugin-babel": "^0.2.4",

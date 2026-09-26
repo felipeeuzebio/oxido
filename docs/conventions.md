@@ -18,7 +18,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`
 
 Automated PRs follow the same rules: release-please titles its PRs `chore(release): release x.y.z`, and Dependabot's are `chore(deps): bump ...`, development dependencies included.
 
-The scope is optional. When present, it must be one of these (enforced by `commitlint.config.js`):
+The scope is optional. When present, it must be one of these (enforced by `commitlint.config.js`; `commitlint.config.test.ts` fails if this table and the config drift apart, or if release-please's or Dependabot's titles stop passing):
 
 | Scope | Covers |
 |---|---|

@@ -31,7 +31,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.{ts,tsx}"],
+    // Tests next to the app code, plus repository checks next to their config.
+    include: ["src/**/*.test.{ts,tsx}", "*.test.ts"],
     setupFiles: ["src/test-setup.ts"],
   },
 });
