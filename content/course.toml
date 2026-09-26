@@ -1,0 +1,193 @@
+# Course structure: the source of truth for the roadmap screen.
+# Phases map Rust Book chapters (as taught in Let's Get Rusty's "The Rust Lang Book"
+# playlist) to belts and to build steps of the Mini SQL project.
+# Video IDs are filled in during platform phase P1, from transcripts/playlist.json.
+# Schema: docs/roadmap-course.md
+#
+# Belts and stripes: a stripe is one slice of a phase's build step with its own
+# group of belt tests. Passing the group earns the stripe; every stripe of a belt
+# earns the belt. Stripe counts follow the material (4 to 6 per belt, 40 in all),
+# so the dense later chapters get more, smaller steps.
+
+[course]
+title = "Build a Mini SQL Database in Rust"
+project = "minisql"
+playlist = "PLai5B987bZ9CoVR-QEIN9foz4QCJ0H2Y8"
+languages = ["en", "pt-BR"]
+
+[[belts]]
+id = "white"
+phases = ["p01"]
+
+[[belts]]
+id = "yellow"
+phases = ["p02"]
+
+[[belts]]
+id = "orange"
+phases = ["p03"]
+
+[[belts]]
+id = "green"
+phases = ["p04"]
+
+[[belts]]
+id = "blue"
+phases = ["p05"]
+
+[[belts]]
+id = "purple"
+phases = ["p06", "p07"]
+
+[[belts]]
+id = "brown"
+phases = ["p08", "p09"]
+
+[[belts]]
+id = "black"
+phases = ["p10", "p11"]
+
+[[phases]]
+id = "kickoff"
+title = "Kickoff: what we'll build"
+chapters = []
+build = "Demo of the finished minisql (terminal and web), the roadmap, how belts and tests work"
+
+[[phases]]
+id = "p01"
+title = "First Steps"
+chapters = [1, 2, 3]
+build = "cargo new minisql; a `db > ` prompt that reads commands, `.exit` and `.help`"
+stripes = [
+  "`db > ` prompt that reads lines in a loop",
+  "`.exit` ends the program",
+  "`.help` lists commands; unknown input prints an error",
+  "quits cleanly when input ends",
+]
+quiz = "quiz-01"
+
+[[phases]]
+id = "p02"
+title = "Rows and Statements"
+chapters = [4, 5, 6]
+build = "Row struct, Statement enum, insert/select into a fixed-size table of Option<Row>"
+stripes = [
+  "Row struct parsed from `insert 1 alice alice@example.com`",
+  "Statement enum and prepare() returning Option",
+  "insert into a fixed-size table, with a table-full error",
+  "select prints every row",
+]
+quiz = "quiz-02"
+
+[[phases]]
+id = "p03"
+title = "Organize and Persist"
+chapters = [7, 8, 9]
+build = "Modules, Vec + HashMap index, PrepareError with Result and ?, save and load a file"
+stripes = [
+  "code split into modules",
+  "Vec storage and String length checks",
+  "HashMap index that rejects duplicate ids",
+  "PrepareError returned with Result and ?",
+  "save on .exit, load on start",
+]
+quiz = "quiz-03"
+
+[[phases]]
+id = "p04"
+title = "Traits, Lifetimes and Tests"
+chapters = [10, 11]
+build = "Record trait, generic Table<R>, Token<'a> tokenizer, unit and integration tests"
+stripes = [
+  "Record trait and generic Table<R>",
+  "Token<'a> tokenizer that borrows from the input line",
+  "unit tests for the tokenizer and parser, written first",
+  "integration tests that run whole scripts, written first",
+]
+quiz = "quiz-04"
+student_tdd = true # from here on, students write the failing test first
+
+[[phases]]
+id = "p05"
+title = "The minisql CLI"
+chapters = [12, 13]
+build = "minisql <file.db>, errors to stderr, WHERE ... CONTAINS with MINISQL_IGNORE_CASE, Cursor iterator"
+stripes = [
+  "minisql <file.db> with Config::build",
+  "errors on stderr with a non-zero exit code",
+  "WHERE ... CONTAINS, case-insensitive with MINISQL_IGNORE_CASE",
+  "closures for filters",
+  "Cursor that implements Iterator; loops become iterator chains",
+]
+quiz = "quiz-05"
+
+[[phases]]
+id = "p06"
+title = "Ship It"
+chapters = [14]
+build = "Workspace (minisql-core + minisql-cli), doc tests, release profile, cargo install"
+stripes = [
+  "workspace with minisql-core and minisql-cli",
+  "doc tests, release profile, cargo install",
+]
+
+[[phases]]
+id = "p07"
+title = "Smart Pointers"
+chapters = [15]
+build = "Box'd index tree, Rc/Weak schema catalog, Drop saves the database on close"
+stripes = [
+  "index rebuilt as a tree of Box<Node>",
+  "Drop saves the database on close",
+  "Rc<RefCell<T>> query log shared by the REPL and the table",
+  "schema catalog with Weak parent links",
+]
+quiz = "quiz-06" # covers chapters 14 and 15
+
+[[phases]]
+id = "p08"
+title = "Going Parallel"
+chapters = [16]
+build = "Parallel .import (worker threads + mpsc), Arc<Mutex<Database>> for concurrent sessions"
+stripes = [
+  "parallel .import: one worker thread per file",
+  "rows sent over mpsc to a single writer",
+  "Arc<Mutex<Database>> shared by several sessions",
+]
+quiz = "quiz-07"
+
+[[phases]]
+id = "p09"
+title = "Objects and Patterns"
+chapters = [17, 18]
+build = "Box<dyn Storage> backends, BEGIN/COMMIT/ROLLBACK state pattern, richer match patterns"
+stripes = [
+  "Box<dyn Storage> with memory and file backends",
+  "BEGIN/COMMIT/ROLLBACK as a state pattern",
+  "parser rewritten with match guards, @ bindings and nested destructuring",
+]
+quiz = "quiz-08"
+
+[[phases]]
+id = "p10"
+title = "Advanced Rust"
+chapters = [19]
+build = "Newtypes, Result alias, Index<RowId> for Table, fn-pointer aggregates, a test macro"
+stripes = [
+  "newtypes (RowId, ColumnName) and a Result alias",
+  "Index<RowId> for Table",
+  "aggregates (count, max) as function pointers",
+  "a declarative macro for test scripts",
+]
+quiz = "quiz-09"
+
+[[phases]]
+id = "p11"
+title = "Database Server"
+chapters = [20]
+build = "minisql serve: TcpListener, query page, POST /query, ThreadPool, graceful shutdown"
+stripes = [
+  "minisql serve: TcpListener, query page and POST /query",
+  "ThreadPool and graceful shutdown that saves the database",
+]
+quiz = "quiz-final"
