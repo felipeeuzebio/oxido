@@ -5,6 +5,7 @@ use axum::Router;
 use axum::body::Body;
 use axum::http::{HeaderMap, Request, StatusCode, header};
 use http_body_util::BodyExt;
+use oxido::launch::Launch;
 use oxido::server::{AppState, Config, router};
 use oxido::store::Store;
 use oxido::ui::MemoryAssets;
@@ -16,18 +17,28 @@ const SECRET: &str = "session-secret-fedcba9876543210";
 const HOST: &str = "127.0.0.1:7878";
 const ORIGIN: &str = "http://127.0.0.1:7878";
 const COOKIE_NAME: &str = "oxido_session_7878";
+const INSTANCE: &str = "instance-00112233445566778899";
 
-fn app() -> Router {
-    let assets = MemoryAssets::new()
-        .with("index.html", "text/html", "<h1>home</h1>")
-        .with("__spa-fallback.html", "text/html", "<div id=spa></div>")
-        .with("assets/app-1234.js", "text/javascript", "console.log(1)");
-    let config = Config {
+fn config() -> Config {
+    Config {
         launch_token: TOKEN.into(),
         session_secret: SECRET.into(),
         port: 7878,
         extra_origins: vec![],
-    };
+        instance: INSTANCE.into(),
+        launch_file: None,
+    }
+}
+
+fn app() -> Router {
+    app_with(config())
+}
+
+fn app_with(config: Config) -> Router {
+    let assets = MemoryAssets::new()
+        .with("index.html", "text/html", "<h1>home</h1>")
+        .with("__spa-fallback.html", "text/html", "<div id=spa></div>")
+        .with("assets/app-1234.js", "text/javascript", "console.log(1)");
     router(AppState::new(
         Store::open_in_memory().unwrap(),
         config,
@@ -218,6 +229,62 @@ async fn the_launch_link_works_only_once() {
     let (status, headers, _) = open(&app, &format!("/?token={TOKEN}")).await;
     assert_eq!(status, StatusCode::OK);
     assert!(headers.get(header::SET_COOKIE).is_none());
+}
+
+#[tokio::test]
+async fn keeps_the_next_unused_launch_link_in_the_launch_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("launch");
+    let app = app_with(Config {
+        launch_file: Some(file.clone()),
+        ..config()
+    });
+    let first = Launch::read(&file).expect("written at start");
+    assert_eq!(
+        first,
+        Launch {
+            port: 7878,
+            instance: INSTANCE.into(),
+            token: TOKEN.into()
+        }
+    );
+
+    login(&app).await;
+    let next = Launch::read(&file).expect("replaced after use");
+    assert_ne!(next.token, TOKEN);
+    assert_eq!(next.token.len(), 32);
+    assert_eq!(next.instance, INSTANCE);
+
+    // The fresh link starts a session in another browser; the used one still doesn't.
+    let (status, headers, _) = open(&app, &format!("/?token={}", next.token)).await;
+    assert_eq!(status, StatusCode::SEE_OTHER);
+    assert!(headers.get(header::SET_COOKIE).is_some());
+    let (_, headers, _) = open(&app, &format!("/?token={TOKEN}")).await;
+    assert!(headers.get(header::SET_COOKIE).is_none());
+}
+
+#[cfg(unix)]
+#[tokio::test]
+async fn the_launch_file_is_readable_by_its_owner_only() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("launch");
+    let app = app_with(Config {
+        launch_file: Some(file.clone()),
+        ..config()
+    });
+    login(&app).await;
+    let mode = std::fs::metadata(&file).unwrap().permissions().mode();
+    assert_eq!(mode & 0o777, 0o600);
+}
+
+#[tokio::test]
+async fn health_names_the_running_oxido() {
+    let (status, _, body) = open(&app(), "/api/health").await;
+    assert_eq!(status, StatusCode::OK);
+    let body: Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(body["status"], "ok");
+    assert_eq!(body["instance"], INSTANCE);
 }
 
 #[tokio::test]

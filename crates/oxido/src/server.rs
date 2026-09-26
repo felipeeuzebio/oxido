@@ -8,15 +8,17 @@
 //!    DNS-rebinding pages, which reach 127.0.0.1 under their own domain name.
 //! 2. **Session** (for `/api`): the terminal prints a launch link with a random
 //!    token. Opening it once sets an `HttpOnly`, `SameSite=Strict` cookie holding
-//!    a separate session secret, then the token stops working. Sites on other
-//!    domains never get the cookie. Pages served from *other ports* on 127.0.0.1
-//!    count as the same site and do get it, so:
+//!    a separate session secret, then the token stops working and a new one takes
+//!    its place in the launch file (owner-only, see `launch`), so a second `oxido`
+//!    in the project can reopen the browser. Sites on other domains never get the
+//!    cookie. Pages served from *other ports* on 127.0.0.1 count as the same site
+//!    and do get it, so:
 //! 3. **Origin**: writes must come from oxido's own origin (a browser always sends
 //!    `Origin` on cross-origin writes), and no CORS headers are ever sent, so
 //!    other origins can't read API responses either.
 //! 4. **Framing**: pages can't be put in a frame (no clickjacking).
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use axum::Router;
@@ -30,6 +32,7 @@ use axum::routing::{get, put};
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::launch::Launch;
 use crate::store::{Anchor, NewNote, Store, StoreError};
 use crate::ui::{Asset, AssetSource};
 
@@ -39,13 +42,19 @@ const SPA_FALLBACK: &str = "__spa-fallback.html";
 const SESSION_MAX_AGE_SECS: u32 = 30 * 24 * 60 * 60;
 
 pub struct Config {
-    /// Printed in the launch link. Works once.
+    /// The first launch link's token, printed in the terminal. Each launch
+    /// token works once; the next one goes to the launch file.
     pub launch_token: String,
     /// What the session cookie holds. Never printed.
     pub session_secret: String,
     pub port: u16,
     /// Extra origins allowed to write, e.g. Vite's dev server.
     pub extra_origins: Vec<String>,
+    /// Random per run; `/api/health` reports it so a second `oxido` knows it
+    /// found this one.
+    pub instance: String,
+    /// Where to keep the next unused launch link (`<project>/.oxido/launch`).
+    pub launch_file: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -55,8 +64,12 @@ pub struct AppState {
 
 struct Inner {
     store: Mutex<Store>,
-    launch_token: String,
-    launch_used: AtomicBool,
+    /// The launch token that works now; each use replaces it. `None` once no
+    /// new token could be made.
+    launch_token: Mutex<Option<String>>,
+    launch_file: Option<PathBuf>,
+    instance: String,
+    port: u16,
     session_secret: String,
     cookie_name: String,
     hosts: Vec<String>,
@@ -70,11 +83,13 @@ impl AppState {
         let hosts = vec![format!("127.0.0.1:{port}"), format!("localhost:{port}")];
         let mut origins: Vec<String> = hosts.iter().map(|host| format!("http://{host}")).collect();
         origins.extend(config.extra_origins);
-        Self {
+        let state = Self {
             inner: Arc::new(Inner {
                 store: Mutex::new(store),
-                launch_token: config.launch_token,
-                launch_used: AtomicBool::new(false),
+                launch_token: Mutex::new(Some(config.launch_token.clone())),
+                launch_file: config.launch_file,
+                instance: config.instance,
+                port,
                 session_secret: config.session_secret,
                 // Cookies aren't scoped by port, so two oxido instances need two names.
                 cookie_name: format!("oxido_session_{port}"),
@@ -82,6 +97,28 @@ impl AppState {
                 origins,
                 assets: Box::new(assets),
             }),
+        };
+        state.keep_launch_file(Some(config.launch_token));
+        state
+    }
+
+    /// Writes the working launch token to the launch file, or removes the file
+    /// when there's none. Failing to write only costs the second-run shortcut.
+    fn keep_launch_file(&self, token: Option<String>) {
+        let Some(path) = &self.inner.launch_file else {
+            return;
+        };
+        let result = match token {
+            Some(token) => Launch {
+                port: self.inner.port,
+                instance: self.inner.instance.clone(),
+                token,
+            }
+            .write(path),
+            None => std::fs::remove_file(path),
+        };
+        if let Err(error) = result {
+            tracing::warn!("couldn't update {}: {error}", path.display());
         }
     }
 
@@ -234,13 +271,25 @@ async fn serve_ui(State(state): State<AppState>, uri: Uri) -> Response {
 /// The launch link: the first valid use sets the session cookie and redirects
 /// to the same page without the token. Later uses, and wrong tokens, do nothing.
 fn start_session(state: &AppState, uri: &Uri, token: &str) -> Option<Response> {
-    if !same(token, &state.inner.launch_token) {
-        tracing::warn!("ignored a launch link with a wrong token");
-        return None;
-    }
-    if state.inner.launch_used.swap(true, Ordering::SeqCst) {
-        tracing::warn!("ignored a launch link that was already used; restart oxido for a new one");
-        return None;
+    {
+        let mut current = state
+            .inner
+            .launch_token
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if !current
+            .as_deref()
+            .is_some_and(|expected| same(token, expected))
+        {
+            tracing::warn!("ignored a launch link that's wrong or already used");
+            return None;
+        }
+        // This link is used up. Its replacement goes to the launch file, where a
+        // second `oxido` in the project picks it up to reopen the browser.
+        *current = crate::random_token()
+            .inspect_err(|error| tracing::warn!("no new launch link: {error}"))
+            .ok();
+        state.keep_launch_file(current.clone());
     }
     let cookie = format!(
         "{}={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={SESSION_MAX_AGE_SECS}",
@@ -352,8 +401,13 @@ fn no_content() -> ApiResult {
     Ok(StatusCode::NO_CONTENT.into_response())
 }
 
-async fn health() -> Response {
-    Json(json!({ "status": "ok", "version": env!("CARGO_PKG_VERSION") })).into_response()
+async fn health(State(state): State<AppState>) -> Response {
+    Json(json!({
+        "status": "ok",
+        "version": env!("CARGO_PKG_VERSION"),
+        "instance": state.inner.instance,
+    }))
+    .into_response()
 }
 
 async fn progress(State(state): State<AppState>) -> ApiResult {

@@ -34,3 +34,41 @@ fn outside_a_project_it_explains_and_creates_nothing() {
     assert!(stderr.contains("oxido init"), "{stderr}");
     assert!(!dir.path().join(".oxido").exists());
 }
+
+/// Kills a background `oxido` when the test ends, even if it fails.
+struct Background(std::process::Child);
+
+impl Drop for Background {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
+        let _ = self.0.wait();
+    }
+}
+
+#[test]
+fn a_second_run_in_the_same_project_opens_the_running_one() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("oxido.toml"), "course = \"minisql\"\n").unwrap();
+    let _first = Background(
+        Command::new(env!("CARGO_BIN_EXE_oxido"))
+            .args(["serve", "--port", "0", "--no-open"])
+            .current_dir(dir.path())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap(),
+    );
+    let launch_file = dir.path().join(".oxido").join("launch");
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while !launch_file.exists() {
+        assert!(Instant::now() < deadline, "the first oxido never started");
+        std::thread::sleep(Duration::from_millis(50));
+    }
+    let link = oxido::launch::Launch::read(&launch_file).unwrap().url();
+
+    let output = run(dir.path(), &["serve", "--port", "0", "--no-open"]);
+    assert!(output.status.success(), "{output:?}");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("already running"), "{stdout}");
+    assert!(stdout.contains(&link), "{stdout}");
+}

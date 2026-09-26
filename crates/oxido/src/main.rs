@@ -67,6 +67,22 @@ async fn main() -> anyhow::Result<()> {
 
 async fn serve(args: ServeArgs) -> anyhow::Result<()> {
     let project = oxido::project::find(&args.project)?;
+    let launch_file = oxido::launch::path(&project);
+
+    // Already running for this project? Open its next launch link instead.
+    if let Some(running) = oxido::launch::Launch::read(&launch_file) {
+        let running =
+            tokio::task::spawn_blocking(move || running.is_running().then_some(running)).await?;
+        if let Some(running) = running {
+            let url = running.url();
+            println!("Oxidō is already running for this project: {url}");
+            if args.no_open || webbrowser::open(&url).is_err() {
+                println!("Open the link above in your browser.");
+            }
+            return Ok(());
+        }
+    }
+
     let store = open_store(&project)?;
     // OXIDO_TOKEN fixes the launch token for automated tests; students never need it.
     let launch_token = match std::env::var("OXIDO_TOKEN") {
@@ -97,6 +113,8 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
         session_secret: oxido::random_token()?,
         port,
         extra_origins,
+        instance: oxido::random_token()?,
+        launch_file: Some(launch_file.clone()),
     };
     let state = AppState::new(store, config, EmbeddedAssets);
     if EmbeddedAssets::is_empty() {
@@ -115,6 +133,7 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
             let _ = tokio::signal::ctrl_c().await;
         })
         .await?;
+    let _ = std::fs::remove_file(&launch_file);
     println!("Stopped. Your progress is saved.");
     Ok(())
 }
