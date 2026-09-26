@@ -1,0 +1,65 @@
+name: Website (GitHub Pages)
+
+# Publishes the hosted version of the app: lessons, videos and quizzes, with
+# progress kept in the browser. In repo Settings > Pages, set Source to
+# "GitHub Actions" once.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "content/**"
+      - "package.json"
+      - "bun.lock"
+      - "react-router.config.ts"
+      - "vite.config.ts"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Pages serves the site from /<repo-name>/
+      BASE_PATH: /${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      # React Router writes pre-rendered pages under build/client/<repo>/ and
+      # shared files at build/client/. Pages needs them in one folder, with the
+      # single-page-app fallback as 404.html for every other path.
+      - name: Assemble the site
+        run: |
+          repo="${BASE_PATH#/}"
+          mkdir site
+          cp -r "build/client/$repo/." site/
+          cp -r build/client/assets site/assets
+          # Top-level files from public/ (favicon, logos, icons)
+          find build/client -maxdepth 1 -type f ! -name '*.html' -exec cp {} site/ \;
+          cp build/client/index.html site/404.html
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

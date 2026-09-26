@@ -1,0 +1,62 @@
+name: Claude Code Review
+
+# Every non-draft PR gets a review from Claude. Make the "Claude review" check
+# required in the main branch ruleset so nothing merges without it.
+# Auth: set ONE of the secrets CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY
+# (`claude /install-github-app` sets this up). See docs/workflows.md.
+# Fork PRs don't receive secrets; a maintainer can comment "@claude review" instead.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Claude review
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request. The PR branch is already checked out.
+            Read CLAUDE.md first, then docs/testing.md and docs/conventions.md.
+
+            Check, in this order:
+            1. Correctness: bugs, edge cases, error handling, panics in Rust code.
+            2. Tests: every behavior change comes with tests, written first (TDD).
+               Flag behavior changes without a test that would have failed before.
+            3. Security: Tauri capabilities and CSP, anything that runs student code,
+               anything that fetches remote content.
+            4. Performance: the app must stay light (no heavy dependency without a reason,
+               lazy-load the editor and the video player).
+            5. Course rules, when content/ or course/ changed: text lessons follow the
+               video's teachings in order without silent corrections, and never copy
+               transcripts; translations never change code identifiers.
+            6. Conventions: Conventional Commits title with a valid scope, docs updated
+               when behavior or structure changed.
+
+            Post specific issues as inline comments. Finish with one top-level comment
+            (gh pr comment) that lists blocking issues first, then suggestions, then a
+            one-line verdict. Only post GitHub comments; don't reply with plain messages.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
