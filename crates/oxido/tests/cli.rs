@@ -72,3 +72,39 @@ fn a_second_run_in_the_same_project_opens_the_running_one() {
     assert!(stdout.contains("already running"), "{stdout}");
     assert!(stdout.contains(&link), "{stdout}");
 }
+
+/// Both ways a terminal or a process manager stops oxido end it cleanly.
+#[cfg(unix)]
+#[test]
+fn stopping_oxido_removes_its_launch_file() {
+    for signal in ["-INT", "-TERM"] {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join("oxido.toml"), "course = \"minisql\"\n").unwrap();
+        let mut child = Command::new(env!("CARGO_BIN_EXE_oxido"))
+            .args(["serve", "--port", "0", "--no-open"])
+            .current_dir(dir.path())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        let launch_file = dir.path().join(".oxido").join("launch");
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while !launch_file.exists() {
+            assert!(Instant::now() < deadline, "oxido never started");
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        Command::new("kill")
+            .args([signal, &child.id().to_string()])
+            .status()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() > deadline {
+                child.kill().unwrap();
+                panic!("oxido ignored kill {signal}");
+            }
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        assert!(!launch_file.exists(), "kill {signal} left the launch file");
+    }
+}

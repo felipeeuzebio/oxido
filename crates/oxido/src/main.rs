@@ -129,13 +129,35 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
     }
 
     axum::serve(listener, router(state))
-        .with_graceful_shutdown(async {
-            let _ = tokio::signal::ctrl_c().await;
-        })
+        .with_graceful_shutdown(stop_requested())
         .await?;
     let _ = std::fs::remove_file(&launch_file);
     println!("Stopped. Your progress is saved.");
     Ok(())
+}
+
+/// Waits for Ctrl+C, or on Unix for SIGTERM (what process managers and
+/// `kill` send), so either way oxido stops cleanly and removes its launch file.
+async fn stop_requested() {
+    let ctrl_c = async {
+        let _ = tokio::signal::ctrl_c().await;
+    };
+    #[cfg(unix)]
+    let terminate = async {
+        use tokio::signal::unix::{SignalKind, signal};
+        match signal(SignalKind::terminate()) {
+            Ok(mut terminate) => {
+                terminate.recv().await;
+            }
+            Err(_) => std::future::pending::<()>().await,
+        }
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+    tokio::select! {
+        () = ctrl_c => {}
+        () = terminate => {}
+    }
 }
 
 /// Opens `<project>/.oxido/oxido.db`, creating the folder (git-ignored) if needed.
