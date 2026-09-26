@@ -1,0 +1,32 @@
+# Git hooks, installed by `bun install` (the "prepare" script runs `lefthook install`).
+# Run one manually with `bunx lefthook run pre-commit`.
+# Skip in an emergency with `LEFTHOOK=0 git commit ...` (CI runs the same checks anyway).
+
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,tsx,json,jsonc,css,html}"
+      run: bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    rustfmt:
+      glob: "*.rs"
+      run: cargo fmt --all
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
+
+pre-push:
+  parallel: true
+  commands:
+    rust-tests:
+      run: cargo test --workspace --quiet
+    rust-clippy:
+      run: cargo clippy --workspace --all-targets --quiet -- -D warnings
+    web-tests:
+      run: bun run test
+    typecheck:
+      run: bun run check
