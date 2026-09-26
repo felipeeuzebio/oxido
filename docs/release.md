@@ -20,12 +20,14 @@ The version lives in `package.json` and `crates/oxido/Cargo.toml` (the `oxido` p
 
 | Path | Command | Notes |
 |---|---|---|
-| Main | `cargo install oxido` | compiles on the student's machine with the toolchain they installed in class 1; the first build takes a minute or two |
+| Main | `cargo install --locked oxido` | compiles on the student's machine with the toolchain they installed in class 1; the first build takes a minute or two |
 | Fast | `cargo binstall oxido` | downloads a prebuilt binary from the GitHub Release |
+
+Every `cargo install` instruction says `--locked`. With it, cargo builds with the exact dependency versions in the `Cargo.lock` that CI tested, which `cargo publish` puts in the crate. Without it, cargo picks the newest compatible version of every dependency on the day the student installs, so a dependency's release can break or change `oxido` after we shipped it.
 
 To get there:
 
-- **crates.io.** `oxido` embeds the frontend at compile time, so the published crate must contain the built UI. The release job runs `bun run build`, copies `build/client` into the crate, points the `rust-embed` folder at it and runs `cargo publish`. Needs a `CARGO_REGISTRY_TOKEN` secret.
+- **crates.io.** `oxido` embeds the frontend at compile time, so the published crate must contain the built UI. The release job runs `bun run build`, copies `build/client` into the crate, points the `rust-embed` folder at it and checks that the packaged crate lists `Cargo.lock` (`cargo package --list`), and runs `cargo publish`. Needs a `CARGO_REGISTRY_TOKEN` secret.
 - **Release settings.** Our `[profile.release]` (size-optimized, LTO, one codegen unit, abort on panic, stripped) lives in the workspace's root `Cargo.toml`, and Cargo doesn't publish it: a published package only keeps profiles from its own manifest, and `cargo install` then builds with Rust's defaults. A copy in `crates/oxido/Cargo.toml` would survive publishing but makes every local build warn that it's ignored, so the release job copies the section into the crate's manifest just before `cargo publish`, and checks the packaged manifest for it. Measured on a clean 2-core build: our settings take 92 s and give a 3.6 MB binary; the defaults take 102 s for 7.3 MB. cargo-dist builds from the repository, so its binaries already use our settings.
 - **Prebuilt binaries.** cargo-dist (`dist init`) generates the workflow that builds `oxido` for Windows, macOS (Apple Silicon and Intel) and Linux (x64 and ARM64) and attaches the archives to each release, with the metadata `cargo binstall` looks for.
 

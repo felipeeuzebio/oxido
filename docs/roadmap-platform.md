@@ -125,6 +125,6 @@ Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes 
 ### P11: Version 1.0
 
 Done when:
-- `cargo install oxido` works from crates.io, with the built UI inside the published crate and our release settings in its manifest (see [release.md](release.md)).
+- `cargo install --locked oxido` works from crates.io, with the built UI inside the published crate and our release settings in its manifest (see [release.md](release.md)).
 - cargo-dist builds prebuilt binaries for Windows, macOS and Linux on each release, and `cargo binstall oxido` finds them.
 - Accessibility and performance checks pass, with budgets set in this phase (JavaScript size, `oxido` idle memory, first-install compile time).

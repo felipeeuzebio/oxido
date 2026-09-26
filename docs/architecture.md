@@ -22,7 +22,7 @@ oxido/
 
 | | Local app (`oxido`) | Website (GitHub Pages) |
 |---|---|---|
-| How | `cargo install oxido`, then `oxido` in the minisql folder | open the site |
+| How | `cargo install --locked oxido`, then `oxido` in the minisql folder | open the site |
 | Lessons, videos, quizzes | yes | yes |
 | Progress and notes | SQLite in `<project>/.oxido/oxido.db` | browser storage, this device only |
 | Stripe tests, clippy on quiz code | runs the student's local cargo | not available (the page says to run `oxido`) |

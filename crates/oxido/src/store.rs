@@ -61,7 +61,7 @@ pub enum StoreError {
     Sqlite(#[from] rusqlite::Error),
     #[error(
         "this progress file was written by a newer oxido (schema {found}, this oxido reads up to \
-         {supported}); update oxido with `cargo install oxido`"
+         {supported}); update oxido with `cargo install --locked oxido`"
     )]
     NewerSchema { found: u32, supported: u32 },
     #[error("note {0} doesn't exist")]
