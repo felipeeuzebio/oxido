@@ -46,6 +46,7 @@ The app has a light theme and a dark theme, and one button switches between them
 | `--foreground` | `#1a1916` | sumi ink |
 | `--muted-foreground` | `#57534a` | diluted ink |
 | `--primary`, `--sidebar-primary` | `#c04218` | iron oxide: the rust itself; also the band along the rail, like the cloth edge of a tatami mat |
+| `--sidebar-current` | `#b23301` | the same rust a little darker, for the current page's icon and label on the rail |
 | `--primary-muted`, `--primary-muted-foreground` | `#fbddd4`, `#832d11` | the rust as a soft tint, and text on it |
 | `--info`, `--ring` | `#243f6b` | aizome indigo, the dye of a judo gi: info callouts, timestamps and focus rings |
 | `--success` | `#2f6a3b` | bamboo |
@@ -60,16 +61,16 @@ The app has a light theme and a dark theme, and one button switches between them
 | `--card`, `--popover`, `--sidebar-accent` | `#1b1a18` | cooled iron |
 | `--secondary`, `--muted`, `--accent`, `--sidebar` | `#23211e` | the rail |
 | `--foreground` | `#efebe3` | a white gi under low light |
-| `--primary`, `--sidebar-primary` | `#ec6a44` | ember; buttons use dark text on it, and it's the rail's edge |
+| `--primary`, `--sidebar-primary`, `--sidebar-current` | `#ec6a44` | ember; buttons use dark text on it, and it's the rail's edge and the current page's icon and label |
 | `--primary-muted`, `--primary-muted-foreground` | `#3b1d14`, `#feb29c` | ember as a soft tint, and text on it |
 | `--info`, `--ring` | `#9db4e0` | moonlit indigo |
 | `--success` | `#7cc08a` | new bamboo |
 | `--destructive` | `#f2868f` | seal red, lifted for the dark |
 | `--warning` | `#e5b45a` | brass in firelight |
 
-Naming follows shadcn/ui: `name` is a surface and `name-foreground` is text on it. Ours adds `-muted` tints for soft badges and callouts (`bg-success-muted text-success`, `bg-primary-muted text-primary-muted-foreground`), `--subtle-foreground`, `--border-strong`, the code colors and the belts. shadcn's `--accent` is the hover surface, so the indigo lives in `--info`.
+Naming follows shadcn/ui: `name` is a surface and `name-foreground` is text on it. Ours adds `--sidebar-current` for the rail's current page, `-muted` tints for soft badges and callouts (`bg-success-muted text-success`, `bg-primary-muted text-primary-muted-foreground`), `--subtle-foreground`, `--border-strong`, the code colors and the belts. shadcn's `--accent` is the hover surface, so the indigo lives in `--info`.
 
-Every text and background pair used in the UI meets WCAG AA (4.5:1). The lowest are `--subtle-foreground` on `--background` (5.05:1 light, 5.82:1 dark) and success text on its tint (5.29:1 light). Focus outlines use `--ring` at full strength rather than shadcn's default 50%, so they stay above 3:1. The rail's rust edge, which marks the current page, is 4.1:1 against the rail in Dojo and 5.1:1 in Forge.
+Every text and background pair used in the UI meets WCAG AA (4.5:1). The lowest are `--subtle-foreground` on `--background` (5.05:1 light, 5.82:1 dark) and success text on its tint (5.29:1 light). Focus outlines use `--ring` at full strength rather than shadcn's default 50%, so they stay above 3:1. The rail's rust edge is 4.1:1 against the rail in Dojo and 5.1:1 in Forge: enough for a line (3:1), not for text, so the current page's label uses `--sidebar-current` (4.86:1 in Dojo, 5.13:1 in Forge), which `tokens.test.ts` checks.
 
 The rust is one color in both themes. In OKLCH, Dojo's `#c04218` and Forge's `#ec6a44` share hue 37° (Ferris's own orange, next to the logo's red) and chroma 0.17; only the lightness differs (0.55 and 0.68), because each has to hold its text: white on Dojo's rust at 5.2:1, dark on Forge's at 6.1:1. The tints use the same hue. Keep it that way when a rust value changes: move the lightness, not the hue.
 
@@ -112,7 +113,7 @@ The canvas draws components at shadcn/ui's own sizes, so building them changes n
 
 Labels and button text are medium weight (500), never bold; bold is for headings and names. `CardTitle` is semibold serif: shadcn's `CardTitle` is a `div`, so one rule in `app.css` on `[data-slot="card-title"]` gives it the heading face and no component carries a typography class. Page context goes in a `Breadcrumb`, not in a tracked ALL-CAPS label above the title, and metadata is written as a sentence ("Phase 3, Organize and Persist, book chapter 8"), not joined with "·".
 
-The navigation stays a custom rail (icon over label, 92px, the rust tatami edge) rather than shadcn's `Sidebar`, whose collapsed mode is icon-only; the rail with the M2 notch was chosen over a syllabus sidebar or a class outline (decision D20). It uses the `--sidebar-*` colors: the rail is `--sidebar` (tatami) and its edge is `--sidebar-primary` (rust). Rail items are links styled with semantic classes, with no tile or background behind them. The current page is marked by a notch: the rust tatami edge thickens (a 6px bar inside the 4px border) beside that item, and its label turns `--foreground` and bold while the others stay `--muted-foreground`. Hover darkens the label and previews the notch as a thin 2px bar; keyboard focus gets the usual `--ring` outline around the item. The theme toggle (a sun or a moon) and the language picker (lucide's `Languages` icon) sit at the rail's foot as ghost icon buttons, 40px (`icon-lg`) with 22px icons at stroke 1.8, the same as the rail's links. That's a deliberate exception to Button's default 16px icons, so these two icons carry a `size-5.5` class. The design canvas's "Options: menu items" board keeps the three looks that weren't chosen.
+The navigation stays a custom rail (icon over label, 92px, the rust tatami edge) rather than shadcn's `Sidebar`, whose collapsed mode is icon-only; it was chosen over a syllabus sidebar or a class outline (decision D20). It uses the `--sidebar-*` colors: the rail is `--sidebar` (tatami) and its 4px edge is `--sidebar-primary` (rust), one plain line from top to bottom. Rail items are links styled with semantic classes, with no tile or background behind them. The current page's icon and label turn `--sidebar-current` and bold (the icon's stroke goes from 1.8 to 2.2), while the others stay `--muted-foreground`; `aria-current="page"` carries the meaning for screen readers. `--sidebar-current` is the edge's rust made readable as text on the rail: the same value in Forge, a little darker in Dojo (`#b23301`, with the same hue), because the edge's `#c04218` is only 4.1:1 on the rail. Nothing is added to the edge beside the current page: a notch, the edge growing into a tab there, was tried in several shapes and set aside for this (decision D20). Hover darkens the label to `--foreground`; keyboard focus gets the usual `--ring` outline around the item. The theme toggle (a sun or a moon) and the language picker (lucide's `Languages` icon) sit at the rail's foot as ghost icon buttons, 40px (`icon-lg`) with 22px icons at stroke 1.8, the same as the rail's links. That's a deliberate exception to Button's default 16px icons, so these two icons carry a `size-5.5` class. The design canvas's "Options: menu items" board keeps the three looks that weren't chosen, and "Options: current menu item" keeps A1, the ink label with the notch.
 
 Rules from the shadcn/ui guide that apply everywhere:
 
@@ -172,7 +173,7 @@ Both text faces come from Japanese type design and have full Latin sets, which g
 
 ## Motifs, sparingly
 
-- The rust band on the edge of the navigation rail (tatami edge), which thickens beside the current page.
+- The rust band on the edge of the navigation rail (tatami edge), and the current page's icon and label in the same rust.
 - Stripes as bars, belts as colored strips with their name.
 - The seal on earned belts.
 

@@ -10,8 +10,10 @@
  * Variables use shadcn/ui's names (`name` for a surface, `name-foreground` for
  * text on it), so components added with `shadcn add` pick up these colors.
  * Our indigo is `--info` (and `--ring`); shadcn's `--accent` is the hover
- * surface. The rail uses the `--sidebar-*` set, and its tatami edge is
- * `--sidebar-primary`: the rust. Every text/background pair used in the UI
+ * surface. The rail uses the `--sidebar-*` set: its tatami edge is
+ * `--sidebar-primary`, the rust, and the current page's icon and label are
+ * `--sidebar-current`, the same rust made readable as text on the rail (a
+ * little darker in Dojo). Every text/background pair used in the UI
  * meets WCAG AA; docs/design.md has the table.
  *
  * Dark mode is the `.dark` class on <html>, set by src/lib/theme/theme.ts and,
@@ -67,6 +69,7 @@
   --sidebar-foreground: #1a1916;
   --sidebar-primary: #c04218;
   --sidebar-primary-foreground: #ffffff;
+  --sidebar-current: #b23301;
   --sidebar-accent: #fffdf8;
   --sidebar-accent-foreground: #1a1916;
   --sidebar-border: #d9d1bc;
@@ -144,6 +147,7 @@
   --sidebar-foreground: #efebe3;
   --sidebar-primary: #ec6a44;
   --sidebar-primary-foreground: #1a0d06;
+  --sidebar-current: #ec6a44;
   --sidebar-accent: #1b1a18;
   --sidebar-accent-foreground: #efebe3;
   --sidebar-border: #34312c;
@@ -229,6 +233,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-current: var(--sidebar-current);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);

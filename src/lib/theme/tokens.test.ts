@@ -62,7 +62,15 @@ const shadcn = [
   "--sidebar-border",
   "--sidebar-ring",
 ];
-const ours = ["--info", "--success", "--warning", "--code", "--code-foreground", "--belt-black"];
+const ours = [
+  "--info",
+  "--success",
+  "--warning",
+  "--code",
+  "--code-foreground",
+  "--belt-black",
+  "--sidebar-current",
+];
 
 const colors = (vars: Map<string, string>) =>
   [...vars.keys()].filter((name) => name !== "--radius").sort();
@@ -144,5 +152,21 @@ describe("theme tokens", () => {
   it("draws the rail's edge in the same rust as the buttons, in both themes", () => {
     expect(light.get("--sidebar-primary")).toBe(light.get("--primary"));
     expect(dark.get("--sidebar-primary")).toBe(dark.get("--primary"));
+  });
+
+  it("marks the rail's current page in a rust that's readable on the rail", () => {
+    // The current item's icon and label (decision D20). Dojo's edge rust is
+    // only 4.1:1 on the rail, so Dojo uses the same hue a little darker.
+    for (const [theme, vars] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
+      expect(
+        contrast(vars.get("--sidebar-current") ?? "", vars.get("--sidebar") ?? ""),
+        `${theme} --sidebar-current on --sidebar`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(light.get("--sidebar-current")).toBe("#b23301");
+    expect(dark.get("--sidebar-current")).toBe(dark.get("--sidebar-primary"));
   });
 });

@@ -82,7 +82,7 @@ The store stays rusqlite with hand-written SQL and our own `user_version` migrat
 
 ## D20. The rail and one long belt (2026-09-26)
 
-Navigation stays the tatami rail with the M2 notch (icon over label, the rust edge thickening beside the current page). The other structures sketched, a syllabus sidebar, the rail plus a class outline, and a belt path, were set aside; shadcn's `Sidebar` isn't used. The Roadmap shows progress as one long belt (P2): the eight belts joined in one strip, each as wide as its stripe count, with stripe bars, seals and a "You are here" mark. It was picked over ranked belt cards, a phase ladder and a stripe grid. Both are drawn on the design canvas, and the details are in [design.md](design.md#belts).
+Navigation stays the tatami rail (icon over label, the rust edge). Revised the same day: the current page was first marked by the M2 notch, the edge growing into a tab beside it, tried in several shapes. It's now marked by its icon and label in the rust (`--sidebar-current`), and the edge stays a plain line (A2 on the design canvas, picked over A1, the ink label with the notch). The other structures sketched, a syllabus sidebar, the rail plus a class outline, and a belt path, were set aside; shadcn's `Sidebar` isn't used. The Roadmap shows progress as one long belt (P2): the eight belts joined in one strip, each as wide as its stripe count, with stripe bars, seals and a "You are here" mark. It was picked over ranked belt cards, a phase ladder and a stripe grid. Both are drawn on the design canvas, and the details are in [design.md](design.md#belts).
 
 ## D21. Code in VS Code's colors (2026-09-26)
 
