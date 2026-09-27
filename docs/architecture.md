@@ -4,18 +4,24 @@
 
 ```
 oxido/
-├── app/                  React frontend (React Router, static single-page app)
-│   ├── root.tsx          document shell, theme, layout
-│   ├── routes.ts         route table; pages in routes/, kept thin
-│   ├── features/         one folder per feature: components, logic, tests
-│   ├── components/ui/    shadcn/ui components (generated, not hand-edited)
-│   ├── hooks/            hooks shared by several features
-│   └── lib/              small helpers (cn)
-├── crates/oxido/           `oxido`: the local server students run (CLI, HTTP API, SQLite store)
-├── crates/oxido-core/      pure Rust logic with no I/O (diagnostics, content, grading)
+├── Cargo.toml            Cargo workspace: the members are in crates/
+├── crates/
+│   ├── oxido/            `oxido`: the local server students run (CLI, HTTP API, SQLite store)
+│   └── oxido-core/       pure Rust logic with no I/O (diagnostics, content, grading)
+├── web/                  the frontend, one Bun workspace package
+│   ├── app/              React Router's app folder (static single-page app)
+│   │   ├── root.tsx      document shell, theme, layout
+│   │   ├── routes.ts     route table; pages in routes/, kept thin
+│   │   ├── features/     one folder per feature: components, logic, tests
+│   │   ├── components/ui/  shadcn/ui components (generated, not hand-edited)
+│   │   ├── hooks/        hooks shared by several features
+│   │   └── lib/          small helpers (cn)
+│   ├── e2e/              Playwright tests against the real `oxido` binary
+│   └── public/           logo and icons
 ├── content/              course.toml, lessons and quizzes per language
 ├── course/minisql/       the students' project: starters, solutions, stripe tests
-├── e2e/                  Playwright tests against the real `oxido` binary
+├── dev/sandbox/          a course project for working on oxido
+├── package.json          repo tooling (lefthook, commitlint, Biome) and the root scripts
 ├── docs/                 documentation for contributors and agents
 └── .github/              workflows, Dependabot, PR template
 ```
@@ -47,7 +53,7 @@ Both serve the same frontend build. The page asks `/api/health` at startup: if `
 |---|---|---|
 | Command line | `clap` | `serve` and `doctor` today; `init` (create the minisql starter) and `check` (run the current stripe) come with P8 |
 | HTTP | `axum` on `tokio` | JSON API under `/api`, the UI everywhere else |
-| UI files | `rust-embed` | release builds embed `build/client`; debug builds read it from disk |
+| UI files | `rust-embed` | release builds embed `web/build/client`; debug builds read it from disk |
 | Storage | `rusqlite` (bundled SQLite) | see below |
 | Browser | `webbrowser` | skipped with `--no-open` |
 
@@ -97,7 +103,7 @@ During development, `bun run dev:all` (`scripts/dev.ts`) runs `oxido serve --dev
 
 ## Theme
 
-Light and dark, switched by one toggle; until it's pressed, the app follows the operating system (an internal "system" default). `app/features/theme/theme.ts` holds the logic (storage key `oxido:theme`, the `dark` class on `<html>`), `use-theme.ts` wraps it for React, and `ThemeToggle.tsx` is the control. `PRE_PAINT_SCRIPT`, built from the same constants, runs in `<head>` so the page never flashes the wrong colors. The colors for both themes are in `app/app.css`. If a content security policy is added in P3, that inline script needs a hash entry.
+Light and dark, switched by one toggle; until it's pressed, the app follows the operating system (an internal "system" default). `web/app/features/theme/theme.ts` holds the logic (storage key `oxido:theme`, the `dark` class on `<html>`), `use-theme.ts` wraps it for React, and `ThemeToggle.tsx` is the control. `PRE_PAINT_SCRIPT`, built from the same constants, runs in `<head>` so the page never flashes the wrong colors. The colors for both themes are in `web/app/app.css`. If a content security policy is added in P3, that inline script needs a hash entry.
 
 ## Data flow
 
@@ -113,6 +119,6 @@ Translation happens at build time, never in the app. A script parses each lesson
 
 ## Security
 
-- The server's checks above are tested in `crates/oxido/tests/http.rs` and, in a real browser, in `e2e/session.test.ts`.
+- The server's checks above are tested in `crates/oxido/tests/http.rs` and, in a real browser, in `web/e2e/session.test.ts`.
 - Student code runs only on the student's own machine, never on project servers.
 - A content security policy is set in P3, when the YouTube embed is added.

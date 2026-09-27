@@ -8,13 +8,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "app/**"
-      - "public/**"
+      - "web/**"
       - "content/**"
       - "package.json"
       - "bun.lock"
-      - "react-router.config.ts"
-      - "vite.config.ts"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -38,18 +35,18 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: bun install --frozen-lockfile
       - run: bun run build
-      # React Router writes pre-rendered pages under build/client/<repo>/ and
-      # shared files at build/client/. Pages needs them in one folder, with the
+      # React Router writes pre-rendered pages under web/build/client/<repo>/ and
+      # shared files at web/build/client/. Pages needs them in one folder, with the
       # single-page-app fallback as 404.html for every other path.
       - name: Assemble the site
         run: |
           repo="${BASE_PATH#/}"
           mkdir site
-          cp -r "build/client/$repo/." site/
-          cp -r build/client/assets site/assets
-          # Top-level files from public/ (favicon, logos, icons)
-          find build/client -maxdepth 1 -type f ! -name '*.html' -exec cp {} site/ \;
-          cp build/client/index.html site/404.html
+          cp -r "web/build/client/$repo/." site/
+          cp -r web/build/client/assets site/assets
+          # Top-level files from web/public/ (favicon, logos, icons)
+          find web/build/client -maxdepth 1 -type f ! -name '*.html' -exec cp {} site/ \;
+          cp web/build/client/index.html site/404.html
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site

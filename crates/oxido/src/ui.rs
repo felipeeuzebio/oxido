@@ -1,4 +1,4 @@
-//! The web UI's files. Release builds embed `build/client` (the output of
+//! The web UI's files. Release builds embed `web/build/client` (the output of
 //! `bun run build`) into the binary; debug builds read it from disk, so a
 //! rebuilt frontend shows up without recompiling Rust.
 
@@ -17,7 +17,7 @@ pub trait AssetSource: Send + Sync + 'static {
 }
 
 #[derive(rust_embed::Embed)]
-#[folder = "../../build/client"]
+#[folder = "../../web/build/client"]
 #[allow_missing = true]
 struct Built;
 

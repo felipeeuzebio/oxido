@@ -34,7 +34,7 @@ The scope is optional. When present, it must be one of these (enforced by `commi
 | `editor` | CodeMirror editor and the clippy runner |
 | `grader` | build steps and belt tests in the app |
 | `i18n` | translation pipeline and language switching |
-| `web` | the hosted website (GitHub Pages) |
+| `web` | the hosted website (GitHub Pages): its build, base path and browser storage. Code in the `web/` folder otherwise takes the scope of what it is (`ui`, `lesson`, `quiz` and so on) |
 | `content` | lessons, quizzes, `course.toml` |
 | `minisql` | the Mini SQL project: starters, solutions, belt tests |
 | `ci` | GitHub workflows |

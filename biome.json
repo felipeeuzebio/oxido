@@ -4,11 +4,11 @@
   "files": {
     "includes": [
       "**",
-      "!build",
-      "!.react-router",
+      "!web/build",
+      "!web/.react-router",
       "!target",
       "!**/fixtures",
-      "!app/components/ui",
+      "!web/app/components/ui",
       "!**/*.svg"
     ]
   },

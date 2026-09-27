@@ -1,11 +1,11 @@
 # Dependencies and build output
 node_modules
-/build
+/web/build
 
 /package
 /target
-/test-results
-/playwright-report
+/web/test-results
+/web/playwright-report
 
 # Environment
 .env
@@ -21,7 +21,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # React Router generated types
-/.react-router
+/web/.react-router
 
 # Python bytecode
 __pycache__/

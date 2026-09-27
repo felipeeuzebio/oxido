@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/logo-on-dark.svg">
-    <img src="public/logo.svg" alt="The Oxidō logo: Ferris the crab in a black ninja hood" width="206">
+    <source media="(prefers-color-scheme: dark)" srcset="web/public/logo-on-dark.svg">
+    <img src="web/public/logo.svg" alt="The Oxidō logo: Ferris the crab in a black ninja hood" width="206">
   </picture>
 </p>
 
