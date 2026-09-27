@@ -14,7 +14,7 @@ const platform = [
   "storage", //  SQLite store (oxido) and browser storage (website)
   "editor", //   CodeMirror editor and the clippy runner
   "grader", //   build steps: running a belt's provided tests
-  "i18n", //     translation pipeline and language switching
+  "i18n", //     translation checks, language switching, interface text
   "web", //      the hosted website (GitHub Pages) specifics
 ];
 

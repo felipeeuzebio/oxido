@@ -12,5 +12,6 @@ Reference for contributors and coding agents. Start with [`CLAUDE.md`](../CLAUDE
 | [conventions.md](conventions.md) | naming a branch, writing a commit, choosing a scope |
 | [workflows.md](workflows.md) | changing CI or repository settings |
 | [release.md](release.md) | shipping a version or publishing `oxido` |
+| [glossary-pt-BR.md](glossary-pt-BR.md) | translating into Portuguese: the terms the course uses |
 | [decisions.md](decisions.md) | before proposing a change to the stack or the course model |
 | [sources.md](sources.md) | checking where a fact or decision came from |

@@ -15,6 +15,7 @@ The project is built test first (see the TDD rule in [roadmap-platform.md](roadm
 | Types | TypeScript 7 (`tsc`, after React Router's typegen) | whole frontend | `bun run check` |
 | End to end | Playwright against the real `oxido` binary serving the production build | `web/e2e/` | `bun run test:e2e` |
 | Lint and format | Biome (TS, JSX, JSON, CSS; React rules on), rustfmt, clippy | everything | `bun run lint`, `cargo clippy --workspace` |
+| Translations | shape and staleness checks in the content compiler, from P9 | `content/<language>/` | CI job: fails on a shape mismatch, warns when a translation is stale |
 | Course project | stripe test suites, from P8 | `course/minisql/` | CI job |
 
 ## Rules

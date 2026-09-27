@@ -60,7 +60,8 @@ jobs:
                lazy-load the editor and the video player).
             5. Course rules, when content/ or course/ changed: text lessons follow the
                video's teachings in order without silent corrections, and never copy
-               transcripts; translations never change code identifiers.
+               transcripts; translations change prose and comments only and use the
+               glossary's terms.
             6. Conventions: Conventional Commits title with a valid scope, docs updated
                when behavior or structure changed.
 

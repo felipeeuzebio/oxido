@@ -47,7 +47,7 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 - Write lessons in new words with new, real-world examples. Never paste or lightly edit transcript text. Transcripts are local reference only (`transcripts/` is git-ignored).
 - Build steps may only use Rust features taught up to that phase ([docs/roadmap-course.md](docs/roadmap-course.md)).
 - Run lesson prose through the Humanizer skill before opening the PR.
-- Translations change prose and, when safe, comments. Never identifiers, string literals or program output.
+- Translations are drafted with Claude and edited by the maintainer (decision D23), in the same PR as the English lesson when possible. They change prose and comments only, never identifiers, string literals or program output, and they keep the English file's paragraphs (P9's shape check enforces this). Use the terms in [docs/glossary-pt-BR.md](docs/glossary-pt-BR.md), and add new ones there in the same PR.
 
 ## Commits by Claude
 

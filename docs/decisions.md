@@ -18,7 +18,7 @@ Live clippy needs a real Rust toolchain, which students install in class 1 anywa
 
 Small runtime, documented Tauri setup. Biome handles formatting and linting for TS, Svelte, JSON and CSS. Bun is the package manager and script runner; it doesn't affect the published files.
 
-## D5. Build-time AI translation of prose only (2026-09-25)
+## D5. Build-time AI translation of prose only (2026-09-25, replaced by D23)
 
 No AI in the app. Code blocks are never sent to the translator; comments are translated only when the code stays identical and parses. Reviewed in PRs like any other content.
 
@@ -91,3 +91,14 @@ Code used to be a dark slab in the app's own warm colors in both themes. It now 
 ## D22. The frontend in web/, Rust in crates/ (2026-09-26)
 
 The repository is split by language (L3 and R1 on the design canvas). The frontend is one Bun workspace package in `web/`, using React Router's default `app/` folder: routes in `app/routes/`, kept thin; one folder per feature in `app/features/`, with its components, logic and tests together; hooks shared by several features in `app/hooks/`; and only small helpers in `app/lib/`. The root is a Cargo workspace with its members in `crates/`, beside the shared folders (`content/`, `course/`, `dev/`, `docs/`) and the repository tooling, whose `package.json` runs `web/`'s scripts so every command works from the root. Before, the web app sat at the root in `src/`, with its features in `src/lib/`, so the first `src/` a Rust developer met was TypeScript. That mattered most here, since the course's contributors are Rust learners. Also considered: the same places with React Router's and shadcn's default names only (L2), and grouping React code by page (L4), set aside because progress and notes cross pages. On the Rust side, `oxido-core` stays its own crate rather than a module (R2), so its no-I/O rule stays enforced by its dependency list.
+
+## D23. Translations by hand, with Claude's help (2026-09-27)
+
+This replaces D5. The maintainer reads Portuguese natively and translates each lesson and quiz with Claude's help. Claude drafts from the English file, the [glossary](glossary-pt-BR.md) and the content rules in `CLAUDE.md`, and the maintainer reads and edits every line. When it can, the translation goes in the same PR as the English lesson, and it's reviewed like any other content.
+
+D5's build-time pipeline was set aside. It would have parsed the Markdown, hidden code behind placeholders and cached paragraphs, and for one extra language, 44 lessons and 10 quizzes, that costs more to build and maintain than it saves. The hard part of translating this course is the choices: which terms stay in English, the tone, and staying faithful to what Bogdan says. A person makes those better, with the video in mind. Two automated checks keep what the pipeline would have guaranteed (P9):
+
+- Every translation has the same shape as its English file: the same paragraph and quiz IDs, the same inline code, and code blocks that are identical except for comments.
+- Each translation records a fingerprint of the English file it was made from, so CI warns when the English changes.
+
+Also considered were a small translation model shipped with `oxido` and a hook for the student's own AI provider. Both were set aside to keep AI out of the app. If more languages or contributors arrive, a pipeline can still be added on top of the same checks.

@@ -115,7 +115,7 @@ Light and dark, switched by one toggle; until it's pressed, the app follows the 
 
 ## Translations
 
-Translation happens at build time, never in the app. A script parses each lesson's Markdown, sends only prose (inline code replaced by placeholders, code blocks never sent), and writes `content/pt-BR/`. Code comments are translated only when the code around them stays byte-for-byte identical and still parses; otherwise the English comment stays. Paragraph IDs are shared across languages, so notes stay attached when the student switches language. Details: [roadmap-platform.md, P9](roadmap-platform.md#p9-translations-en-pt-br).
+Lessons and quizzes are translated by hand, with Claude's help (decision D23). Nothing is translated at build time or in the app. `content/en/` holds the English and `content/pt-BR/` the translation, file for file. The content compiler checks each translation against its English file: the same paragraph and quiz IDs, the same inline code, and code blocks that are identical once comments are removed. Each translation records a fingerprint of the English file it was made from; when they stop matching, CI warns that the translation is stale, and the local check shows what changed. Paragraph IDs are shared across languages, so notes stay attached when the student switches language. Interface text comes from typed dictionaries in `web/app/features/i18n/`. Another language needs its code in `languages` in `course.toml`, its folder, its glossary and a reviewer who reads it. Details: [roadmap-platform.md, P9](roadmap-platform.md#p9-translations-en-pt-br).
 
 ## Security
 

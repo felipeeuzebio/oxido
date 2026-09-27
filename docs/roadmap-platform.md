@@ -111,16 +111,27 @@ Tests first: the CI check above is written before any belt content; the test-out
 
 ### P9: Translations (en, pt-BR)
 
-Done when:
-- A build-time script translates prose only: Markdown is parsed, inline code is replaced by placeholders, code blocks are never sent, and comments are translated only when the surrounding code stays byte-for-byte identical and still parses (otherwise the English comment stays).
-- A glossary keeps Rust terms consistent; each paragraph is cached so only changed ones are sent again.
-- The app switches language at runtime without calling any AI.
+Lessons and quizzes are translated by hand, with Claude's help (decision D23). This phase builds the checks that keep translations correct, and the language switch.
 
-Tests first: pipeline invariants with a fake translator (code blocks untouched, placeholders preserved, fallback on broken comments).
+Done when:
+- English content lives in `content/en/` and each translation in a folder named after its language, such as `content/pt-BR/`, with the same file names. Phase titles and stripe descriptions from `course.toml` are translated in `content/pt-BR/course.toml`, keyed by phase ID.
+- The content compiler checks every translation's shape against its English file. It fails with a clear message when:
+  - a paragraph or heading ID is missing or extra;
+  - a quiz's questions, question kinds, option counts or correct answers differ;
+  - a paragraph's inline code spans or link targets differ;
+  - a code block differs once comments are removed (blocks without comments, like program output, must match exactly).
+- Each translated file records a fingerprint of the English file it was made from (`source` in its front matter). When the English file changes, CI adds a warning naming the stale translations, without failing. Run locally, the check lists them with the English diff since each was made: it finds the version with that fingerprint in git history.
+- A lesson that has no translation is shown in English, with a short notice.
+- The app switches language at runtime without calling any AI and remembers the choice (`oxido:lang`). Until the student picks one, it follows the browser's language. Notes stay attached because paragraph IDs are shared across languages.
+- Interface text (buttons, menus, messages) comes from one typed dictionary per language in `web/app/features/i18n/`, so a key missing from pt-BR fails `bun run check`. No i18n library.
+- Code blocks carry `translate="no"`. A student who reads the course through the browser's own page translation, in a language we don't ship, still sees the code unchanged.
+- The terms in [glossary-pt-BR.md](glossary-pt-BR.md) are decided before the first translated lesson.
+
+Tests first: one shape-check fixture per mismatch, each with its expected error. The fixtures cover a missing paragraph, a renamed identifier in inline code, a changed string literal in a code block, a changed correct answer, and a translated comment, which must pass. A staleness test edits the English fixture and expects the warning.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps. Each lesson PR goes through the Humanizer skill and the content checklist in the PR template.
+Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson PR goes through the Humanizer skill and the content checklist in the PR template.
 
 ### P11: Version 1.0
 

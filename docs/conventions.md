@@ -33,7 +33,7 @@ The scope is optional. When present, it must be one of these (enforced by `commi
 | `storage` | the SQLite store in `oxido` and browser storage on the website |
 | `editor` | CodeMirror editor and the clippy runner |
 | `grader` | build steps and belt tests in the app |
-| `i18n` | translation pipeline and language switching |
+| `i18n` | translation checks, language switching and interface text. Translated lessons and quizzes themselves are `content` |
 | `web` | the hosted website (GitHub Pages): its build, base path and browser storage. Code in the `web/` folder otherwise takes the scope of what it is (`ui`, `lesson`, `quiz` and so on) |
 | `content` | lessons, quizzes, `course.toml` |
 | `minisql` | the Mini SQL project: starters, solutions, belt tests |
