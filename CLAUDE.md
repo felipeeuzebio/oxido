@@ -27,7 +27,7 @@ Debug builds of `oxido` read the UI from `build/client` at runtime; release buil
 ## Where code goes
 
 - Rust logic without I/O: `crates/oxido-core`. The server (HTTP, SQLite, processes, CLI): `crates/oxido`, kept thin over tested functions.
-- Frontend: routes in `src/routes/`, feature logic and components in `src/lib/<feature>/` (plain `.ts` modules for logic, `.tsx` for components). Tests sit next to the code as `*.test.ts(x)`. shadcn/ui components go in `src/components/ui/`.
+- Frontend, in `app/` (React Router's default folder): routes in `app/routes/`, kept thin (they load data and compose features); each feature in `app/features/<feature>/`, its components (`.tsx`) and logic (plain `.ts` modules) together; hooks shared by several features in `app/hooks/`; small helpers only in `app/lib/`. Tests sit next to the code as `*.test.ts(x)`. shadcn/ui components go in `app/components/ui/`.
 - Course data: `content/` (`course.toml`, lessons, quizzes). The students' project: `course/minisql/`.
 - Local app vs website differences go behind an interface with one implementation per target (see [docs/architecture.md](docs/architecture.md)).
 
@@ -38,7 +38,7 @@ Debug builds of `oxido` read the UI from `build/client` at runtime; release buil
 3. **Keep the app light.** No new runtime dependency without a reason in the PR. Lazy-load heavy parts (the quiz code editor, the video player).
 4. **Update docs** in the same PR when behavior, structure or a decision changes. Don't re-open a decision in [docs/decisions.md](docs/decisions.md) without saying so explicitly.
 5. **Keep oxido locked down.** Every `/api` route needs the session, writes need oxido's own origin, and the host check stays on for everything. Any new route, header or process `oxido` runs gets a test in `crates/oxido/tests/http.rs` and a line in the PR on why it's safe. Never hold the store lock while cargo runs.
-6. **Use shadcn/ui and the design tokens.** Build UI from the components in `src/components/ui/` (added with `shadcn add`, never hand-edited) before writing custom markup. Colors, fonts and belt colors come from `src/app.css` through Tailwind's semantic classes (`bg-card`, `text-muted-foreground`); never hard-code them (`raw-colors.test.ts` checks). Every screen must work in both themes. Rules and the component map: [docs/design.md](docs/design.md).
+6. **Use shadcn/ui and the design tokens.** Build UI from the components in `app/components/ui/` (added with `shadcn add`, never hand-edited) before writing custom markup. Colors, fonts and belt colors come from `app/app.css` through Tailwind's semantic classes (`bg-card`, `text-muted-foreground`); never hard-code them (`raw-colors.test.ts` checks). Every screen must work in both themes. Rules and the component map: [docs/design.md](docs/design.md).
 7. **Let the React Compiler memoize.** Don't add `useMemo`, `useCallback` or `memo` by hand unless a profiler shows a need.
 
 ## Content rules (lessons, quizzes, translations)

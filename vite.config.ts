@@ -21,7 +21,7 @@ const plugins = process.env.VITEST
 export default defineConfig({
   base,
   plugins,
-  resolve: { alias: { "@": resolve(import.meta.dirname, "src") } },
+  resolve: { alias: { "@": resolve(import.meta.dirname, "app") } },
   server: {
     host: "127.0.0.1",
     port: 5173,
@@ -32,7 +32,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     // Tests next to the app code, plus repository checks next to their config.
-    include: ["src/**/*.test.{ts,tsx}", "*.test.ts"],
-    setupFiles: ["src/test-setup.ts"],
+    include: ["app/**/*.test.{ts,tsx}", "*.test.ts"],
+    setupFiles: ["app/test-setup.ts"],
   },
 });

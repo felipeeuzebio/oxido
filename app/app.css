@@ -16,8 +16,8 @@
  * little darker in Dojo). Every text/background pair used in the UI
  * meets WCAG AA; docs/design.md has the table.
  *
- * Dark mode is the `.dark` class on <html>, set by src/lib/theme/theme.ts and,
- * before first paint, by its PRE_PAINT_SCRIPT in src/root.tsx. tokens.test.ts
+ * Dark mode is the `.dark` class on <html>, set by app/features/theme/theme.ts and,
+ * before first paint, by its PRE_PAINT_SCRIPT in app/root.tsx. tokens.test.ts
  * checks that both themes define the same variables and that Tailwind knows
  * all of them.
  */

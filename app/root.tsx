@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "./app.css";
-import { BrandMark } from "@/lib/brand/BrandMark";
-import { ThemeToggle } from "@/lib/theme/ThemeToggle";
-import { PRE_PAINT_SCRIPT } from "@/lib/theme/theme";
-import { useTheme } from "@/lib/theme/use-theme";
+import { BrandMark } from "@/features/brand/BrandMark";
+import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { PRE_PAINT_SCRIPT } from "@/features/theme/theme";
+import { useTheme } from "@/features/theme/use-theme";
 
 const base = import.meta.env.BASE_URL;
 

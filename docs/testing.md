@@ -10,8 +10,8 @@ The project is built test first (see the TDD rule in [roadmap-platform.md](roadm
 | Server store and HTTP | `cargo test`, with in-memory SQLite and `tower`'s `oneshot` (no network) | `crates/oxido/tests/` | `cargo test -p oxido` |
 | Repository rules | Vitest in a Node environment | `*.test.ts` at the root: `commitlint.config.test.ts` (commit rules), `tooling.test.ts` (workflows and hooks) | `bun run test` |
 | Rust snapshots | insta, from P1 | content compiler and parser output | `cargo insta review` |
-| Frontend logic and components | Vitest + React Testing Library (jsdom) | `src/**/*.test.{ts,tsx}` next to the code | `bun run test` |
-| Theme guards | Vitest reading source files | `src/lib/theme/tokens.test.ts`, `raw-colors.test.ts` | `bun run test` |
+| Frontend logic and components | Vitest + React Testing Library (jsdom) | `app/**/*.test.{ts,tsx}` next to the code | `bun run test` |
+| Theme guards | Vitest reading source files | `app/features/theme/tokens.test.ts`, `raw-colors.test.ts` | `bun run test` |
 | Types | TypeScript 7 (`tsc`, after React Router's typegen) | whole frontend | `bun run check` |
 | End to end | Playwright against the real `oxido` binary serving the production build | `e2e/` | `bun run test:e2e` |
 | Lint and format | Biome (TS, JSX, JSON, CSS; React rules on), rustfmt, clippy | everything | `bun run lint`, `cargo clippy --workspace` |

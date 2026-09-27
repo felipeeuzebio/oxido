@@ -22,7 +22,7 @@ Done when:
 - `main` builds in CI: Biome, TypeScript 7, Vitest, Playwright against `oxido`, rustfmt, clippy and cargo tests all pass.
 - Git hooks run formatting, commitlint and fast tests.
 - Every non-draft PR gets a Claude review, and release-please keeps a release PR.
-- First TDD seeds: the clippy diagnostics parser (`crates/oxido-core`), quiz grading and results (`src/lib/quiz`), the theme (`src/lib/theme`).
+- First TDD seeds: the clippy diagnostics parser (`crates/oxido-core`), quiz grading and results (`app/features/quiz`), the theme (`app/features/theme`).
 - `oxido` serves the UI on 127.0.0.1 with the host, session and origin checks, and stores progress and notes in SQLite with versioned migrations (`crates/oxido`).
 
 ### P1: Content pipeline

@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/**"
+      - "app/**"
       - "public/**"
       - "content/**"
       - "package.json"

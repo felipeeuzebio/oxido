@@ -4,11 +4,13 @@
 
 ```
 oxido/
-├── src/                  React frontend (React Router, static single-page app)
+├── app/                  React frontend (React Router, static single-page app)
 │   ├── root.tsx          document shell, theme, layout
-│   ├── routes.ts         route table; pages in routes/
+│   ├── routes.ts         route table; pages in routes/, kept thin
+│   ├── features/         one folder per feature: components, logic, tests
 │   ├── components/ui/    shadcn/ui components (generated, not hand-edited)
-│   └── lib/              feature logic and components; tests sit next to the code
+│   ├── hooks/            hooks shared by several features
+│   └── lib/              small helpers (cn)
 ├── crates/oxido/           `oxido`: the local server students run (CLI, HTTP API, SQLite store)
 ├── crates/oxido-core/      pure Rust logic with no I/O (diagnostics, content, grading)
 ├── content/              course.toml, lessons and quizzes per language
@@ -95,7 +97,7 @@ During development, `bun run dev:all` (`scripts/dev.ts`) runs `oxido serve --dev
 
 ## Theme
 
-Light and dark, switched by one toggle; until it's pressed, the app follows the operating system (an internal "system" default). `src/lib/theme/theme.ts` holds the logic (storage key `oxido:theme`, the `dark` class on `<html>`), `use-theme.ts` wraps it for React, and `ThemeToggle.tsx` is the control. `PRE_PAINT_SCRIPT`, built from the same constants, runs in `<head>` so the page never flashes the wrong colors. The colors for both themes are in `src/app.css`. If a content security policy is added in P3, that inline script needs a hash entry.
+Light and dark, switched by one toggle; until it's pressed, the app follows the operating system (an internal "system" default). `app/features/theme/theme.ts` holds the logic (storage key `oxido:theme`, the `dark` class on `<html>`), `use-theme.ts` wraps it for React, and `ThemeToggle.tsx` is the control. `PRE_PAINT_SCRIPT`, built from the same constants, runs in `<head>` so the page never flashes the wrong colors. The colors for both themes are in `app/app.css`. If a content security policy is added in P3, that inline script needs a hash entry.
 
 ## Data flow
 

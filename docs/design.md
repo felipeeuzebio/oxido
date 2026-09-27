@@ -4,7 +4,7 @@ The name and the look come from the same two places. Oxidō is *oxide* (rust) pl
 
 Write the name with the macron, Oxidō, wherever people read it (UI, docs, the terminal). Identifiers stay plain ASCII: the `oxido` crate and command, `.oxido/`, `oxido:theme`.
 
-The UI is built with [shadcn/ui](https://ui.shadcn.com) on Tailwind CSS v4, themed with these colors. Everything lives in one stylesheet, [`src/app.css`](../src/app.css): the variables for both themes use shadcn/ui's names, and `@theme inline` turns them into Tailwind classes (`bg-card`, `text-muted-foreground`, `bg-success-muted`, `bg-belt-orange`). Components use those classes and never hard-code colors. Two tests guard this: `tokens.test.ts` (both themes define the same variables, and Tailwind knows every one) and `raw-colors.test.ts` (no hex, `rgb()` or raw Tailwind palette colors in our `.tsx` components).
+The UI is built with [shadcn/ui](https://ui.shadcn.com) on Tailwind CSS v4, themed with these colors. Everything lives in one stylesheet, [`app/app.css`](../app/app.css): the variables for both themes use shadcn/ui's names, and `@theme inline` turns them into Tailwind classes (`bg-card`, `text-muted-foreground`, `bg-success-muted`, `bg-belt-orange`). Components use those classes and never hard-code colors. Two tests guard this: `tokens.test.ts` (both themes define the same variables, and Tailwind knows every one) and `raw-colors.test.ts` (no hex, `rgb()` or raw Tailwind palette colors in our `.tsx` components).
 
 ## Logo
 
@@ -34,7 +34,7 @@ Rules:
 
 The app has a light theme and a dark theme, and one button switches between them. Until a student presses it, the app follows the operating system, and keeps following it when it changes; that "system" default is internal and has no button of its own. Pressing the toggle switches to the other theme and saves it, and from then on the system setting no longer matters.
 
-`src/lib/theme/theme.ts` keeps the choice (per browser, key `oxido:theme`) and puts the `dark` class on `<html>`; an inline script in `<head>` (from `src/root.tsx`) does the same before first paint. Tailwind's `dark:` variant follows that class. The toggle is `src/lib/theme/ThemeToggle.tsx`: a toggle button named "Dark theme" with `aria-pressed`, showing a sun in the light theme and a moon in the dark one. Its icons switch on the `dark` class, not on React state, so the first paint is right. `oxido` always uses port 7878 by default so the browser remembers the choice between launches.
+`app/features/theme/theme.ts` keeps the choice (per browser, key `oxido:theme`) and puts the `dark` class on `<html>`; an inline script in `<head>` (from `app/root.tsx`) does the same before first paint. Tailwind's `dark:` variant follows that class. The toggle is `app/features/theme/ThemeToggle.tsx`: a toggle button named "Dark theme" with `aria-pressed`, showing a sun in the light theme and a moon in the dark one. Its icons switch on the `dark` class, not on React state, so the first paint is right. `oxido` always uses port 7878 by default so the browser remembers the choice between launches.
 
 ### Dojo (light)
 
@@ -76,14 +76,14 @@ The rust is one color in both themes. In OKLCH, Dojo's `#c04218` and Forge's `#e
 
 ## Components
 
-Build from shadcn/ui components before writing custom markup, and restyle them only through these variables, never with color classes on the component. They live in `src/components/ui/` as generated code: add or update them with the CLI, don't hand-edit them (Biome skips that folder). `components.json` is set up (style new-york, Lucide icons, `@/` aliases); don't run `init` again, because it would rewrite `src/app.css`.
+Build from shadcn/ui components before writing custom markup, and restyle them only through these variables, never with color classes on the component. They live in `app/components/ui/` as generated code: add or update them with the CLI, don't hand-edit them (Biome skips that folder). `components.json` is set up (style new-york, Lucide icons, `@/` aliases); don't run `init` again, because it would rewrite `app/app.css`.
 
 ```sh
 bunx --bun shadcn@latest add toggle-group toggle button card badge collapsible alert separator \
   progress tabs resizable sheet tooltip checkbox field scroll-area skeleton breadcrumb item dropdown-menu
 ```
 
-The workspace where Claude runs can't reach the shadcn/ui registry, so run `add` from a machine that can. If `add` writes `:root` or `.dark` color variables into `src/app.css`, delete them: the colors are already there. Until then, the two existing components (the theme toggle and quiz results) are plain markup shaped like the components they become, with a comment naming them.
+The workspace where Claude runs can't reach the shadcn/ui registry, so run `add` from a machine that can. If `add` writes `:root` or `.dark` color variables into `app/app.css`, delete them: the colors are already there. Until then, the two existing components (the theme toggle and quiz results) are plain markup shaped like the components they become, with a comment naming them.
 
 After `add`, give `Badge` and `Alert` our tinted variants with `cva` in their own files (shadcn's "add a variant" route, not class overrides at the call site): `success` (`bg-success-muted text-success`), `destructive-muted` (`bg-destructive-muted text-destructive`), `info` (`bg-info-muted text-info`), `warning` (`bg-warning-muted text-warning`) and `primary-muted` (`bg-primary-muted text-primary-muted-foreground`); on `Alert`, add a `border-*/25` of the same color.
 

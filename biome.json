@@ -8,7 +8,7 @@
       "!.react-router",
       "!target",
       "!**/fixtures",
-      "!src/components/ui",
+      "!app/components/ui",
       "!**/*.svg"
     ]
   },

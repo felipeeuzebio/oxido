@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 // Read from disk: Vitest turns CSS imports (even ?raw) into empty strings.
-const css = readFileSync(resolve(process.cwd(), "src/app.css"), "utf8");
+const css = readFileSync(resolve(process.cwd(), "app/app.css"), "utf8");
 
 // Pulls "--name: value;" pairs out of the block that follows `selector {`.
 function block(selector: string): Map<string, string> {

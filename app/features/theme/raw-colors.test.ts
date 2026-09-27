@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 // Components must take their colors from the theme tokens (CLAUDE.md rule 6),
 // so both themes work everywhere. Generated shadcn/ui components are skipped:
 // they're updated with the CLI, not by hand.
-const root = resolve(process.cwd(), "src");
+const root = resolve(process.cwd(), "app");
 const skip = [join("components", "ui")];
 
 function componentFiles(dir: string): string[] {
