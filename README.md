@@ -50,7 +50,7 @@ Your progress, your quiz results and the notes you take on video timestamps or p
 
 ## Status
 
-The project is in early development. Platform phase P0 (the foundation) is done. That covers the React app and the `oxido` server with its SQLite store and security checks. [docs/roadmap-platform.md](docs/roadmap-platform.md) lists what comes next. `oxido` isn't on crates.io yet. Until it is, install it from a clone of this repository with `bun install && bun run build && cargo install --locked --path crates/oxido`. Keep `--locked` when it reaches crates.io too (`cargo install --locked oxido`): it builds with the exact dependency versions CI tested. If something doesn't work, run `oxido doctor` in your minisql folder: it checks Rust, clippy, Git, the project and your progress file, and says how to fix what it finds.
+The project is in early development. Platform phases P0 (the foundation) and P1 (the content pipeline) are done. They cover the React app, the `oxido` server with its SQLite store and security checks, and the compiler that turns the course into the lesson pages the app pre-renders. [docs/roadmap-platform.md](docs/roadmap-platform.md) lists what comes next. `oxido` isn't on crates.io yet. Until it is, install it from a clone of this repository with `bun install && bun run build && cargo install --locked --path crates/oxido`. Keep `--locked` when it reaches crates.io too (`cargo install --locked oxido`): it builds with the exact dependency versions CI tested. If something doesn't work, run `oxido doctor` in your minisql folder: it checks Rust, clippy, Git, the project and your progress file, and says how to fix what it finds.
 
 ## Development
 

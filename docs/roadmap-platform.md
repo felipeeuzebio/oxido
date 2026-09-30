@@ -25,7 +25,7 @@ Done when:
 - First TDD seeds: the clippy diagnostics parser (`crates/oxido-core`), quiz grading and results (`web/app/features/quiz`), the theme (`web/app/features/theme`).
 - `oxido` serves the UI on 127.0.0.1 with the host, session and origin checks, and stores progress and notes in SQLite with versioned migrations (`crates/oxido`).
 
-### P1: Content pipeline
+### P1: Content pipeline (done)
 
 Lessons, quizzes and course structure become validated data the app can load.
 
