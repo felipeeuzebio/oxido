@@ -5,6 +5,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
+      "initial-version": "0.1.0",
       "package-name": "oxido",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
