@@ -10,7 +10,8 @@
   "scripts": {
     "prepare": "lefthook install || echo ''",
     "dev": "bun run --cwd web dev",
-    "dev:all": "bun scripts/dev.ts",
+    "dev:oxido": "cargo run -p oxido -- serve --dev --no-open --project dev/sandbox",
+    "dev:all": "bun run --parallel dev:oxido dev",
     "build": "bun run --cwd web build",
     "check": "tsc -p . && bun run --cwd web check",
     "lint": "biome check .",
