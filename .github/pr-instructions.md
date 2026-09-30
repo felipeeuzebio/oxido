@@ -26,7 +26,7 @@ One or two sentences on what changes and why. End with the roadmap phase or issu
 | Phase | Covers |
 |---|---|
 | P0 | Foundation (done) |
-| P1 | Content pipeline |
+| P1 | Content pipeline (done) |
 | P2 | Roadmap home and navigation |
 | P3 | Lesson page |
 | P4 | Progress tracking |

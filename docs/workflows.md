@@ -29,7 +29,7 @@ The cargo-deny job fails when a Rust dependency has a security advisory, a licen
    They differ in the one merge method each allows: squash on `develop`, so every PR lands as one commit, and merge on `main`, so `main` stays connected to `develop` ([release.md](release.md)).
 4. **Merge settings** (Settings > General > Pull Requests): allow squash merging and merge commits (for `main`), but not rebase merging. A squash commit takes the PR title as its title and the commit messages as its body, which keeps their `Co-Authored-By` trailers. By default, GitHub titles a one-commit PR's squash with its commit's title instead of the PR title, and release-please reads that title. A merge commit takes the PR title and no body. Turn on "Automatically delete head branches"; the rulesets' deletion rule keeps `develop` and `main` safe from it.
 5. **Pages.** Settings > Pages > Source: GitHub Actions.
-6. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
+6. **Release token.** Create a fine-grained personal access token with read and write access to Contents, Issues and Pull requests on this repo, and save it as `RELEASE_PLEASE_TOKEN`. release-please needs Issues for the labels it puts on its PR. Without the token, the release workflow fails, because GitHub Actions isn't allowed to open PRs in this repository. Allowing that wouldn't be enough either: a PR opened with the default token doesn't trigger CI or the Claude review, so its required checks never report.
 
 ## About the Claude review
 
