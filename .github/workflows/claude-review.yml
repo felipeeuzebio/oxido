@@ -58,8 +58,9 @@ jobs:
                remote content.
             4. Performance: the app must stay light (no heavy dependency without a reason,
                lazy-load the editor and the video player).
-            5. Course rules, when content/ or course/ changed: text lessons follow the
-               video's teachings in order without silent corrections, and never copy
+            5. Course rules, when content/ or course/ changed: a text lesson covers
+               every point of its outline in content/outlines/ (the video's points, in
+               order) in the same order, without silent corrections, and never copies
                transcripts; translations change prose and comments only and use the
                glossary's terms.
             6. Conventions: Conventional Commits title with a valid scope, docs updated

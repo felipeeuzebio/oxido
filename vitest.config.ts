@@ -1,10 +1,12 @@
 import { defineConfig } from "vitest/config";
 
-// Repository rules: tests at the root that check the tooling and CI setup
-// (commit rules, workflows, hooks). The frontend's tests run in web/.
+// The repository's own tests, in tests/: rules for the tooling and CI setup
+// (commit rules, workflows, hooks, agent skills) and the scripts that agent
+// skills bundle.
+// The frontend's tests run in web/.
 export default defineConfig({
   test: {
-    include: ["*.test.ts"],
+    include: ["tests/**/*.test.ts"],
     environment: "node",
   },
 });

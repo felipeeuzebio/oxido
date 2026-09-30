@@ -1,5 +1,5 @@
 {
-  "include": ["*.ts", "scripts/**/*.ts"],
+  "include": ["*.ts", ".agents/skills/**/*.ts", "tests/**/*.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023"],
