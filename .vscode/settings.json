@@ -1,5 +1,12 @@
 {
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    { "file": ".github/commit-instructions.md" }
+  ],
+  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
+    { "file": ".github/pr-instructions.md" }
+  ],
+  "ty.experimental.useUv": "scripts"
 }
