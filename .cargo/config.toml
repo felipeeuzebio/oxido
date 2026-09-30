@@ -1,0 +1,4 @@
+# `cargo xtask <command>` runs the repository's maintainer commands
+# (crates/xtask): content and check-code.
+[alias]
+xtask = "run --quiet --package xtask --"

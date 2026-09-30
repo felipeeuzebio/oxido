@@ -23,5 +23,8 @@ vite.config.ts.timestamp-*
 # React Router generated types
 /web/.react-router
 
+# Compiled content: `bun run content` (cargo xtask content) writes it on every build
+/web/.content
+
 # Python bytecode
 __pycache__/

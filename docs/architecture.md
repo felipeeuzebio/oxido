@@ -7,7 +7,9 @@ oxido/
 ├── Cargo.toml            Cargo workspace: the members are in crates/
 ├── crates/
 │   ├── oxido/            `oxido`: the local server students run (CLI, HTTP API, SQLite store)
-│   └── oxido-core/       pure Rust logic with no I/O (diagnostics, content, grading)
+│   ├── oxido-core/       pure Rust logic with no I/O (diagnostics, grading)
+│   ├── oxido-content/    the content compiler's logic, no I/O: content/ in, JSON and lesson HTML out
+│   └── xtask/            maintainer commands: cargo xtask content | check-code
 ├── web/                  the frontend, one Bun workspace package
 │   ├── app/              React Router's app folder (static single-page app)
 │   │   ├── root.tsx      document shell, theme, layout
@@ -18,12 +20,15 @@ oxido/
 │   │   └── lib/          small helpers (cn)
 │   ├── e2e/              Playwright tests against the real `oxido` binary
 │   └── public/           logo and icons
-├── content/              course.toml, lessons and quizzes per language
+├── content/              course.toml, outlines, and lessons and quizzes per language
 ├── course/minisql/       the students' project: starters, solutions, stripe tests
 ├── dev/sandbox/          a course project for working on oxido
 ├── package.json          repo tooling (lefthook, commitlint, Biome) and the root scripts
+├── scripts/              repo scripts (fetching the video transcripts)
+├── tests/                tests for the repo tooling and scripts (web/ and crates/ have their own)
 ├── docs/                 documentation for contributors and agents
-└── .github/              workflows, Dependabot, PR template
+├── .agents/skills/       agent skills and their scripts; .claude/skills/ links to them
+└── .github/              workflows, Dependabot, PR template, commit and PR instructions
 ```
 
 ## Two ways to take the course
@@ -99,7 +104,7 @@ Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies
 
 React 19 with React Router 8 in framework mode, `ssr: false`: a static single-page app whose pages are pre-rendered to HTML at build time. Vite 8 builds it (Rolldown and Oxc), with the React Compiler handling memoization. `BASE_PATH` sets the path prefix for GitHub Pages; the local server uses `/`.
 
-During development, `bun run dev:all` (`scripts/dev.ts`) runs `oxido serve --dev` on the sandbox project and `bun run dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878.
+During development, `bun run dev:all` runs two scripts with `bun run --parallel`: `dev:oxido` (`oxido serve --dev` on the sandbox project) and `dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878. Ctrl+C stops both, and so does either one failing.
 
 ## Theme
 
@@ -107,7 +112,7 @@ Light and dark, switched by one toggle; until it's pressed, the app follows the 
 
 ## Data flow
 
-1. **Content.** `content/` → content compiler (P1: `markdown` for lessons, `arborium` for code highlighting) → JSON and HTML → frontend build.
+1. **Content.** `content/` → `cargo xtask content` (`oxido-content`: `markdown` for lessons, `arborium` for code highlighting, decision D26) → `web/.content/`, JSON with each lesson's HTML → the route loaders, which run only while React Router pre-renders each lesson. The lesson route is registered once there's a lesson to pre-render, since a route with a loader must have one when `ssr` is off.
 2. **Lesson page.** Lesson HTML + video ID → YouTube player facade (loads on play) → IFrame API for time and seeking.
 3. **Quiz code editor.** CodeMirror 6, only on quiz questions with code. `oxido` writes the snippet into a scratch crate in the user's cache folder and runs `cargo clippy` or `cargo run` with a timeout → cargo's JSON messages → `oxido_core::diagnostics::parse_cargo_messages` → editor markers.
 4. **Stripes.** The student edits minisql in their own editor. `oxido` watches the files, reruns the current stripe's tests on save (`cargo test --test stripe_NN`), parses the output and pushes results to the page with server-sent events (P8). libtest's JSON output is still nightly-only, so the plain output is parsed.

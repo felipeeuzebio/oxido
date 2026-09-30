@@ -102,3 +102,31 @@ D5's build-time pipeline was set aside. It would have parsed the Markdown, hidde
 - Each translation records a fingerprint of the English file it was made from, so CI warns when the English changes.
 
 Also considered were a small translation model shipped with `oxido` and a hook for the student's own AI provider. Both were set aside to keep AI out of the app. If more languages or contributors arrive, a pipeline can still be added on top of the same checks.
+
+## D24. Lessons drafted with an agent skill, from a committed outline (2026-09-27)
+
+Each lesson is drafted with the `lesson` skill (`.agents/skills/lesson/`), one class per run, in an agent session on the maintainer's machine, where the transcripts are. The skill first writes an outline of the video: Bogdan's points in order, in new words, with timestamps, notes on anything he gets wrong, and the Rust features the video introduces. Then it writes the lesson from the outline. Both are committed, the outline in `content/outlines/`, and reviewed in one PR. The outline is what the lesson gets checked against: the Claude review in CI never sees the transcript, so without it nothing after the local session could check that a lesson follows the video. The skill's `scripts/transcript-overlap.ts` flags any run of 8 or more words that the outline or the lesson shares with the transcript.
+
+A merged lesson is never regenerated. The lesson records a fingerprint of its outline; when the outline changes, the content compiler (P1) flags the lesson as stale, and the skill proposes edits for the maintainer to approve.
+
+Set aside: a script that sends each transcript and the course instructions to the Anthropic API, or to a headless agent, for all 44 lessons at once. It would copy the rules in `CLAUDE.md` into a prompt that drifts from them, need an API key, and turn out 44 drafts the maintainer would still read line by line, the same trade-off D23 weighed for translations. A GitHub Action can't do it at all: YouTube blocks requests from cloud servers, and the transcripts are git-ignored. The skill follows the Agent Skills format, so Claude Code (through a symlink in `.claude/skills/`), Codex, Gemini CLI, Cursor and VS Code can all run it.
+
+## D25. Transcripts come from a Python script, run once (2026-09-27)
+
+`scripts/fetch_transcripts.py` fetches the playlist and the transcripts with youtube-transcript-api and yt-dlp, run by uv. It runs once, again only to finish after YouTube blocks it partway: the videos are published and won't change, so neither will their transcripts. Revised the same day: at first the script was to get a Rust entry point, `cargo xtask update-course`, that fetched again and reported playlist changes and outlines written from an older transcript. That was dropped, since nothing it watched is expected to change. If the course ever follows a new playlist, running the script again and comparing its `playlist.json` with `course.toml` by hand is enough.
+
+Set aside:
+
+- Embedding the Python libraries with PyO3. It links libpython into the build, so every crate in the workspace, and every CI job that builds them, would need Python's development files, and the packages would still need an environment to import from. uv already handles that in one line.
+- Putting the command in `oxido`. Students install it and never fetch transcripts, and linking Python would break `cargo install` on machines without it.
+- Porting the fetching to Rust. YouTube's undocumented API changes often, the Python libraries get the fixes first, and the Rust crates lag behind: the most used one had its last release in June 2025.
+
+## D26. The content compiler: its own crate, run on every build, TOML front matter (2026-09-27)
+
+The content compiler is `crates/oxido-content`, a library that does no I/O, like `oxido-core`: `course.toml`, lessons, quizzes and outlines go in as text, and the JSON and lesson HTML the frontend reads come out, with every problem reported as a file, a line and a message. It's a crate of its own because it pulls in markdown-rs and arborium's tree-sitter grammars, which the students' `cargo install oxido` shouldn't have to compile; `oxido` gets the lessons through the frontend build it embeds. `crates/xtask`, never published, does the file and process work: `cargo xtask content` and `check-code`.
+
+The compiled content isn't committed. `bun run build` and `bun run dev` run `cargo xtask content` first, into the git-ignored `web/.content/`, so CI's frontend job and the Pages build install Rust. Committing the output would have kept Pages on Bun alone, but every content PR would carry generated files and need a check that they're current.
+
+Lessons, outlines and translations start with TOML front matter between `+++` lines, the format `course.toml` already uses. YAML would have added a second format and a parser (serde_yaml is no longer maintained).
+
+Lessons and quizzes that `course.toml` plans but that aren't written yet are listed on every build, not treated as errors, so the course can be written one PR at a time; `cargo xtask content --complete` makes them errors for a release. A quiz file that no phase uses is always an error, which catches a typo in a quiz's name.

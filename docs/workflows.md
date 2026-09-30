@@ -4,11 +4,11 @@
 
 | File | Runs on | What it does |
 |---|---|---|
-| `ci.yml` | every PR, pushes to `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build); Rust job (rustfmt, clippy, nextest, doc tests); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
+| `ci.yml` | every PR, pushes to `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build, with Rust installed for the content compiler); Rust job (rustfmt, clippy, nextest, doc tests, then `cargo xtask content` and `check-code` on the real course); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
 | `claude-review.yml` | PR opened, updated, reopened or marked ready | Claude reviews the diff and posts inline comments plus a summary |
 | `claude.yml` | comments, reviews and issues that mention `@claude` | Claude answers or makes the change (users with write access only) |
 | `release.yml` | pushes to `main` | release-please keeps a release PR up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
-| `pages.yml` | pushes to `main` that touch the frontend or content | builds the website (with `BASE_PATH=/<repo>`) and deploys it to GitHub Pages |
+| `pages.yml` | pushes to `main` that touch the frontend, the content or the content compiler | compiles the content, builds the website (with `BASE_PATH=/<repo>`) and deploys it to GitHub Pages |
 
 Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and GitHub Actions, titled `chore(deps): ...`.
 

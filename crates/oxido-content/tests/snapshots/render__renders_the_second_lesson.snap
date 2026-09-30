@@ -1,0 +1,29 @@
+---
+source: crates/oxido-content/tests/render.rs
+expression: "html(\"02-variables\")"
+---
+<h2 id="shadowing">Shadowing</h2>
+<p>A second <code translate="no">let</code> can reuse a name. Go back to <a href="/lesson/p01/01-hello">the first lesson</a>.</p>
+<ul>
+<li>one</li>
+<li>two</li>
+</ul>
+<ol start="3">
+<li>third</li>
+<li>fourth</li>
+</ol>
+<blockquote>
+<p><strong>Note:</strong> a clearly marked note after his point.</p>
+</blockquote>
+<table>
+<thead>
+<tr><th data-align="left">Command</th><th data-align="right">Does</th></tr>
+</thead>
+<tbody>
+<tr><td data-align="left"><code translate="no">.exit</code></td><td data-align="right">quits</td></tr>
+</tbody>
+</table>
+<hr>
+<pre class="code" data-lang="rust" translate="no"><code>this block isn<a-o>&#39;</a-o>t compiled</code></pre>
+<pre class="code" data-lang="console" translate="no"><code>$ cargo run
+db &gt; .exit</code></pre>

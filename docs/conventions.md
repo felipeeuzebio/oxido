@@ -35,13 +35,14 @@ The scope is optional. When present, it must be one of these (enforced by `commi
 | `grader` | build steps and belt tests in the app |
 | `i18n` | translation checks, language switching and interface text. Translated lessons and quizzes themselves are `content` |
 | `web` | the hosted website (GitHub Pages): its build, base path and browser storage. Code in the `web/` folder otherwise takes the scope of what it is (`ui`, `lesson`, `quiz` and so on) |
-| `content` | lessons, quizzes, `course.toml` |
+| `compiler` | the content compiler (`crates/oxido-content`) and `cargo xtask` (`crates/xtask`) |
+| `content` | lessons, their outlines, quizzes, `course.toml` |
 | `minisql` | the Mini SQL project: starters, solutions, belt tests |
 | `ci` | GitHub workflows |
 | `release` | release-please, bundling, signing |
 | `deps` | dependency updates (Dependabot uses it) |
 | `hooks` | lefthook and commitlint setup |
-| `agents` | `CLAUDE.md` and agent-facing docs in `docs/` |
+| `agents` | `CLAUDE.md`, agent skills in `.agents/skills/`, and agent-facing docs in `docs/` |
 | `config` | tool configuration (Biome, Vite, TypeScript, Cargo) |
 
 Examples:
@@ -57,6 +58,8 @@ chore(deps): bump axum to 0.8.10
 ```
 
 Commits written with Claude keep the `Co-Authored-By: Claude <noreply@anthropic.com>` trailer.
+
+`.github/commit-instructions.md` and `.github/pr-instructions.md` repeat these rules, the scope table included, for tools that draft commit messages and PR descriptions from the diff alone and can't follow links. Change them together with this file.
 
 ## Code style
 
