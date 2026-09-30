@@ -21,11 +21,13 @@ The cargo-deny job fails when a Rust dependency has a security advisory, a licen
 1. **Default branch.** The repository's default branch is `main`.
 2. **Claude.** Run `claude /install-github-app` from a local clone (you must be a repo admin). It installs the Claude GitHub App and adds a secret. The workflows accept either `CLAUDE_CODE_OAUTH_TOKEN` (Claude subscription) or `ANTHROPIC_API_KEY` (API billing); set one.
 3. **Ruleset for `main`** (Settings > Rules > Rulesets > New branch ruleset, target the default branch):
-   - Require a pull request before merging; allow squash merge only.
-   - Require status checks to pass: `PR title follows Conventional Commits`, `Frontend (lint, types, unit tests, build)`, `Rust (fmt, clippy, tests)`, `Rust minimum version`, `Rust dependencies (cargo-deny)`, `End to end (Playwright against oxido)`, `Claude review`.
+   - Require a pull request before merging, with every review conversation resolved; allow squash merge only. No approvals are required, since maintainers can't approve their own PRs.
+   - Require status checks to pass, reported by GitHub Actions only, so no other app can report them: `PR title follows Conventional Commits`, `Frontend (lint, types, unit tests, build)`, `Rust (fmt, clippy, tests)`, `Rust minimum version`, `Rust dependencies (cargo-deny)`, `End to end (Playwright against oxido)`, `Claude review`.
    - Block force pushes and deletions.
-4. **Pages.** Settings > Pages > Source: GitHub Actions.
-5. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
+   - Bypass list: the Repository admin role, for pull requests only. An admin can merge a PR whose checks can't pass (the Claude review before step 2 is done), but can't push to `main` directly.
+4. **Merge settings** (Settings > General > Pull Requests): allow squash merging only, with the PR title as the commit title and the commit messages as its body, which keeps their `Co-Authored-By` trailers. Turn on "Automatically delete head branches". By default, GitHub titles a one-commit PR with its commit's title instead of the PR title, and release-please reads that title.
+5. **Pages.** Settings > Pages > Source: GitHub Actions.
+6. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
 
 ## About the Claude review
 
