@@ -1,0 +1,88 @@
+{
+  "title": "Fixture Course",
+  "project": "minisql",
+  "playlist": "PLfixture",
+  "languages": [
+    "en"
+  ],
+  "belts": [
+    {
+      "id": "white",
+      "phases": [
+        "p01"
+      ]
+    },
+    {
+      "id": "yellow",
+      "phases": [
+        "p02"
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "id": "kickoff",
+      "title": "Kickoff",
+      "chapters": [],
+      "build": "A demo of the finished project",
+      "stripes": [],
+      "quiz": null,
+      "studentTdd": false,
+      "videos": [],
+      "lessons": []
+    },
+    {
+      "id": "p01",
+      "title": "First Steps",
+      "chapters": [
+        1,
+        3
+      ],
+      "build": "A prompt that reads commands",
+      "stripes": [
+        "a prompt that reads lines",
+        ".exit ends the program"
+      ],
+      "quiz": "quiz-01",
+      "studentTdd": false,
+      "videos": [
+        "helloVideo1",
+        "shadowVid02"
+      ],
+      "lessons": [
+        {
+          "slug": "01-hello",
+          "title": "Hello, Cargo",
+          "video": "helloVideo1",
+          "route": "/lesson/p01/01-hello"
+        },
+        {
+          "slug": "02-variables",
+          "title": "Variables",
+          "video": "shadowVid02",
+          "route": "/lesson/p01/02-variables"
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "title": "Ownership",
+      "chapters": [
+        4
+      ],
+      "build": "Rows in a table",
+      "stripes": [
+        "rows"
+      ],
+      "quiz": "quiz-02",
+      "studentTdd": true,
+      "videos": [
+        "ownerVideo3"
+      ],
+      "lessons": []
+    }
+  ],
+  "quizzes": [
+    "quiz-01"
+  ]
+}

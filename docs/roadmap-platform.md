@@ -10,7 +10,7 @@ Every phase is built test first:
 2. Write the smallest implementation that makes them pass (green).
 3. Clean up with the tests still passing (refactor).
 
-A phase is finished when all of its "Done when" tests pass in CI on `main`. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
+A phase is finished when all of its "Done when" tests pass in CI on `develop`. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
 
 ## Phases
 
@@ -31,9 +31,10 @@ Lessons, quizzes and course structure become validated data the app can load.
 
 Done when:
 - `course.toml`, lesson front matter and quiz files have a schema, and a content compiler (Rust, run at build time) turns them into JSON plus lesson HTML: `markdown` (markdown-rs) for Markdown, `arborium` for code highlighting, its classes mapped to the `--code-*` colors (decision D21).
-- Invalid content fails with a clear message: unknown phase, missing quiz, answer index out of range, broken internal link, missing video ID.
+- Invalid content fails with a clear message: unknown phase, a quiz file no phase uses (and, with `--complete`, a planned quiz or lesson that isn't written), answer index out of range, broken internal link, missing video ID.
 - Every ```` ```rust ```` block in a lesson compiles, unless marked `ignore` or `compile_fail`.
 - The 44 videos from `playlist.json` are mapped to phases, and each lesson route is pre-rendered.
+- Outlines in `content/outlines/` (decision D24) have a schema, aren't published, and the compiler warns when a lesson's `outline` fingerprint doesn't match its outline.
 
 Tests first: valid and invalid content fixtures with expected errors; snapshot tests (insta) of the compiled output.
 
@@ -131,7 +132,7 @@ Tests first: one shape-check fixture per mismatch, each with its expected error.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson PR goes through the Humanizer skill and the content checklist in the PR template.
+Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decision D24), and its PR goes through the Humanizer skill and the content checklist in the PR template.
 
 ### P11: Version 1.0
 

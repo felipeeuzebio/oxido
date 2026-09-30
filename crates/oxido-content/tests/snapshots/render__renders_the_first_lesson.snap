@@ -1,0 +1,18 @@
+---
+source: crates/oxido-content/tests/render.rs
+expression: "html(\"01-hello\")"
+---
+<p>Cargo builds and runs a project. A tag like &lt;b&gt;this&lt;/b&gt; stays plain text.</p>
+<h2 id="your-first-program">Your first program</h2>
+<pre class="code" data-lang="rust" translate="no"><code><a-k>fn</a-k> <a-f>main</a-f><a-p>()</a-p> <a-p>{</a-p>
+    <a-k>let</a-k> name = <a-s>&quot;minisql&quot;</a-s><a-p>;</a-p>
+    <a-kc>if</a-kc> name<a-p>.</a-p><a-f>len</a-f><a-p>()</a-p> &gt; <a-n>3</a-n> <a-p>{</a-p>
+        <a-m>println!</a-m><a-p>(</a-p><a-s>&quot;hello, {name}! {}&quot;</a-s><a-p>,</a-p> <a-n>42</a-n><a-p>);</a-p>
+    <a-p>}</a-p>
+<a-p>}</a-p></code></pre>
+<pre class="code" data-lang="rust" translate="no"><code><a-k>let</a-k> count<a-p>:</a-p> <a-t>i32</a-t> = <a-s>&quot;three&quot;</a-s><a-p>;</a-p></code></pre>
+<pre class="code" data-lang="toml" translate="no"><code><a-p>[</a-p><a-pr>package</a-pr><a-p>]</a-p>
+<a-pr>name</a-pr> <a-o>=</a-o> <a-s>&quot;minisql&quot;</a-s></code></pre>
+<p>Read about <a href="/lesson/p01/02-variables#shadowing">shadowing</a> next, or the <a href="https://doc.rust-lang.org/book/">Rust Book</a>.</p>
+<h2 id="your-first-program-2">Your first program</h2>
+<p>Run it with <code translate="no">cargo run</code>, then <em>try</em> <strong>again</strong>.</p>

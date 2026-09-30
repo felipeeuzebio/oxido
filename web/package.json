@@ -6,8 +6,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "react-router dev",
-    "build": "react-router build",
+    "content": "cargo xtask content",
+    "dev": "bun run content && react-router dev",
+    "build": "bun run content && react-router build",
     "check": "react-router typegen && tsc",
     "test": "vitest run",
     "test:watch": "vitest",

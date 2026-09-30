@@ -4,11 +4,11 @@
 
 | File | Runs on | What it does |
 |---|---|---|
-| `ci.yml` | every PR, pushes to `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build); Rust job (rustfmt, clippy, nextest, doc tests); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
+| `ci.yml` | every PR, pushes to `develop` and `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build, with Rust installed for the content compiler); Rust job (rustfmt, clippy, nextest, doc tests, then `cargo xtask content` and `check-code` on the real course); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
 | `claude-review.yml` | PR opened, updated, reopened or marked ready | Claude reviews the diff and posts inline comments plus a summary |
 | `claude.yml` | comments, reviews and issues that mention `@claude` | Claude answers or makes the change (users with write access only) |
-| `release.yml` | pushes to `main` | release-please keeps a release PR up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
-| `pages.yml` | pushes to `main` that touch the frontend or content | builds the website (with `BASE_PATH=/<repo>`) and deploys it to GitHub Pages |
+| `release.yml` | pushes to `develop` | release-please keeps a release PR into `develop` up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
+| `pages.yml` | pushes to `main` that touch the frontend, the content or the content compiler | compiles the content, builds the website (with `BASE_PATH=/<repo>`) and deploys it to GitHub Pages |
 
 Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and GitHub Actions, titled `chore(deps): ...`.
 
@@ -18,14 +18,18 @@ The cargo-deny job fails when a Rust dependency has a security advisory, a licen
 
 ## One-time setup
 
-1. **Default branch.** The repository's default branch is `main`.
+1. **Branches.** Create `develop` from `main` and make it the default branch (Settings > General > Default branch), so new PRs target it.
 2. **Claude.** Run `claude /install-github-app` from a local clone (you must be a repo admin). It installs the Claude GitHub App and adds a secret. The workflows accept either `CLAUDE_CODE_OAUTH_TOKEN` (Claude subscription) or `ANTHROPIC_API_KEY` (API billing); set one.
-3. **Ruleset for `main`** (Settings > Rules > Rulesets > New branch ruleset, target the default branch):
-   - Require a pull request before merging; allow squash merge only.
-   - Require status checks to pass: `PR title follows Conventional Commits`, `Frontend (lint, types, unit tests, build)`, `Rust (fmt, clippy, tests)`, `Rust minimum version`, `Rust dependencies (cargo-deny)`, `End to end (Playwright against oxido)`, `Claude review`.
+3. **Rulesets** (Settings > Rules > Rulesets > New branch ruleset), one for `develop` and one for `main`, each targeting its branch by name. Both rulesets:
+   - Require a pull request before merging, with every review conversation resolved. No approvals are required, since maintainers can't approve their own PRs.
+   - Require status checks to pass, reported by GitHub Actions only, so no other app can report them: `PR title follows Conventional Commits`, `Frontend (lint, types, unit tests, build)`, `Rust (fmt, clippy, tests)`, `Rust minimum version`, `Rust dependencies (cargo-deny)`, `End to end (Playwright against oxido)`, `Claude review`.
    - Block force pushes and deletions.
-4. **Pages.** Settings > Pages > Source: GitHub Actions.
-5. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
+   - Bypass list: the Repository admin role, for pull requests only. An admin can merge a PR whose checks fail for a reason outside it, such as a new cargo-deny advisory, but can't push to either branch directly.
+
+   They differ in the one merge method each allows: squash on `develop`, so every PR lands as one commit, and merge on `main`, so `main` stays connected to `develop` ([release.md](release.md)).
+4. **Merge settings** (Settings > General > Pull Requests): allow squash merging and merge commits (for `main`), but not rebase merging. A squash commit takes the PR title as its title and the commit messages as its body, which keeps their `Co-Authored-By` trailers. By default, GitHub titles a one-commit PR's squash with its commit's title instead of the PR title, and release-please reads that title. A merge commit takes the PR title and no body. Turn on "Automatically delete head branches"; the rulesets' deletion rule keeps `develop` and `main` safe from it.
+5. **Pages.** Settings > Pages > Source: GitHub Actions.
+6. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
 
 ## About the Claude review
 

@@ -290,3 +290,39 @@
     @apply font-serif;
   }
 }
+
+/* Code blocks in compiled lessons (decision D21). The content compiler
+   highlights with arborium, whose custom elements map onto the --code-*
+   colors here; control flow and numbers are retagged to match rust-analyzer. */
+@layer components {
+  pre.code {
+    @apply overflow-x-auto rounded-lg border border-code-border bg-code p-4 font-mono text-sm leading-relaxed text-code-foreground;
+  }
+  pre.code :is(a-k, a-kf, a-ki, a-kp, a-ky, a-ko, a-kd, a-l) {
+    color: var(--code-keyword);
+  }
+  pre.code :is(a-kc, a-kr, a-kt, a-ke) {
+    color: var(--code-control);
+  }
+  pre.code :is(a-t, a-tb, a-tq) {
+    color: var(--code-type);
+  }
+  pre.code :is(a-f, a-fb, a-fm, a-m) {
+    color: var(--code-function);
+  }
+  pre.code :is(a-v, a-pr) {
+    color: var(--code-variable);
+  }
+  pre.code :is(a-co, a-cb, a-cr) {
+    color: var(--code-constant);
+  }
+  pre.code :is(a-s, a-ss) {
+    color: var(--code-string);
+  }
+  pre.code a-n {
+    color: var(--code-number);
+  }
+  pre.code a-c {
+    color: var(--code-comment);
+  }
+}
