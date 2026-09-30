@@ -40,12 +40,12 @@ describe("GitHub workflows", () => {
     expect(read(".github/workflows/ci.yml")).toMatch(/push:\n\s+branches: \[develop, main\]/);
   });
 
-  it("release and deploy the website from main only", () => {
-    // release-please opens its release PR against the default branch unless
-    // told otherwise, and the default branch is develop.
+  it("release from develop and deploy the website from main", () => {
+    // release-please follows the default branch unless it's named, so a change
+    // of default branch would otherwise move the releases with it.
     const release = read(".github/workflows/release.yml");
-    expect(release).toMatch(/push:\n\s+branches: \[main\]/);
-    expect(release).toMatch(/^\s+target-branch: main$/m);
+    expect(release).toMatch(/push:\n\s+branches: \[develop\]/);
+    expect(release).toMatch(/^\s+target-branch: develop$/m);
     expect(read(".github/workflows/pages.yml")).toMatch(/push:\n\s+branches: \[main\]/);
   });
 });

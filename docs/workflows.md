@@ -7,7 +7,7 @@
 | `ci.yml` | every PR, pushes to `develop` and `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build, with Rust installed for the content compiler); Rust job (rustfmt, clippy, nextest, doc tests, then `cargo xtask content` and `check-code` on the real course); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
 | `claude-review.yml` | PR opened, updated, reopened or marked ready | Claude reviews the diff and posts inline comments plus a summary |
 | `claude.yml` | comments, reviews and issues that mention `@claude` | Claude answers or makes the change (users with write access only) |
-| `release.yml` | pushes to `main` | release-please keeps a release PR into `main` up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
+| `release.yml` | pushes to `develop` | release-please keeps a release PR into `develop` up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
 | `pages.yml` | pushes to `main` that touch the frontend, the content or the content compiler | compiles the content, builds the website (with `BASE_PATH=/<repo>`) and deploys it to GitHub Pages |
 
 Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and GitHub Actions, titled `chore(deps): ...`.
@@ -26,8 +26,8 @@ The cargo-deny job fails when a Rust dependency has a security advisory, a licen
    - Block force pushes and deletions.
    - Bypass list: the Repository admin role, for pull requests only. An admin can merge a PR whose checks fail for a reason outside it, such as a new cargo-deny advisory, but can't push to either branch directly.
 
-   They differ in the merge methods they allow. `develop` allows squash, for PRs, and merge, for bringing a release back from `main`. `main` allows merge only, so a release can't be squashed into one commit ([release.md](release.md)).
-4. **Merge settings** (Settings > General > Pull Requests): allow squash merging and merge commits, but not rebase merging. A squash commit takes the PR title as its title and the commit messages as its body, which keeps their `Co-Authored-By` trailers. By default, GitHub titles a one-commit PR's squash with its commit's title instead of the PR title, and release-please reads that title. A merge commit takes the PR title and no body. Turn on "Automatically delete head branches"; the rulesets' deletion rule keeps `develop` and `main` safe from it.
+   They differ in the one merge method each allows: squash on `develop`, so every PR lands as one commit, and merge on `main`, so `main` stays connected to `develop` ([release.md](release.md)).
+4. **Merge settings** (Settings > General > Pull Requests): allow squash merging and merge commits (for `main`), but not rebase merging. A squash commit takes the PR title as its title and the commit messages as its body, which keeps their `Co-Authored-By` trailers. By default, GitHub titles a one-commit PR's squash with its commit's title instead of the PR title, and release-please reads that title. A merge commit takes the PR title and no body. Turn on "Automatically delete head branches"; the rulesets' deletion rule keeps `develop` and `main` safe from it.
 5. **Pages.** Settings > Pages > Source: GitHub Actions.
 6. **Release token (recommended).** Create a fine-grained personal access token with Contents and Pull requests read/write on this repo, and save it as `RELEASE_PLEASE_TOKEN`. Without it, release PRs are opened with the default token, which doesn't trigger CI or the Claude review, so the required checks never report.
 

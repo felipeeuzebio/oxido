@@ -23,7 +23,7 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: bun install --frozen-lockfile
       # PRs into develop are squash-merged, so the title becomes the commit
-      # that release-please reads once it reaches main.
+      # that release-please reads.
       - name: Lint PR title
         env:
           TITLE: ${{ github.event.pull_request.title }}
