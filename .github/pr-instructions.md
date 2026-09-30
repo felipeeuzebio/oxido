@@ -4,7 +4,8 @@ How to write the title and description of a pull request in this repository. The
 
 ## How a PR lands
 
-- `main` only takes pull requests, and they are squash-merged. The PR title becomes the single commit on `main`, and release-please builds the version and changelog from it.
+- PRs go into `develop`, the default branch, and are squash-merged. The PR title becomes the single commit on `develop`. It reaches `main` unchanged when `develop` is merged into it for a release, and release-please builds the version and changelog from it.
+- `main` only takes merges from `develop`, release PRs and urgent fixes (`docs/release.md`). Open a PR into `main` only for a fix that can't wait for the next release.
 - CI lints the title with commitlint, and that check is required to merge.
 - Claude reviews every PR that isn't a draft, against `CLAUDE.md`, `docs/testing.md` and `docs/conventions.md`. The description is the first thing the reviewer reads.
 - Branches are named `<type>/<short-description>`, e.g. `feat/quiz-page`, `fix/notes-anchor`.
@@ -65,6 +66,7 @@ Leave every checkbox unticked. Each one is the author's own statement ("I wrote.
 - Don't walk through the diff file by file; the reviewer has the diff.
 - Don't claim anything the diff doesn't show: no test results, benchmarks or manual checks you didn't see.
 - release-please and Dependabot title their own PRs (`chore(release): release x.y.z`, `chore(deps): bump ...`). Don't rewrite those titles.
+- The PRs that carry a release between the branches are titled `chore(release): merge develop into main` and `chore(release): merge main into develop`, with a one-line description of which release they carry.
 
 ## Example
 

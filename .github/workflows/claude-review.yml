@@ -1,7 +1,7 @@
 name: Claude Code Review
 
 # Every non-draft PR gets a review from Claude. Make the "Claude review" check
-# required in the main branch ruleset so nothing merges without it.
+# required in the rulesets for develop and main so nothing merges without it.
 # Auth: set ONE of the secrets CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY
 # (`claude /install-github-app` sets this up). See docs/workflows.md.
 #

@@ -130,3 +130,11 @@ The compiled content isn't committed. `bun run build` and `bun run dev` run `car
 Lessons, outlines and translations start with TOML front matter between `+++` lines, the format `course.toml` already uses. YAML would have added a second format and a parser (serde_yaml is no longer maintained).
 
 Lessons and quizzes that `course.toml` plans but that aren't written yet are listed on every build, not treated as errors, so the course can be written one PR at a time; `cargo xtask content --complete` makes them errors for a release. A quiz file that no phase uses is always an error, which catches a typo in a quiz's name.
+
+## D27. Two long-lived branches: develop and main (2026-09-30)
+
+Work lands on `develop`, the default branch, through squash-merged PRs. `main` holds what has been released. `develop` is merged into it when a release is due, release-please opens its release PR there, and the website deploys from it. After each release, `main` is merged back into `develop`, because release-please's release commit, with the new version numbers and changelog, lands on `main` only.
+
+Merges into `main` keep a merge commit. release-please writes one changelog line per commit, so squashing `develop` into `main` would turn a whole release into one line. `main`'s ruleset allows merge commits only, and `develop`'s allows squash for PRs and merge commits for the merge back.
+
+Until now `main` was the only long-lived branch. With two, the website shows only what was merged into `main` on purpose, and a fix that can't wait goes straight to `main` without shipping the unreleased work on `develop`. Each release costs two extra PRs. Also considered: running release-please on `develop` and merging into `main` after each release, which needs no merge back but tags releases on `develop` and can't release a fix without everything else there.

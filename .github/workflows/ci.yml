@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [develop, main]
   merge_group:
 
 concurrency:
@@ -22,7 +22,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: bun install --frozen-lockfile
-      # PRs are squash-merged, so the title becomes the commit on main.
+      # PRs into develop are squash-merged, so the title becomes the commit
+      # that release-please reads once it reaches main.
       - name: Lint PR title
         env:
           TITLE: ${{ github.event.pull_request.title }}

@@ -65,6 +65,16 @@ describe("commit rules", () => {
     expect(await accepts(title), title).toBe(true);
   });
 
+  it("accept the titles of the PRs that carry a release between develop and main", async () => {
+    // docs/release.md: the title check is required on both branches.
+    for (const title of [
+      "chore(release): merge develop into main",
+      "chore(release): merge main into develop",
+    ]) {
+      expect(await accepts(title), title).toBe(true);
+    }
+  });
+
   it("accept Dependabot's update titles, for every ecosystem", async () => {
     const blocks = read(".github/dependabot.yml").split("- package-ecosystem:").slice(1);
     expect(blocks.length).toBeGreaterThan(0);

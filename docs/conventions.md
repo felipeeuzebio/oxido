@@ -2,9 +2,10 @@
 
 ## Branches
 
-- `main` is the only long-lived branch. It is protected: changes land through pull requests.
+- `develop` is the default branch. Work branches start from it and come back through PRs, which are squash-merged, so the PR title becomes the commit message.
+- `main` holds what has been released. It only takes merges from `develop`, release-please's release PRs and urgent fixes, all as merge commits, so each squashed PR reaches `main` as its own commit and gets its own changelog line. The steps are in [release.md](release.md).
+- Both branches are protected: changes land through pull requests (decision D27).
 - Work branches: `<type>/<short-description>`, e.g. `feat/quiz-page`, `fix/notes-anchor`.
-- PRs are squash-merged, so the PR title becomes the commit message on `main`.
 
 ## Commits: Conventional Commits
 
@@ -16,7 +17,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`
 
 `feat` bumps the minor version and `fix` the patch version (release-please). A `!` after the scope or a `BREAKING CHANGE:` footer marks a breaking change.
 
-Automated PRs follow the same rules: release-please titles its PRs `chore(release): release x.y.z`, and Dependabot's are `chore(deps): bump ...`, development dependencies included.
+Automated PRs follow the same rules: release-please titles its PRs `chore(release): release x.y.z`, and Dependabot's are `chore(deps): bump ...`, development dependencies included. The PRs that carry a release between the branches are `chore(release): merge develop into main` and `chore(release): merge main into develop`.
 
 The scope is optional. When present, it must be one of these (enforced by `commitlint.config.js`; `commitlint.config.test.ts` fails if this table and the config drift apart, or if release-please's or Dependabot's titles stop passing):
 

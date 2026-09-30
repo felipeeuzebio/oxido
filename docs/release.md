@@ -12,9 +12,15 @@ The version lives in `web/package.json` and `crates/oxido/Cargo.toml` (the `oxid
 
 ## Flow today
 
-1. Merge PRs into `main` as usual.
-2. release-please opens or updates a PR named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
-3. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
+1. Merge PRs into `develop` as usual.
+2. When `develop` should go out, open a PR from `develop` into `main` titled `chore(release): merge develop into main`, and merge it with a merge commit. The website deploys from `main`, so it updates here.
+3. release-please opens or updates a PR into `main` named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
+4. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
+5. Open a PR from `main` into `develop` titled `chore(release): merge main into develop`, and merge it with a merge commit. The release commit with the new version numbers and changelog only exists on `main` until then.
+
+Every merge into `main` keeps a merge commit. A squash would turn everything since the last release into one commit, and release-please would write one changelog line for it.
+
+A fix that can't wait for the next release goes straight to `main`: branch from `main`, open the PR into `main`, then release it with steps 3 to 5. Step 5 also brings the fix into `develop`.
 
 ## Minimum Rust
 

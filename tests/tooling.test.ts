@@ -33,6 +33,21 @@ describe("GitHub workflows", () => {
   it("are kept up to date by Dependabot", () => {
     expect(read(".github/dependabot.yml")).toMatch(/package-ecosystem:\s*github-actions/);
   });
+
+  // Work lands on develop, the default branch; main holds what has been
+  // released (docs/conventions.md, decision D27).
+  it("run CI on pushes to both long-lived branches", () => {
+    expect(read(".github/workflows/ci.yml")).toMatch(/push:\n\s+branches: \[develop, main\]/);
+  });
+
+  it("release and deploy the website from main only", () => {
+    // release-please opens its release PR against the default branch unless
+    // told otherwise, and the default branch is develop.
+    const release = read(".github/workflows/release.yml");
+    expect(release).toMatch(/push:\n\s+branches: \[main\]/);
+    expect(release).toMatch(/^\s+target-branch: main$/m);
+    expect(read(".github/workflows/pages.yml")).toMatch(/push:\n\s+branches: \[main\]/);
+  });
 });
 
 describe("git hooks", () => {

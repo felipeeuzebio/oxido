@@ -10,7 +10,7 @@ Every phase is built test first:
 2. Write the smallest implementation that makes them pass (green).
 3. Clean up with the tests still passing (refactor).
 
-A phase is finished when all of its "Done when" tests pass in CI on `main`. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
+A phase is finished when all of its "Done when" tests pass in CI on `develop`. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
 
 ## Phases
 
