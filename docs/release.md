@@ -8,6 +8,8 @@ Versions follow SemVer and come from Conventional Commits through release-please
 - `feat:` → minor (0.1.0 → 0.2.0); before 1.0, breaking changes also bump the minor version
 - `feat!:` or a `BREAKING CHANGE:` footer → major, once past 1.0
 
+The first release is 0.1.0 (`initial-version` in `release-please-config.json`; without it, release-please starts at 1.0.0), and 1.0.0 comes with P11.
+
 The version lives in `web/package.json` and `crates/oxido/Cargo.toml` (the `oxido` package students install); release-please updates both. `oxido-core` stays at `0.0.0` because it isn't published on its own.
 
 ## Flow today

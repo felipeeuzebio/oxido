@@ -48,6 +48,12 @@ describe("GitHub workflows", () => {
     expect(release).toMatch(/^\s+target-branch: develop$/m);
     expect(read(".github/workflows/pages.yml")).toMatch(/push:\n\s+branches: \[main\]/);
   });
+
+  it("start releases below 1.0, which is P11", () => {
+    // With no release yet, release-please starts at 1.0.0 unless told otherwise.
+    const config = JSON.parse(read("release-please-config.json"));
+    expect(config.packages["."]["initial-version"]).toMatch(/^0\./);
+  });
 });
 
 describe("git hooks", () => {
