@@ -17,7 +17,7 @@ The version lives in `web/package.json` and `crates/oxido/Cargo.toml` (the `oxid
 1. Merge PRs into `develop` as usual.
 2. release-please opens or updates a PR into `develop` named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
 3. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
-4. Open a PR from `develop` into `main` titled `chore(release): merge develop into main`, and merge it with a merge commit. The website deploys from `main`, so it updates here.
+4. Open a PR from `develop` into `main` titled `chore(release): merge develop into main`, and merge it with a merge commit. Claude doesn't review this PR, since everything in it was reviewed on its way into `develop`. The website deploys from `main`, so it updates here.
 
 `main` only takes merge commits, which keep it connected to `develop`: each merge then carries only what's new since the last one. A squash would leave `main` with a copy of the changes, and the next merge from `develop` would carry, and could conflict on, everything since the first release.
 

@@ -11,6 +11,11 @@ name: Claude Code Review
 # can still ask for a review by commenting "@claude review this PR" (claude.yml).
 # To review Dependabot PRs automatically too, add the same secret under
 # Settings > Secrets and variables > Dependabot and drop the Dependabot line below.
+#
+# PRs from develop into main are skipped too: they only carry PRs that were
+# already reviewed. The job fails when Claude finishes without posting a
+# verdict, for example when no secret is set, except on a PR that changes this
+# file, which claude-code-action refuses to review.
 
 on:
   pull_request:
@@ -26,13 +31,18 @@ jobs:
     if: >-
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.user.login != 'dependabot[bot]'
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.head_ref != 'develop'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
+      issues: read
       id-token: write
     steps:
+      - name: Note the start time
+        run: echo "STARTED=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 1
@@ -46,7 +56,8 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Review this pull request. The PR branch is already checked out.
+            Review this pull request. The PR branch is already checked out; use
+            gh pr diff for the diff, since git can't see the base branch here.
             Read CLAUDE.md first, then docs/testing.md and docs/conventions.md.
 
             Check, in this order:
@@ -67,8 +78,27 @@ jobs:
                when behavior or structure changed.
 
             Post specific issues as inline comments. Finish with one top-level comment
-            (gh pr comment) that lists blocking issues first, then suggestions, then a
-            one-line verdict. Only post GitHub comments; don't reply with plain messages.
+            (gh pr comment) that lists blocking issues first, then suggestions, then
+            a last line that starts with `Verdict:`. Only post GitHub comments; don't
+            reply with plain messages.
 
           claude_args: |
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+      - name: Check that Claude posted a verdict
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          # claude-code-action only runs when this file matches the copy on the
+          # default branch, so a PR that changes it can't be reviewed.
+          if gh pr diff "$PR" --repo "$GITHUB_REPOSITORY" --name-only | grep -qx '.github/workflows/claude-review.yml'; then
+            echo "::notice::This PR changes claude-review.yml, so Claude can't review it. Review it by hand."
+            exit 0
+          fi
+          verdicts=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select((.user.login | startswith("claude")) and .updated_at >= env.STARTED and (.body | contains("Verdict:"))) | .id' | wc -l)
+          if [ "$verdicts" -eq 0 ]; then
+            echo "::error::Claude finished without posting a verdict. Check that CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY is set, then re-run this job."
+            exit 1
+          fi

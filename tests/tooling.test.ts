@@ -49,6 +49,18 @@ describe("GitHub workflows", () => {
     expect(read(".github/workflows/pages.yml")).toMatch(/push:\n\s+branches: \[main\]/);
   });
 
+  it("skip the Claude review on PRs from develop into main, which only carry reviewed PRs", () => {
+    expect(read(".github/workflows/claude-review.yml")).toMatch(/github\.head_ref != 'develop'/);
+  });
+
+  it("fail the Claude review when Claude posts no verdict", () => {
+    // claude-code-action exits cleanly without reviewing when no Claude secret
+    // is set, so the job looks for the verdict line the prompt asks for.
+    const review = read(".github/workflows/claude-review.yml");
+    expect(review).toMatch(/a last line that starts with `Verdict:`/);
+    expect(review).toMatch(/name: Check that Claude posted a verdict[\s\S]*contains\("Verdict:"\)/);
+  });
+
   it("start releases below 1.0, which is P11", () => {
     // With no release yet, release-please starts at 1.0.0 unless told otherwise.
     const config = JSON.parse(read("release-please-config.json"));
