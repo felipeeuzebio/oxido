@@ -1,0 +1,45 @@
+{
+  "id": "quiz-01",
+  "questions": [
+    {
+      "type": "MultipleChoice",
+      "id": "cargo-run",
+      "prompt": "Which command builds and runs the project?",
+      "explanation": "`cargo run` builds the project if needed, then runs it.",
+      "choices": [
+        "cargo build",
+        "cargo run",
+        "cargo check"
+      ],
+      "answer": 1
+    },
+    {
+      "type": "ShortAnswer",
+      "id": "shadowing-name",
+      "prompt": "What is it called when a second `let` reuses a name?",
+      "answer": "shadowing",
+      "alternatives": [
+        "variable shadowing"
+      ]
+    },
+    {
+      "type": "Tracing",
+      "id": "does-it-compile",
+      "prompt": "Does this program compile? If it does, what does it print?",
+      "program": "fn main() {\n    let x = 5;\n    let x = x + 1;\n    println!(\"{x}\");\n}\n",
+      "answer": {
+        "doesCompile": true,
+        "stdout": "6"
+      }
+    },
+    {
+      "type": "Tracing",
+      "id": "mutate-immutable",
+      "prompt": "Does this program compile? If it does, what does it print?",
+      "program": "fn main() {\n    let x = 5;\n    x = 6;\n    println!(\"{x}\");\n}\n",
+      "answer": {
+        "doesCompile": false
+      }
+    }
+  ]
+}

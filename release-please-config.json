@@ -2,9 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "include-component-in-tag": false,
   "pull-request-title-pattern": "chore(release): release ${version}",
+  "pull-request-header": "Merging this PR tags the release and creates the GitHub Release. After that, merge `develop` into `main` to update the website (see docs/release.md).",
   "packages": {
     ".": {
       "release-type": "simple",
+      "initial-version": "0.1.0",
       "package-name": "oxido",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
@@ -19,6 +21,11 @@
           "type": "toml",
           "path": "crates/oxido/Cargo.toml",
           "jsonpath": "$.package.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.lock",
+          "jsonpath": "$.package[?(@.name.value === 'oxido')].version"
         }
       ]
     }

@@ -1,0 +1,20 @@
+[package]
+name = "oxido-content"
+version = "0.0.0"
+description = "The content compiler's logic: course.toml, lessons, quizzes and outlines in, JSON and lesson HTML out (no I/O)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+arborium = { version = "2.18", default-features = false, features = ["lang-rust", "lang-toml", "lang-bash"] }
+markdown = "1"
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+toml = "1"
+
+[dev-dependencies]
+insta = "1"

@@ -8,13 +8,20 @@ Versions follow SemVer and come from Conventional Commits through release-please
 - `feat:` → minor (0.1.0 → 0.2.0); before 1.0, breaking changes also bump the minor version
 - `feat!:` or a `BREAKING CHANGE:` footer → major, once past 1.0
 
-The version lives in `web/package.json` and `crates/oxido/Cargo.toml` (the `oxido` package students install); release-please updates both. `oxido-core` stays at `0.0.0` because it isn't published on its own.
+The first release is 0.1.0 (`initial-version` in `release-please-config.json`; without it, release-please starts at 1.0.0), and 1.0.0 comes with P11.
+
+The version lives in `web/package.json` and `crates/oxido/Cargo.toml` (the `oxido` package students install); release-please updates both, and `oxido`'s entry in `Cargo.lock` with them, since CI builds with `--locked`. `oxido-core` stays at `0.0.0` because it isn't published on its own.
 
 ## Flow today
 
-1. Merge PRs into `main` as usual.
-2. release-please opens or updates a PR named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
+1. Merge PRs into `develop` as usual.
+2. release-please opens or updates a PR into `develop` named `chore(release): release x.y.z` with the changelog (the title pattern is set in `release-please-config.json`, because its default scope, `main`, isn't one of ours).
 3. Merge that PR when you want to ship. release-please tags `vX.Y.Z` and creates the GitHub Release.
+4. Open a PR from `develop` into `main` titled `chore(release): merge develop into main`, and merge it with a merge commit. The website deploys from `main`, so it updates here.
+
+`main` only takes merge commits, which keep it connected to `develop`: each merge then carries only what's new since the last one. A squash would leave `main` with a copy of the changes, and the next merge from `develop` would carry, and could conflict on, everything since the first release.
+
+A fix that can't wait goes through `develop` like any other PR, and ships with whatever else is on `develop` at the time (decision D27).
 
 ## Minimum Rust
 

@@ -1,7 +1,7 @@
 [package]
 name = "oxido-core"
 version = "0.0.0"
-description = "Pure platform logic for oxido: no I/O, no server (diagnostics, content, grading)"
+description = "Pure platform logic for oxido: no I/O, no server (diagnostics, grading)"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

@@ -11,12 +11,12 @@ Thanks for helping. This page is the short version; details are linked.
 ## Workflow
 
 1. Pick an item from [docs/roadmap-platform.md](docs/roadmap-platform.md) or an issue.
-2. Branch from `main`: `feat/quiz-page`, `fix/notes-anchor`, and so on.
+2. Branch from `develop`: `feat/quiz-page`, `fix/notes-anchor`, and so on.
 3. **Write the failing test first**, then the code that makes it pass, then clean up. See [docs/testing.md](docs/testing.md).
 4. Commit with Conventional Commits, e.g. `feat(quiz): show one question per screen`. Scopes: [docs/conventions.md](docs/conventions.md).
 5. Open a PR with a Conventional Commits title and fill in the template.
 6. CI and the Claude review run automatically. Address blocking review comments before merging.
-7. PRs are squash-merged into `main`.
+7. PRs are squash-merged into `develop`. `main` gets the changes when a release goes out ([docs/release.md](docs/release.md)).
 
 ## Git hooks
 

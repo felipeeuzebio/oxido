@@ -1,0 +1,41 @@
+[[questions]]
+id = "cargo-run"
+type = "MultipleChoice"
+prompt = "Which command builds and runs the project?"
+choices = ["cargo build", "cargo run", "cargo check"]
+answer = 1
+explanation = "`cargo run` builds the project if needed, then runs it."
+
+[[questions]]
+id = "shadowing-name"
+type = "ShortAnswer"
+prompt = "What is it called when a second `let` reuses a name?"
+answer = "shadowing"
+alternatives = ["variable shadowing"]
+
+[[questions]]
+id = "does-it-compile"
+type = "Tracing"
+prompt = "Does this program compile? If it does, what does it print?"
+program = """
+fn main() {
+    let x = 5;
+    let x = x + 1;
+    println!("{x}");
+}
+"""
+does_compile = true
+stdout = "6"
+
+[[questions]]
+id = "mutate-immutable"
+type = "Tracing"
+prompt = "Does this program compile? If it does, what does it print?"
+program = """
+fn main() {
+    let x = 5;
+    x = 6;
+    println!("{x}");
+}
+"""
+does_compile = false

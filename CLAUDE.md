@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude (and other coding agents) working in this repository.
+Guidance for Claude (and other coding agents) working in this repository. Other agents read it as `AGENTS.md`, a symlink to this file, so edit `CLAUDE.md`.
 
 ## What this is
 
@@ -19,6 +19,8 @@ bun run test:e2e                 # Playwright against the real oxido binary
 bun run check                    # React Router typegen + TypeScript 7
 bun run lint                     # Biome
 cargo test --workspace           # Rust tests
+cargo xtask content              # compile content/ into web/.content (build and dev run it first)
+cargo xtask check-code           # compile every rust block in the lessons
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
@@ -26,9 +28,11 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 
 ## Where code goes
 
-- Rust logic without I/O: `crates/oxido-core`. The server (HTTP, SQLite, processes, CLI): `crates/oxido`, kept thin over tested functions.
+- Rust logic without I/O: `crates/oxido-core`. The server (HTTP, SQLite, processes, CLI): `crates/oxido`, kept thin over tested functions. The content compiler's logic (no I/O either): `crates/oxido-content`; the maintainer commands that read and write for it: `crates/xtask`.
 - Frontend: the `web/` workspace (its own `package.json`; the root one holds the repo tooling and runs `web/`'s scripts, so every command above works from the root). The app is in `web/app/` (React Router's default folder): routes in `web/app/routes/`, kept thin (they load data and compose features); each feature in `web/app/features/<feature>/`, its components (`.tsx`) and logic (plain `.ts` modules) together; hooks shared by several features in `web/app/hooks/`; small helpers only in `web/app/lib/`. Tests sit next to the code as `*.test.ts(x)`. shadcn/ui components go in `web/app/components/ui/`.
-- Course data: `content/` (`course.toml`, lessons, quizzes). The students' project: `course/minisql/`.
+- Repository tooling (root configs, `scripts/`, and scripts that agent skills bundle): its tests go in `tests/` at the root.
+- Course data: `content/` (`course.toml`, lessons, quizzes, and the outlines lessons are written from). The students' project: `course/minisql/`.
+- Agent skills: `.agents/skills/<name>/`, which Codex, Gemini CLI, Cursor and VS Code read. Claude Code reads them through symlinks in `.claude/skills/` (`tooling.test.ts` checks both).
 - Local app vs website differences go behind an interface with one implementation per target (see [docs/architecture.md](docs/architecture.md)).
 
 ## Rules
@@ -45,6 +49,7 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 
 - Text lessons teach exactly what Bogdan teaches in the matching video: same points, same order, same claims, including mistakes. Never correct him silently; a clearly marked note after his point is allowed.
 - Write lessons in new words with new, real-world examples. Never paste or lightly edit transcript text. Transcripts are local reference only (`transcripts/` is git-ignored).
+- Draft lessons with the `lesson` skill (`.agents/skills/lesson/`, decision D24): an outline of the video's points first, then the lesson from it. The skill's `scripts/transcript-overlap.ts` flags wording copied from the transcript.
 - Build steps may only use Rust features taught up to that phase ([docs/roadmap-course.md](docs/roadmap-course.md)).
 - Run lesson prose through the Humanizer skill before opening the PR.
 - Translations are drafted with Claude and edited by the maintainer (decision D23), in the same PR as the English lesson when possible. They change prose and comments only, never identifiers, string literals or program output, and they keep the English file's paragraphs (P9's shape check enforces this). Use the terms in [docs/glossary-pt-BR.md](docs/glossary-pt-BR.md), and add new ones there in the same PR.

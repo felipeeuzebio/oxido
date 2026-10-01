@@ -20,7 +20,8 @@ const platform = [
 
 /** Course content */
 const content = [
-  "content", // lessons, quizzes and course.toml
+  "compiler", // crates/oxido-content and cargo xtask: the content compiler and its commands
+  "content", // lessons, their outlines, quizzes and course.toml
   "minisql", // the Mini SQL project: reference solutions and belt tests
 ];
 

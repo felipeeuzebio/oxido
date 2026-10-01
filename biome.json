@@ -8,6 +8,7 @@
       "!web/.react-router",
       "!target",
       "!**/fixtures",
+      "!crates/oxido-content/tests/golden",
       "!web/app/components/ui",
       "!**/*.svg"
     ]

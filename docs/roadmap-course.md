@@ -74,7 +74,16 @@ Each class has two parts:
 1. **Bogdan's video**, embedded from YouTube.
 2. **A text lesson** that covers the same points in the same order and keeps his claims as he states them, including anything he gets wrong. No silent corrections: if a later Rust version changed something, the lesson can add a clearly marked note after his point, never instead of it. The lesson is written in new wording with new, real-world code examples. It is never a lightly edited transcript. Prose goes through the Humanizer skill before review.
 
-Transcripts are reference material for writing lessons. `python3 scripts/fetch_transcripts.py` downloads them into `transcripts/`, which stays out of the repository (it's in `.gitignore`).
+Transcripts are reference material for writing lessons. `uv run scripts/fetch_transcripts.py` downloads them into `transcripts/` once (decision D25); when YouTube blocks your IP, it waits and tries again, which stays out of the repository (it's in `.gitignore`). Lessons are drafted with the `lesson` agent skill (decision D24): first an outline of the video's points in new words, then the lesson written from that outline.
+
+## Content format
+
+`cargo xtask content` checks all of this; the compiler's fixture course (`crates/oxido-content/tests/fixtures/valid/`) has one of each.
+
+- `content/course.toml` holds the phases, belts and quizzes, and each phase's `videos`: YouTube IDs, in playlist order.
+- A lesson is `content/en/<phase>/<NN>-<slug>.md`, where NN is its video's position in the playlist. It starts with TOML front matter between `+++` lines: `title`, `video`, and `outline` (the fingerprint of the outline it was written from). Sections start at `##`. Code blocks are `rust` (marked `ignore` or `compile_fail` when needed), `toml`, `bash`, `sh`, `console` or `text`. A link to another lesson points at its file: `[shadowing](02-variables.md#shadowing)`.
+- A quiz is `content/en/quizzes/<id>.toml`, with one `[[questions]]` table per question: `MultipleChoice` (`choices`, and `answer` as an index), `ShortAnswer` (`answer`, `alternatives`) or `Tracing` (`program`, `does_compile`, `stdout`).
+- An outline is `content/outlines/<NN>-<slug>.md`, with `video` and `title` in its front matter (decision D24).
 
 ## Quizzes
 
@@ -86,5 +95,6 @@ Transcripts are reference material for writing lessons. `python3 scripts/fetch_t
 ## Where things live
 
 - `content/course.toml`: phases, belts, chapters, quizzes.
-- `content/<lang>/<phase>/`: lessons and quizzes (added in platform phase P1 and P10).
+- `content/en/<phase>/`: lessons; `content/en/quizzes/`: quizzes (platform phases P1 and P10). Translations mirror them in `content/<lang>/` (P9).
+- `content/outlines/`: one outline per video, the points its lesson is checked against (D24). English only, never shown to students.
 - `course/minisql/`: starter code, reference solution and belt tests for each belt (platform phase P8).

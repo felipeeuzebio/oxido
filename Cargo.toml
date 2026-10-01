@@ -6,7 +6,7 @@ members = ["crates/*"]
 edition = "2024"
 rust-version = "1.90"
 license = "MIT"
-repository = "https://github.com/OWNER/oxido"
+repository = "https://github.com/felipeeuzebio/oxido"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }

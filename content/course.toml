@@ -1,7 +1,8 @@
 # Course structure: the source of truth for the roadmap screen.
 # Phases map Rust Book chapters (as taught in Let's Get Rusty's "The Rust Lang Book"
 # playlist) to belts and to build steps of the Mini SQL project.
-# Video IDs are filled in during platform phase P1, from transcripts/playlist.json.
+# Each phase's videos are YouTube IDs in playlist order, from transcripts/playlist.json
+# (uv run scripts/fetch_transcripts.py, decision D25); the numbers are playlist positions.
 # Schema: docs/roadmap-course.md
 #
 # Belts and stripes: a stripe is one slice of a phase's build step with its own
@@ -65,6 +66,11 @@ stripes = [
   "quits cleanly when input ends",
 ]
 quiz = "quiz-01"
+videos = [
+  "OX9HJsJUDxA", # 01
+  "H0xBSbnQYds", # 02
+  "2V0JaMVjzws", # 03
+]
 
 [[phases]]
 id = "p02"
@@ -78,6 +84,11 @@ stripes = [
   "select prints every row",
 ]
 quiz = "quiz-02"
+videos = [
+  "VFIOSWy93H0", # 04
+  "n3bPhdiJm9I", # 05
+  "DSZqIJhkNCM", # 06
+]
 
 [[phases]]
 id = "p03"
@@ -92,6 +103,11 @@ stripes = [
   "save on .exit, load on start",
 ]
 quiz = "quiz-03"
+videos = [
+  "5RPXgDQrjio", # 07
+  "Zs-pS-egQSs", # 08
+  "wM6o70NAWUI", # 09
+]
 
 [[phases]]
 id = "p04"
@@ -106,6 +122,13 @@ stripes = [
 ]
 quiz = "quiz-04"
 student_tdd = true # from here on, students write the failing test first
+videos = [
+  "6rcTSxPJ6Bw", # 10
+  "T0Xfltu4h3A", # 11
+  "juIINGuZyBc", # 12
+  "18-7NoNPO30", # 13
+  "-L4nKAlmH3M", # 14
+]
 
 [[phases]]
 id = "p05"
@@ -120,6 +143,13 @@ stripes = [
   "Cursor that implements Iterator; loops become iterator chains",
 ]
 quiz = "quiz-05"
+videos = [
+  "XYkiwsplDTg", # 15
+  "AABHxixn6Cw", # 16
+  "kZXJvLfjUS4", # 17
+  "4GcKrj4By8k", # 18
+  "rb63xJEjaZU", # 19
+]
 
 [[phases]]
 id = "p06"
@@ -129,6 +159,10 @@ build = "Workspace (minisql-core + minisql-cli), doc tests, release profile, car
 stripes = [
   "workspace with minisql-core and minisql-cli",
   "doc tests, release profile, cargo install",
+]
+videos = [
+  "4TI153PIEDQ", # 20
+  "70_9IIsQfjs", # 21
 ]
 
 [[phases]]
@@ -143,6 +177,14 @@ stripes = [
   "schema catalog with Weak parent links",
 ]
 quiz = "quiz-06" # covers chapters 14 and 15
+videos = [
+  "m76sRj2VgGo", # 22
+  "dYEC6NElVOg", # 23
+  "RPWZcTYBS4k", # 24
+  "M9Owp3iLigg", # 25
+  "77aRH6YBKyY", # 26
+  "pIVZRDFAUyc", # 27
+]
 
 [[phases]]
 id = "p08"
@@ -155,6 +197,11 @@ stripes = [
   "Arc<Mutex<Database>> shared by several sessions",
 ]
 quiz = "quiz-07"
+videos = [
+  "06WcsNPUNC8", # 28
+  "FE1BkKqYCGU", # 29
+  "mupwF9jbVZ4", # 30
+]
 
 [[phases]]
 id = "p09"
@@ -167,6 +214,13 @@ stripes = [
   "parser rewritten with match guards, @ bindings and nested destructuring",
 ]
 quiz = "quiz-08"
+videos = [
+  "UGDa0P2PXrY", # 31
+  "ReBmm0eJg6g", # 32
+  "VFmPwvhubow", # 33
+  "NzeQbiiqhgo", # 34
+  "8_HPKGZGM5I", # 35
+]
 
 [[phases]]
 id = "p10"
@@ -180,6 +234,14 @@ stripes = [
   "a declarative macro for test scripts",
 ]
 quiz = "quiz-09"
+videos = [
+  "9E2v8pCUc48", # 36
+  "RDxz94tuxqM", # 37
+  "aI1oIFqh44Y", # 38
+  "rnxutl7t1hI", # 39
+  "KsJHlqULpO4", # 40
+  "crWfcA064is", # 41
+]
 
 [[phases]]
 id = "p11"
@@ -191,3 +253,8 @@ stripes = [
   "ThreadPool and graceful shutdown that saves the database",
 ]
 quiz = "quiz-final"
+videos = [
+  "BHxmWTVFWxQ", # 42
+  "1AamFJGAE8E", # 43
+  "qjx8vutWaUQ", # 44
+]
