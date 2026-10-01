@@ -32,7 +32,7 @@ The web build is static. GitHub Pages is free and lives with the repo. Move to C
 
 ## D8. Every PR is reviewed by Claude (2026-09-25)
 
-`claude-review.yml` runs on every non-draft PR and is a required check on `main`.
+`claude-review.yml` runs on every non-draft PR and is a required check on `develop` and `main`. PRs from `develop` into `main` skip it, since they only carry PRs that were already reviewed (D27).
 
 ## D9. Stripes inside belts, sized by the material (2026-09-25)
 
