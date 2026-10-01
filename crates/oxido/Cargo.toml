@@ -1,6 +1,6 @@
 [package]
 name = "oxido"
-version = "0.0.0"
+version = "0.1.0"
 description = "The Oxidō course app: a local server that runs your minisql tests and serves the course in your browser"
 edition.workspace = true
 rust-version.workspace = true
