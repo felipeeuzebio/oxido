@@ -54,6 +54,18 @@ describe("GitHub workflows", () => {
     const config = JSON.parse(read("release-please-config.json"));
     expect(config.packages["."]["initial-version"]).toMatch(/^0\./);
   });
+
+  it("bump oxido in Cargo.lock with every release, since CI builds with --locked", () => {
+    const config = JSON.parse(read("release-please-config.json"));
+    const files = config.packages["."]["extra-files"].map((file: { path: string }) => file.path);
+    expect(files).toEqual(expect.arrayContaining(["crates/oxido/Cargo.toml", "Cargo.lock"]));
+  });
+
+  it("open release PRs with our own header", () => {
+    // Without one, release-please opens every release PR with a bot greeting.
+    const config = JSON.parse(read("release-please-config.json"));
+    expect(config["pull-request-header"]).toBeTruthy();
+  });
 });
 
 describe("git hooks", () => {
