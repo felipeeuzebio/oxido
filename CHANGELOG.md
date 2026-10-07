@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/felipeeuzebio/oxido/compare/v0.2.0...v0.3.0) (2026-10-07)
+
+
+### Features
+
+* **ui:** add the shadcn/ui components and move the buttons onto Button ([#20](https://github.com/felipeeuzebio/oxido/issues/20)) ([6130da4](https://github.com/felipeeuzebio/oxido/commit/6130da4b5b235bd498842d5906af1a9b637e7551))
+
 ## [0.2.0](https://github.com/felipeeuzebio/oxido/compare/v0.1.0...v0.2.0) (2026-10-07)
 
 
