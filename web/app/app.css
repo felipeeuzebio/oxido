@@ -295,6 +295,16 @@
    highlights with arborium, whose custom elements map onto the --code-*
    colors here; control flow and numbers are retagged to match rust-analyzer. */
 @layer components {
+  /* shadcn's inline-code recipe, as a rule because lesson HTML is compiled
+     and can't carry components. Block code keeps pre.code's styling. */
+  .lesson :not(pre) > code {
+    @apply rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm;
+  }
+  /* The compiler adds "(opens in a new tab)" to links that leave the course;
+     only screen readers need to hear it. */
+  .lesson .new-tab {
+    @apply sr-only;
+  }
   pre.code {
     @apply overflow-x-auto rounded-lg border border-code-border bg-code p-4 font-mono text-sm leading-relaxed text-code-foreground;
   }

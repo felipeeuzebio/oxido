@@ -199,8 +199,22 @@ impl<'a> Writer<'a> {
             Node::Break(_) => out.push_str("<br>"),
             Node::Link(link) => {
                 let href = self.href(node, &link.url);
-                out.push_str(&format!("<a href=\"{}\">", escape(&href)));
+                // A link out of the course opens in a new tab, so the student
+                // keeps the lesson, and screen readers hear that it will.
+                // Links within the course (lessons, headings) stay in the tab.
+                let leaves = href.starts_with("https://") || href.starts_with("http://");
+                if leaves {
+                    out.push_str(&format!(
+                        "<a href=\"{}\" target=\"_blank\" rel=\"noopener noreferrer\">",
+                        escape(&href)
+                    ));
+                } else {
+                    out.push_str(&format!("<a href=\"{}\">", escape(&href)));
+                }
                 self.inlines(&link.children, out);
+                if leaves {
+                    out.push_str(r#"<span class="new-tab"> (opens in a new tab)</span>"#);
+                }
                 out.push_str("</a>");
             }
             _ => {}

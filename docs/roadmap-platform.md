@@ -54,6 +54,7 @@ Done when:
 - YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules); the saved position and note markers sit in a strip under it (decision D16).
 - The text lesson renders next to it with Video / Both / Text views and a mini player while scrolling.
 - Timestamp links in the text jump the video to that moment.
+- Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links").
 - YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Spike this first.
 
 Tests first: the player wrapper against a fake YouTube API; an e2e test where clicking a timestamp seeks the player.
