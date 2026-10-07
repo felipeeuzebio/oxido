@@ -120,6 +120,14 @@ Light and dark, switched by one toggle; until it's pressed, the app follows the 
 4. **Stripes.** The student edits minisql in their own editor. `oxido` watches the files, reruns the current stripe's tests on save (`cargo test --test stripe_NN`), parses the output and pushes results to the page with server-sent events (P8). libtest's JSON output is still nightly-only, so the plain output is parsed.
 5. **Progress and notes.** Page events (video position, text read, quiz finished) → `/api` → SQLite. Stripe passes are recorded by `oxido` itself.
 
+## YouTube embeds
+
+Checked by hand on 2026-10-07, before P3, in Chromium with lesson 1's video: the IFrame API's player plays on a page served by `oxido` on 127.0.0.1 and on the GitHub Pages site. Firefox and Safari weren't checked. What P3 has to keep true:
+
+- **The embed sends a referrer.** YouTube refuses an embed request that has none, with error 153. The IFrame API gives the iframe it creates `referrerpolicy="strict-origin-when-cross-origin"`, so the request carries the page's origin (`http://127.0.0.1:7878/`, `https://felipeeuzebio.github.io/`) whatever the page's own policy. An iframe we create ourselves and hand to the API must not strip it: with `referrerpolicy="no-referrer"`, the same video fails with error 153.
+- **The page loads little from YouTube.** Outside the player's iframe, it loads two scripts from `https://www.youtube.com` (`iframe_api`, then the player's `www-widgetapi.js`) and frames `https://www.youtube.com/embed/`. Everything else loads inside YouTube's iframe, under its own policy. The content security policy P3 adds has to allow those two, plus `https://i.ytimg.com` for the facade's thumbnail (`/vi/<id>/hqdefault.jpg`).
+- **An ad may come first.** On Pages, YouTube played an ad before the video; on 127.0.0.1 it didn't. During an ad the API reports the video as unstarted (`-1`) and its time stays at 0, so the player and progress tracking (P4) count only real playback.
+
 ## Translations
 
 Lessons and quizzes are translated by hand, with Claude's help (decision D23). Nothing is translated at build time or in the app. `content/en/` holds the English and `content/pt-BR/` the translation, file for file. The content compiler checks each translation against its English file: the same paragraph and quiz IDs, the same inline code, and code blocks that are identical once comments are removed. Each translation records a fingerprint of the English file it was made from; when they stop matching, CI warns that the translation is stale, and the local check shows what changed. Paragraph IDs are shared across languages, so notes stay attached when the student switches language. Interface text comes from typed dictionaries in `web/app/features/i18n/`. Another language needs its code in `languages` in `course.toml`, its folder, its glossary and a reviewer who reads it. Details: [roadmap-platform.md, P9](roadmap-platform.md#p9-translations-en-pt-br).
@@ -128,4 +136,4 @@ Lessons and quizzes are translated by hand, with Claude's help (decision D23). N
 
 - The server's checks above are tested in `crates/oxido/tests/http.rs` and, in a real browser, in `web/e2e/session.test.ts`.
 - Student code runs only on the student's own machine, never on project servers.
-- A content security policy is set in P3, when the YouTube embed is added.
+- A content security policy is set in P3, when the YouTube embed is added. "YouTube embeds" above lists what it has to allow.
