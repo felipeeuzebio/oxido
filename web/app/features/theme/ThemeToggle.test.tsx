@@ -17,6 +17,12 @@ describe("ThemeToggle", () => {
     expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 
+  it("is shadcn/ui's ghost Button at the icon-lg size", () => {
+    render(<ThemeToggle dark={false} onToggle={() => {}} />);
+    const { slot, variant, size } = screen.getByRole("button", { name: "Dark theme" }).dataset;
+    expect({ slot, variant, size }).toEqual({ slot: "button", variant: "ghost", size: "icon-lg" });
+  });
+
   it("asks to toggle when pressed", () => {
     const onToggle = vi.fn();
     render(<ThemeToggle dark={false} onToggle={onToggle} />);

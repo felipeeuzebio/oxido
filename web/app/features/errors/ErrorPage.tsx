@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import type { Diagnostic } from "./diagnostic";
 import panics from "./panics.svg";
 
@@ -9,15 +10,7 @@ interface ErrorPageProps {
 
 const base = import.meta.env.BASE_URL;
 
-// Plain markup until P2 adds shadcn/ui's components, Button among them
-// (roadmap-platform.md). Then these become `<Button asChild>` around the link
-// and `<Button variant="outline">`; `data-variant` already matches what Button sets.
-const BUTTON =
-  "inline-flex h-11 cursor-pointer items-center justify-center rounded-md px-5 font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
-const VARIANT = {
-  default: `${BUTTON} bg-primary text-primary-foreground hover:bg-primary/90`,
-  outline: `${BUTTON} border border-border bg-card text-foreground hover:bg-accent`,
-};
+type Variant = "default" | "outline";
 
 /** A blue gutter mark, as rustc draws `-->`, `|` and `=`. */
 const gutter = (mark: string) => <span className="text-code-constant">{mark}</span>;
@@ -52,21 +45,15 @@ export function ErrorPage({ diagnostic: d, onRetry }: ErrorPageProps) {
       </>,
     );
 
-  const roadmap = (variant: keyof typeof VARIANT) => (
-    <a key="roadmap" href={base} data-variant={variant} className={VARIANT[variant]}>
-      Go to the roadmap
-    </a>
+  const roadmap = (variant: Variant) => (
+    <Button key="roadmap" asChild size="lg" variant={variant}>
+      <a href={base}>Go to the roadmap</a>
+    </Button>
   );
-  const retry = (variant: keyof typeof VARIANT) => (
-    <button
-      key="retry"
-      type="button"
-      onClick={onRetry}
-      data-variant={variant}
-      className={VARIANT[variant]}
-    >
+  const retry = (variant: Variant) => (
+    <Button key="retry" type="button" size="lg" variant={variant} onClick={onRetry}>
       Try again
-    </button>
+    </Button>
   );
 
   return (
