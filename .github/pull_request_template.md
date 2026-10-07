@@ -2,7 +2,7 @@
 
 ## What and why
 
-<!-- One or two sentences. Link the roadmap phase or issue, e.g. "Part of P5 (quizzes), closes #12". -->
+<!-- One or two sentences on what changes and why, then the issue it closes, if any ("closes #12"). -->
 
 ## Tests first
 
