@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/felipeeuzebio/oxido/compare/v0.3.0...v0.4.0) (2026-10-07)
+
+
+### Features
+
+* **ui:** self-host the three fonts ([#22](https://github.com/felipeeuzebio/oxido/issues/22)) ([7259cbc](https://github.com/felipeeuzebio/oxido/commit/7259cbcebd79238655d8eda1904f54ee55e9f372))
+
 ## [0.3.0](https://github.com/felipeeuzebio/oxido/compare/v0.2.0...v0.3.0) (2026-10-07)
 
 
