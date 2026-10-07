@@ -83,9 +83,9 @@ bunx --bun shadcn@latest add toggle-group toggle button card badge collapsible a
   progress tabs resizable sheet tooltip checkbox field scroll-area skeleton breadcrumb item dropdown-menu
 ```
 
-The workspace where Claude runs can't reach the shadcn/ui registry, so run `add` from a machine that can, in `web/` (where `components.json` is). If `add` writes `:root` or `.dark` color variables into `web/app/app.css`, delete them: the colors are already there. Until then, the two existing components (the theme toggle and quiz results) are plain markup shaped like the components they become, with a comment naming them.
+Run `add` in `web/`, where `components.json` is. If it writes `:root` or `.dark` color variables into `web/app/app.css`, delete them: the colors are already there. The CLI can leave a package it imports uninstalled (it skipped `class-variance-authority` once), so run `bun run check` after it. Generated components import `cn` from shadcn's `cn` package, which `@/lib/utils` re-exports for our own code. `Tooltip` needs a `TooltipProvider` at the root, added with the first tooltip. Quiz results are still plain markup shaped like the components they become, with a comment naming them, until the quiz page moves them over.
 
-After `add`, give `Badge` and `Alert` our tinted variants with `cva` in their own files (shadcn's "add a variant" route, not class overrides at the call site): `success` (`bg-success-muted text-success`), `destructive-muted` (`bg-destructive-muted text-destructive`), `info` (`bg-info-muted text-info`), `warning` (`bg-warning-muted text-warning`) and `primary-muted` (`bg-primary-muted text-primary-muted-foreground`); on `Alert`, add a `border-*/25` of the same color.
+`Badge` and `Alert` get our tinted variants, with `cva`, in their own files, `web/app/components/badge.tsx` and `alert.tsx`, which wrap the generated components (shadcn's "add a variant" route, without touching the generated code). Import them from there, not from `ui/`: `success` (`bg-success-muted text-success`), `destructive-muted` (`bg-destructive-muted text-destructive`), `info` (`bg-info-muted text-info`), `warning` (`bg-warning-muted text-warning`) and `primary-muted` (`bg-primary-muted text-primary-muted-foreground`); on `Alert`, a `border-*/25` of the same color.
 
 | Screen part | Component | Keeps |
 |---|---|---|
@@ -193,7 +193,7 @@ Every error in the app lands on one page, the root `ErrorBoundary` (`web/app/fea
 - A crash is "Something went wrong" (`error: this page panicked`, with the error's message as the `note:`) and leads with "Try again". In development only, its stack follows as a Rust-style backtrace of up to 12 frames, ending with how many it leaves out, and ` -->` points at its first frame; the published site never shows a stack.
 - The tab title is the heading: "Page not found · Oxidō".
 
-The buttons are plain markup shaped like shadcn's `Button` (primary, then `outline`) until P2 adds the shadcn components and they become `Button`. When the rail arrives in P2, the same content can move into a `Card` next to it.
+The actions are shadcn's `Button` at the `lg` size, primary then `outline`. When the rail arrives in P2, the same content can move into a `Card` next to it.
 
 ## Preview
 

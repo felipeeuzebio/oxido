@@ -58,6 +58,14 @@ describe("ErrorPage", () => {
     );
   });
 
+  it("draws its actions with shadcn/ui's Button", () => {
+    render(<ErrorPage diagnostic={notFound} onRetry={() => {}} />);
+    const roadmap = screen.getByRole("link", { name: "Go to the roadmap" });
+    const retry = screen.getByRole("button", { name: "Try again" });
+    expect([roadmap.dataset.slot, roadmap.dataset.variant]).toEqual(["button", "default"]);
+    expect([retry.dataset.slot, retry.dataset.variant]).toEqual(["button", "outline"]);
+  });
+
   it("shows a backtrace only when there is one", () => {
     const { unmount } = render(<ErrorPage diagnostic={notFound} onRetry={() => {}} />);
     expect(screen.queryByText("Backtrace (only in development)")).toBeNull();
