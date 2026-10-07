@@ -84,5 +84,5 @@ Every reference used while planning the project is listed in [docs/sources.md](d
 
 ## License
 
-The code and the original text in this repository are released under the [MIT License](LICENSE). The embedded videos aren't part of this repository and remain the property of their creator. _The Rust Programming Language_ is licensed under MIT or Apache-2.0.
+The code and the original text in this repository are released under the [MIT License](LICENSE). The embedded videos aren't part of this repository and remain the property of their creator.
 
