@@ -187,7 +187,7 @@ Every error in the app lands on one page, the root `ErrorBoundary` (`web/app/fea
 - A crash is "Something went wrong" (`error: this page panicked`, with the error's message as the `note:`) and leads with "Try again". In development only, its stack follows as a Rust-style backtrace of up to 12 frames, ending with how many it leaves out, and ` -->` points at its first frame; the published site never shows a stack.
 - The tab title is the heading: "Page not found · Oxidō".
 
-The buttons are plain markup shaped like shadcn's `Button` (primary, then `outline`) until the component is added. When the rail arrives in P2, the same content can move into a `Card` next to it.
+The buttons are plain markup shaped like shadcn's `Button` (primary, then `outline`) until P2 adds the shadcn components and they become `Button`. When the rail arrives in P2, the same content can move into a `Card` next to it.
 
 ## Preview
 

@@ -9,10 +9,9 @@ interface ErrorPageProps {
 
 const base = import.meta.env.BASE_URL;
 
-// Plain markup until shadcn/ui's Button is added (`bunx --bun shadcn@latest add
-// button`; the registry isn't reachable from Claude's workspace). Then these
-// become `<Button asChild>` around the link and `<Button variant="outline">`;
-// `data-variant` already matches what Button sets.
+// Plain markup until P2 adds shadcn/ui's components, Button among them
+// (roadmap-platform.md). Then these become `<Button asChild>` around the link
+// and `<Button variant="outline">`; `data-variant` already matches what Button sets.
 const BUTTON =
   "inline-flex h-11 cursor-pointer items-center justify-center rounded-md px-5 font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
 const VARIANT = {

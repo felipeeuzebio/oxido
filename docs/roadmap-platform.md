@@ -45,6 +45,7 @@ Done when:
 - Routes exist for kickoff, lesson, quiz and build step pages, and the rail from the design canvas.
 - Keyboard navigation and a Ctrl+K command palette. Fonts are self-hosted.
 - Done early: every error, from an unknown address to a crash, lands on one error page under the header (design.md, "Errors").
+- The shadcn/ui components design.md lists are added with `shadcn add`, in one PR that settles the dependencies they bring, and the error page's buttons become `Button`.
 
 Tests first: component tests that render a fixture course; a Playwright test that goes home → lesson → back.
 
