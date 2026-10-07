@@ -2,6 +2,8 @@
 
 Read this before Step 4. There are three judges, each answering a different question, so one of each is enough; the gate's scripts are a free fourth. Each judge runs as a fresh subagent that sees only what's listed under it: not the session, not the transcript, not which writer wrote which draft, and not the other judges. Shuffle the drafts and relabel them A, B and C first, so no judge can favor the first one.
 
+In Review mode there's one lesson and no tournament: give it to each judge as draft A, skip the shuffle, and leave the ranking out of the prompt and the shape. Each judge still reports its findings and its biggest single fix, and the fidelity judge still grades every point of its rubric.
+
 Every judge returns the same shape:
 
 ```

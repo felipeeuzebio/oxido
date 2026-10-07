@@ -15,7 +15,7 @@ Modes:
 
 - **Full** (default): Steps 1 to 6.
 - **Quick** ("quick", "single writer"): write the one draft yourself, following "The lesson", then run Step 3 and Step 6. No writers or judges.
-- **Review** ("review lesson 1"): run Steps 3 and 4 on the lesson as it is, and report what they found. An approved lesson is never rewritten from scratch; see "New lesson or update?".
+- **Review** ("review lesson 1"): run Steps 3 and 4 on the lesson as it is, and report what they found. With one lesson instead of three drafts, each judge gets it as draft A and returns its findings and biggest fix with no ranking (`references/judging.md`). An approved lesson is never rewritten from scratch; see "New lesson or update?".
 
 ## Read first
 
