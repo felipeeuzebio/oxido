@@ -81,6 +81,15 @@ describe("GitHub workflows", () => {
   });
 });
 
+describe("end-to-end tests", () => {
+  it("compile their fixture course outside web/.content, which the dev server reads", () => {
+    const config = read("web/playwright.config.ts");
+    const out = config.match(/OXIDO_CONTENT_OUT:\s*"([^"]+)"/)?.[1];
+    expect(out, "playwright.config.ts sets OXIDO_CONTENT_OUT").toBeTruthy();
+    expect(out).not.toMatch(/^(\.\/)?\.content\/?$/);
+  });
+});
+
 describe("git hooks", () => {
   it("format only the staged Rust files, in the workspace's edition", () => {
     // rustfmt called directly doesn't read Cargo.toml, so the hook names the

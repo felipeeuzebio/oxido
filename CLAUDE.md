@@ -19,7 +19,8 @@ bun run test:e2e                 # Playwright against the real oxido binary
 bun run check                    # React Router typegen + TypeScript 7
 bun run lint                     # Biome
 cargo test --workspace           # Rust tests
-cargo xtask content              # compile content/ into web/.content (build and dev run it first)
+cargo xtask content              # compile content/ into web/.content (build and dev run it first;
+                                 # a running dev server restarts to serve new lessons)
 cargo xtask check-code           # compile every rust block in the lessons
 cargo clippy --workspace --all-targets -- -D warnings
 ```

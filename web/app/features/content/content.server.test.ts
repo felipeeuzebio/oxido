@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
 import { lessonRoutes, readLesson } from "./content.server";
 
@@ -35,5 +35,30 @@ describe("reading compiled content at build time", () => {
 
   it("lists no routes before the content is compiled", () => {
     expect(lessonRoutes(join(tmpdir(), "oxido-no-such-folder"))).toEqual([]);
+  });
+});
+
+describe("where the compiled content lives", () => {
+  // CONTENT is read once, when the module loads, and this file already loaded
+  // it above. Each test loads a fresh copy after stubbing the environment.
+  beforeEach(() => {
+    vi.resetModules();
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads web/.content by default", async () => {
+    vi.stubEnv("OXIDO_CONTENT_OUT", undefined);
+    const { CONTENT } = await import("./content.server");
+    expect(CONTENT).toBe(join(process.cwd(), ".content"));
+  });
+
+  it("reads the folder OXIDO_CONTENT_OUT names, as `cargo xtask content` writes it", async () => {
+    // The e2e build compiles the fixture course into its own folder, so it
+    // never replaces the course a running dev server reads.
+    vi.stubEnv("OXIDO_CONTENT_OUT", ".content-e2e");
+    const { CONTENT } = await import("./content.server");
+    expect(CONTENT).toBe(join(process.cwd(), ".content-e2e"));
   });
 });
