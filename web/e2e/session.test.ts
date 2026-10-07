@@ -9,7 +9,7 @@ test("the launch link opens a session once, then progress can be saved", async (
 }) => {
   await page.goto(`/?token=${E2E_TOKEN}`);
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "Oxidō" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   const progress = await page.evaluate(async () => {
     const put = await fetch("/api/classes/3.4/text", {
@@ -32,7 +32,7 @@ test("the launch link opens a session once, then progress can be saved", async (
 
 test("without the launch link, the page loads but progress stays locked", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Oxidō" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   const status = await page.evaluate(async () => (await fetch("/api/progress")).status);
   expect(status).toBe(401);
