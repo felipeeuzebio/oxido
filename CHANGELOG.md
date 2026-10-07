@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/felipeeuzebio/oxido/compare/v0.4.0...v0.5.0) (2026-10-07)
+
+
+### Features
+
+* **ui:** add the rail, and a tab bar on phones ([#24](https://github.com/felipeeuzebio/oxido/issues/24)) ([59b8c0a](https://github.com/felipeeuzebio/oxido/commit/59b8c0a25368d7225e18409f95af08badfedf8d7))
+
 ## [0.4.0](https://github.com/felipeeuzebio/oxido/compare/v0.3.0...v0.4.0) (2026-10-07)
 
 
