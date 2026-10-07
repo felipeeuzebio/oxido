@@ -130,6 +130,38 @@ fn rejects_a_blank_summary() {
 }
 
 #[test]
+fn rejects_an_unmatched_backtick_in_text_the_roadmap_shows() {
+    // The roadmap sets code between a pair of backticks, so a lone one would
+    // turn the rest of the sentence into code.
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        "course.toml",
+        "summary = \"Store rows in a table.\"",
+        "summary = \"Store `rows in a table.\"",
+    );
+    edit(
+        &mut sources,
+        "course.toml",
+        "\".exit ends the program\"",
+        "\"`.exit ends the program\"",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "course.toml: phase p02's summary has an unmatched backtick; code goes between a pair of them"
+        ),
+        "{errors}"
+    );
+    assert!(
+        errors.contains(
+            "course.toml: phase p01's stripe 2 has an unmatched backtick; code goes between a pair of them"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
 fn rejects_a_quiz_file_that_no_phase_uses() {
     // Usually a typo: the file is quiz-1.toml, course.toml says quiz-01.
     let mut sources = valid();
