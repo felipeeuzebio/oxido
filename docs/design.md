@@ -161,6 +161,8 @@ Code looks like it does in VS Code, the editor most students use, so a lesson's 
 
 Syntax colors go on `--code` only: on `--code-panel` the Dojo type and number colors fall just under 4.5:1. Everything else passes WCAG AA where it's used (the lowest are Dojo's type and number colors, at 4.59:1 and 4.60:1), and a test in `tokens.test.ts` checks it. Blocks have a 1px `--code-border` and the usual 12px corners. Quiz code in CodeMirror has line numbers, and clippy's findings show as wavy `--code-warning` underlines with the message in an `Alert` below.
 
+Inline code in a lesson (`Cargo.toml`, `[dependencies]`, a name in a sentence) isn't syntax: it takes shadcn's inline-code recipe, the mono face at `text-sm` on a `--muted` chip with 4px corners, through one rule in `app.css` on `.lesson :not(pre) > code`. Lesson HTML comes from the content compiler and can't carry components, so compiled markup that needs a shadcn look (inline code, notes, tables) gets a `.lesson` rule in `app.css`, with semantic tokens only, never a component.
+
 ## Type
 
 | Tailwind | Family | Use |
@@ -170,6 +172,10 @@ Syntax colors go on `--code` only: on `--code-panel` the Dojo type and number co
 | `font-mono` | JetBrains Mono | code, timestamps |
 
 Both text faces come from Japanese type design and have full Latin sets, which gives the dojo feel without brush-script clichés. The fonts are self-hosted in platform phase P2 (no font requests to Google from the local app); until then the stacks fall back to system fonts.
+
+## Links
+
+A link that leaves the course opens in a new tab, so the student keeps their place: `target="_blank"` with `rel="noopener noreferrer"`, and "(opens in a new tab)" in an `sr-only` span for screen readers. The content compiler does this for every `http` and `https` link in a lesson; a component that links out does the same. Links within the course (another lesson, a heading, home, the roadmap) stay in the same tab, where the app keeps its state.
 
 ## Motifs, sparingly
 

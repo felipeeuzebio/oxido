@@ -69,12 +69,28 @@ fn rewrites_links_between_lessons_to_routes_under_the_base_path() {
         html.contains(r#"<a href="/oxido/lesson/p01/02-variables#shadowing">shadowing</a>"#),
         "{html}"
     );
-    assert!(
-        html.contains(r#"<a href="https://doc.rust-lang.org/book/">Rust Book</a>"#),
-        "{html}"
-    );
     // The route in the JSON stays relative to the app, for the router.
     assert_eq!(compiled.lessons[0].route, "/lesson/p01/01-hello");
+}
+
+#[test]
+fn opens_links_that_leave_the_course_in_a_new_tab() {
+    // A link out of the course shouldn't take the student off the lesson, and
+    // screen readers announce the new tab. Links within the course, to another
+    // lesson or a heading, stay in the same tab.
+    let compiled = compile(&valid(), &Options::default()).expect("compiles");
+    let html = &compiled.lessons[0].html;
+    assert!(
+        html.contains(concat!(
+            r#"<a href="https://doc.rust-lang.org/book/" target="_blank" rel="noopener noreferrer">"#,
+            r#"Rust Book<span class="new-tab"> (opens in a new tab)</span></a>"#
+        )),
+        "{html}"
+    );
+    assert!(
+        html.contains(r#"<a href="/lesson/p01/02-variables#shadowing">shadowing</a>"#),
+        "{html}"
+    );
 }
 
 #[test]

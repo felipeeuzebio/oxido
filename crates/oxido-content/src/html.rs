@@ -199,8 +199,22 @@ impl<'a> Writer<'a> {
             Node::Break(_) => out.push_str("<br>"),
             Node::Link(link) => {
                 let href = self.href(node, &link.url);
-                out.push_str(&format!("<a href=\"{}\">", escape(&href)));
+                // A link out of the course opens in a new tab, so the student
+                // keeps the lesson, and screen readers hear that it will.
+                // Links within the course (lessons, headings) stay in the tab.
+                let leaves = is_web_address(&href);
+                if leaves {
+                    out.push_str(&format!(
+                        "<a href=\"{}\" target=\"_blank\" rel=\"noopener noreferrer\">",
+                        escape(&href)
+                    ));
+                } else {
+                    out.push_str(&format!("<a href=\"{}\">", escape(&href)));
+                }
                 self.inlines(&link.children, out);
+                if leaves {
+                    out.push_str(r#"<span class="new-tab"> (opens in a new tab)</span>"#);
+                }
                 out.push_str("</a>");
             }
             _ => {}
@@ -209,7 +223,7 @@ impl<'a> Writer<'a> {
 
     /// Where a link goes: web addresses as they are, lessons as routes.
     fn href(&mut self, node: &Node, url: &str) -> String {
-        if url.starts_with("https://") || url.starts_with("http://") || url.starts_with("mailto:") {
+        if is_web_address(url) || url.starts_with("mailto:") {
             return url.to_string();
         }
         let (path, fragment) = url
@@ -272,6 +286,12 @@ impl<'a> Writer<'a> {
             message: message.to_string(),
         });
     }
+}
+
+/// An address on the web, which leaves the course. A link to one opens in a
+/// new tab, and `href` passes it through as it is.
+fn is_web_address(url: &str) -> bool {
+    url.starts_with("https://") || url.starts_with("http://")
 }
 
 /// `path` relative to the folder `from` is in, with `.` and `..` resolved.

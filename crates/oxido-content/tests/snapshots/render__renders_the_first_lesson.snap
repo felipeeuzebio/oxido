@@ -13,6 +13,6 @@ expression: "html(\"01-hello\")"
 <pre class="code" data-lang="rust" translate="no"><code><a-k>let</a-k> count<a-p>:</a-p> <a-t>i32</a-t> = <a-s>&quot;three&quot;</a-s><a-p>;</a-p></code></pre>
 <pre class="code" data-lang="toml" translate="no"><code><a-p>[</a-p><a-pr>package</a-pr><a-p>]</a-p>
 <a-pr>name</a-pr> <a-o>=</a-o> <a-s>&quot;minisql&quot;</a-s></code></pre>
-<p>Read about <a href="/lesson/p01/02-variables#shadowing">shadowing</a> next, or the <a href="https://doc.rust-lang.org/book/">Rust Book</a>.</p>
+<p>Read about <a href="/lesson/p01/02-variables#shadowing">shadowing</a> next, or the <a href="https://doc.rust-lang.org/book/" target="_blank" rel="noopener noreferrer">Rust Book<span class="new-tab"> (opens in a new tab)</span></a>.</p>
 <h2 id="your-first-program-2">Your first program</h2>
 <p>Run it with <code translate="no">cargo run</code>, then <em>try</em> <strong>again</strong>.</p>
