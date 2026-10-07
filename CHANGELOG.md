@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/felipeeuzebio/oxido/compare/v0.5.0...v0.6.0) (2026-10-07)
+
+
+### Features
+
+* **roadmap:** build the home screen from the compiled course ([#26](https://github.com/felipeeuzebio/oxido/issues/26)) ([003cb84](https://github.com/felipeeuzebio/oxido/commit/003cb84a0e02f0db5f9015faed1980c3c0295f07))
+
 ## [0.5.0](https://github.com/felipeeuzebio/oxido/compare/v0.4.0...v0.5.0) (2026-10-07)
 
 
