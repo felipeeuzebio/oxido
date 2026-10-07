@@ -70,5 +70,5 @@ Commits written with Claude keep the `Co-Authored-By: Claude <noreply@anthropic.
 
 ## Writing style
 
-- Docs and lessons: plain, direct sentences. Lessons go through the Humanizer skill before review.
+- Docs and lessons: plain, direct sentences. Lessons go through the Humanizer skill before review, as the `lesson` skill's last step.
 - Lesson content follows the rules in [roadmap-course.md](roadmap-course.md#class-format).

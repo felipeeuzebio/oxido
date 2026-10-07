@@ -132,7 +132,7 @@ Tests first: one shape-check fixture per mismatch, each with its expected error.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decision D24), and its PR goes through the Humanizer skill and the content checklist in the PR template.
+Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decisions D24 and D28), which ends with a pass of the Humanizer skill, and its PR goes through the content checklist in the PR template.
 
 ### P11: Version 1.0
 

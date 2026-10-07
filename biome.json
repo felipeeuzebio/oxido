@@ -8,6 +8,7 @@
       "!web/.react-router",
       "!target",
       "!**/fixtures",
+      "!.agents/skills/avoid-ai-writing",
       "!crates/oxido-content/tests/golden",
       "!web/app/components/ui",
       "!**/*.svg"

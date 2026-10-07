@@ -3,6 +3,7 @@
 // CI and git hook settings that must stay in step with the rest of the repo.
 // (Commit message rules have their own test: commitlint.config.test.ts.)
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(path, "utf8");
@@ -132,5 +133,94 @@ describe("agent skills", () => {
       expect(lstatSync(`.claude/skills/${skill}`).isSymbolicLink(), skill).toBe(true);
       expect(realpathSync(`.claude/skills/${skill}`)).toBe(realpathSync(`.agents/skills/${skill}`));
     }
+  });
+
+  it("point only at files that exist", () => {
+    // An agent follows a skill's paths literally, so a moved file breaks the
+    // skill without any error. Checks repository paths (.agents/skills/...)
+    // anywhere in the text, and the skill's own `references/...` and `scripts/...`.
+    const missing: string[] = [];
+    for (const skill of skills) {
+      const dir = `.agents/skills/${skill}`;
+      const docs = ["SKILL.md", ...list(`${dir}/references`).map((name) => `references/${name}`)];
+      for (const doc of docs.filter((name) => name.endsWith(".md"))) {
+        const text = read(`${dir}/${doc}`);
+        for (const [path] of text.matchAll(/\.agents\/skills\/[\w./-]*[\w/]/g)) {
+          if (!existsSync(path)) missing.push(`${skill}/${doc}: ${path}`);
+        }
+        for (const [, path] of text.matchAll(/`((?:references|scripts)\/[\w./-]*[\w/])`/g)) {
+          if (!existsSync(`${dir}/${path}`)) missing.push(`${skill}/${doc}: ${path}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it("have scripts that Node runs as they are, with no build step", () => {
+    // Node 24 strips TypeScript types itself, but it only resolves relative
+    // imports that name the file. tsconfig's erasableSyntaxOnly keeps out the
+    // TypeScript that can't simply be stripped.
+    const scripts = skills.flatMap((skill) =>
+      readdirSync(`.agents/skills/${skill}`, { recursive: true, encoding: "utf8" })
+        .filter((path) => path.endsWith(".ts"))
+        .map((path) => `.agents/skills/${skill}/${path}`),
+    );
+    expect(scripts.length).toBeGreaterThan(0);
+    const unnamed = scripts.flatMap((script) =>
+      [...read(script).matchAll(/from\s+"(\.\.?\/[^"]+)"/g)]
+        .filter(([, path]) => !path.endsWith(".ts"))
+        .map(([, path]) => `${script}: ${path}`),
+    );
+    expect(unnamed).toEqual([]);
+    expect(JSON.parse(read("tsconfig.json")).compilerOptions).toMatchObject({
+      allowImportingTsExtensions: true,
+      erasableSyntaxOnly: true,
+    });
+  });
+
+  it("spell invisible characters in their scripts as escapes", () => {
+    // The AI-writing detector looks for zero-width characters, so its own code
+    // names them. Written literally, they're invisible in review.
+    const literal = skills.flatMap((skill) =>
+      readdirSync(`.agents/skills/${skill}`, { recursive: true, encoding: "utf8" })
+        .filter((path) => path.endsWith(".ts"))
+        .flatMap((path) =>
+          read(`.agents/skills/${skill}/${path}`)
+            .split("\n")
+            .flatMap((line, i) => (/\p{Cf}/u.test(line) ? [`${skill}/${path}:${i + 1}`] : [])),
+        ),
+    );
+    expect(literal).toEqual([]);
+  });
+
+  it("use other skills only through their instructions, never by importing their files", () => {
+    // The lesson skill names the humanizer and avoid-ai-writing skills in its
+    // SKILL.md; its scripts don't load their code, so each skill updates on its own.
+    const reaching = skills.flatMap((skill) => {
+      const root = `.agents/skills/${skill}`;
+      return readdirSync(root, { recursive: true, encoding: "utf8" })
+        .filter((path) => path.endsWith(".ts"))
+        .flatMap((path) =>
+          [...read(`${root}/${path}`).matchAll(/(?:from\s+|require\()["'](\.[^"']+)["']/g)]
+            .map(([, target]) => join(root, dirname(path), target))
+            .filter((target) => !target.startsWith(`${root}/`))
+            .map((target) => `${root}/${path} loads ${target}`),
+        );
+    });
+    expect(reaching).toEqual([]);
+  });
+
+  it.each([
+    ["humanizer", "Copyright (c) 2025 Siqi Chen"],
+    ["avoid-ai-writing", "Copyright (c) 2026 Conor Bronsdon"],
+  ])("keep the vendored %s skill whole, with its license", (skill, copyright) => {
+    // Copied unchanged from upstream (docs/sources.md has the versions), so
+    // they can be diffed against it. The lesson skill calls them; it doesn't copy them.
+    expect(skills).toContain(skill);
+    expect(read(`.agents/skills/${skill}/LICENSE`)).toContain(copyright);
+  });
+
+  it("run the vendored detector's CommonJS scripts, though the repository is an ES module", () => {
+    expect(JSON.parse(read(".agents/skills/avoid-ai-writing/package.json")).type).toBe("commonjs");
   });
 });

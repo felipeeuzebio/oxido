@@ -5,8 +5,13 @@ References used to plan and build oxido. Checked in September 2026. When a decis
 ## Course material
 
 - Let's Get Rusty, "The Rust Lang Book" playlist (44 videos): https://www.youtube.com/playlist?list=PLai5B987bZ9CoVR-QEIN9foz4QCJ0H2Y8
-- *The Rust Programming Language* by Steve Klabnik, Carol Nichols and the Rust community (MIT or Apache-2.0): https://doc.rust-lang.org/book/
+- *The Rust Programming Language* by Steve Klabnik, Carol Nichols and the Rust community (MIT or Apache-2.0): https://doc.rust-lang.org/book/. The base for every lesson: the videos follow it chapter by chapter.
+- *The Rust Book (Abridged)* by Jason Walton (no license stated): https://jasonwalton.ca/rust-book-abridged/. The model for lesson length: the book at about half the words, with the prose rewritten. Nothing is copied from it.
+- The Brown University version of the book, by the Cognitive Engineering Lab (a fork of the book, MIT or Apache-2.0): https://rust-book.cs.brown.edu/. Considered as the model for ownership and set aside: its chapter 4 teaches ownership through undefined behavior and permissions, which the videos never use (decision D29).
+- Comprehensive Rust, Google's Rust course for developers (prose CC BY 4.0, code Apache-2.0): https://google.github.io/comprehensive-rust/. A fallback for phrasing a point when the book's explanation is heavy going (decision D29); nothing is copied from it. Its style guide: https://github.com/google/comprehensive-rust/blob/main/STYLE.md
 - mdbook-quiz, quiz format with MultipleChoice, ShortAnswer and Tracing questions: https://github.com/cognitive-engineering-lab/mdbook-quiz
+- Humanizer, the agent skill that strips AI writing patterns from lesson prose, by Siqi Chen (MIT): https://github.com/blader/humanizer. Version 3.0.0 is copied unchanged into `.agents/skills/humanizer/` with its license. It is built on Wikipedia's "Signs of AI writing": https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing
+- Avoid AI Writing, the agent skill that audits and rewrites AI writing patterns, with a deterministic detector, by Conor Bronsdon (MIT): https://github.com/conorbronsdon/avoid-ai-writing. Version 3.36.0 of its packaged skill (the repository's `skills/avoid-ai-writing/`) is copied unchanged into `.agents/skills/avoid-ai-writing/`, with the repository's license and one added `package.json` that marks its scripts as CommonJS, since this repository's root is an ES module. The `lesson` skill runs it in detect mode on each draft, and its mechanical check on the Humanizer pass.
 
 ## Project inspiration (Mini SQL)
 

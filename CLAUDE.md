@@ -48,10 +48,13 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 ## Content rules (lessons, quizzes, translations)
 
 - Text lessons teach exactly what Bogdan teaches in the matching video: same points, same order, same claims, including mistakes. Never correct him silently; a clearly marked note after his point is allowed.
+- A lesson is the video in text form, at his level: his steps, short and practical, with nothing he doesn't explain. Details of his setup that have changed since (editor menus, versions on his screen) are given as they are today, without a note.
+- The videos follow *The Rust Programming Language* chapter by chapter, and so do the lessons: the official book is the model for the facts, terms, examples and framing, ownership included, and for the register (decision D29), and Jason Walton's abridged version is the model for length. The lesson skill lists them.
+- Lessons link what they point to outside the course when it's docs, an extension, a tool or a library (the first mention, by name), never an editor or IDE.
 - Write lessons in new words with new, real-world examples. Never paste or lightly edit transcript text. Transcripts are local reference only (`transcripts/` is git-ignored).
-- Draft lessons with the `lesson` skill (`.agents/skills/lesson/`, decision D24): an outline of the video's points first, then the lesson from it. The skill's `scripts/transcript-overlap.ts` flags wording copied from the transcript.
+- Draft lessons with the `lesson` skill (`.agents/skills/lesson/`, decisions D24 and D28): an outline of the video's points first, then the lesson from it, drafted by three writers and picked by blind judges. The skill's `scripts/transcript-overlap.ts` flags wording copied from the transcript.
 - Build steps may only use Rust features taught up to that phase ([docs/roadmap-course.md](docs/roadmap-course.md)).
-- Run lesson prose through the Humanizer skill before opening the PR.
+- Run lesson prose through the `humanizer` skill (`.agents/skills/humanizer/`, in the repository so every agent has it) before opening the PR. The `lesson` skill does it as its last step.
 - Translations are drafted with Claude and edited by the maintainer (decision D23), in the same PR as the English lesson when possible. They change prose and comments only, never identifiers, string literals or program output, and they keep the English file's paragraphs (P9's shape check enforces this). Use the terms in [docs/glossary-pt-BR.md](docs/glossary-pt-BR.md), and add new ones there in the same PR.
 
 ## Commits by Claude
