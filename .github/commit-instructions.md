@@ -76,9 +76,10 @@ Leave it out when the header says everything. Otherwise:
 
 - Write plain prose paragraphs, wrapped at 72 columns. No headings, bold or bullet lists.
 - Start with why: what was wrong, missing or risky before. Then what changed, and what a reviewer would ask about: trade-offs, options tried and dropped, which tests cover it, which docs changed with it.
-- Name the decision (`D23`) or roadmap phase (`P9`) when the change relates to one.
+- Name the decision (`D23`) when the change relates to one. Leave the roadmaps and their phases (`P9`) out unless the change is about a roadmap itself (`CLAUDE.md`, rule 8).
 - Put commands, code identifiers and flags in backticks.
 - Use plain, direct sentences. Don't open with "This commit", don't list every file touched, and skip filler like "enhance", "robust" or "seamless".
+- Avoid AI writing patterns (`CLAUDE.md`, rule 8). A message can be as technical as the change needs; check it with the `humanizer` skill before committing.
 
 ## Footer
 

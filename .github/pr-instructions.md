@@ -21,22 +21,7 @@ Follow the template and keep its three sections and checkboxes in order.
 
 ### What and why
 
-One or two sentences on what changes and why. End with the roadmap phase or issue: "Part of P5 (quizzes), closes #12". Leave the phase out only when the PR belongs to none (a dependency bump, a CI fix).
-
-| Phase | Covers |
-|---|---|
-| P0 | Foundation (done) |
-| P1 | Content pipeline (done) |
-| P2 | Roadmap home and navigation |
-| P3 | Lesson page |
-| P4 | Progress tracking |
-| P5 | Quizzes |
-| P6 | Notes |
-| P7 | Quiz code editor |
-| P8 | Build steps and stripe tests |
-| P9 | Translations (en, pt-BR) |
-| P10 | Content production |
-| P11 | Version 1.0 |
+One or two sentences on what changes and why, then the issue it closes, if any ("closes #12"). Leave the roadmaps and their phases (P3, P10) out unless the PR is about a roadmap itself: they orient agents, and the reader of a PR doesn't need them (`CLAUDE.md`, rule 8).
 
 Add a short paragraph after it for each of these that applies. Reviewers send the PR back when one is missing.
 
@@ -50,7 +35,7 @@ Add a short paragraph after it for each of these that applies. Reviewers send th
 
 ### Tests first
 
-Under the checkboxes, name the tests that cover the change (test names or files), and the "Done when" line of the phase they check, if any. For a PR with no behavior change (docs, refactor, CI), say so and name what still covers it.
+Under the checkboxes, name the tests that cover the change (test names or files). For a PR with no behavior change (docs, refactor, CI), say so and name what still covers it.
 
 ### Checklist
 
@@ -63,6 +48,7 @@ Leave every checkbox unticked. Each one is the author's own statement ("I wrote.
 ## Style
 
 - Plain, direct sentences. No marketing words, emoji or extra headings.
+- Avoid AI writing patterns (`CLAUDE.md`, rule 8). The title and description can be as technical as the change needs; check them with the `humanizer` skill before opening the PR.
 - Don't walk through the diff file by file; the reviewer has the diff.
 - Don't claim anything the diff doesn't show: no test results, benchmarks or manual checks you didn't see.
 - release-please and Dependabot title their own PRs (`chore(release): release x.y.z`, `chore(deps): bump ...`). Don't rewrite those titles.
@@ -79,7 +65,7 @@ feat(quiz): reveal the correct answer on the results page
 
 The results page only said whether each answer was right, so a student who
 missed a question had no way to learn from it. It now shows the correct
-answer under each wrong one. Part of P5 (quizzes), closes #12.
+answer under each wrong one. Closes #12.
 
 `docs/design.md` describes the new answer row.
 

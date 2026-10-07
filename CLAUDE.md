@@ -45,6 +45,7 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 5. **Keep oxido locked down.** Every `/api` route needs the session, writes need oxido's own origin, and the host check stays on for everything. Any new route, header or process `oxido` runs gets a test in `crates/oxido/tests/http.rs` and a line in the PR on why it's safe. Never hold the store lock while cargo runs.
 6. **Use shadcn/ui and the design tokens.** Build UI from the components in `web/app/components/ui/` (added with `shadcn add`, never hand-edited) before writing custom markup. Colors, fonts and belt colors come from `web/app/app.css` through Tailwind's semantic classes (`bg-card`, `text-muted-foreground`); never hard-code them (`raw-colors.test.ts` checks). Every screen must work in both themes. Rules and the component map: [docs/design.md](docs/design.md).
 7. **Let the React Compiler memoize.** Don't add `useMemo`, `useCallback` or `memo` by hand unless a profiler shows a need.
+8. **Write commits and PRs for the people reading them.** Commit messages, PR titles and PR descriptions can be as technical as the change needs, but they state what changed and why in plain sentences. Leave out AI writing patterns: staged contrasts ("not X, but Y"), lists of three for rhythm, inflated words, bold labels, one-line closers and filler. Check each one with the `humanizer` skill (`.agents/skills/humanizer/`) before committing or opening the PR. Don't mention the roadmaps or their phases (P3, P10) unless the change is about a roadmap itself: they're there to orient agents. The format is in `.github/commit-instructions.md` and `.github/pr-instructions.md`.
 
 ## Content rules (lessons, quizzes, translations)
 
@@ -66,4 +67,4 @@ Keep the `Co-Authored-By: Claude <noreply@anthropic.com>` trailer on commits you
 
 - Tests written first, and all of CI passing: Biome, TypeScript, Vitest, Playwright, rustfmt, clippy, cargo tests.
 - Docs updated.
-- PR description says what changed, why, and which roadmap phase it belongs to.
+- PR description says what changed and why.
