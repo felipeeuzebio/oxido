@@ -44,6 +44,7 @@ Done when:
 - The home screen shows progress as one long belt (decision D20), the phases, and a "Continue" card, all from the compiled content.
 - Routes exist for kickoff, lesson, quiz and build step pages, and the rail from the design canvas.
 - Keyboard navigation and a Ctrl+K command palette. Fonts are self-hosted.
+- Done early: every error, from an unknown address to a crash, lands on one error page under the header (design.md, "Errors").
 
 Tests first: component tests that render a fixture course; a Playwright test that goes home → lesson → back.
 
