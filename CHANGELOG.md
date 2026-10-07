@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/felipeeuzebio/oxido/compare/v0.1.0...v0.2.0) (2026-10-07)
+
+
+### Features
+
+* **agents:** draft lessons as a tournament with blind judges ([#9](https://github.com/felipeeuzebio/oxido/issues/9)) ([e3923b3](https://github.com/felipeeuzebio/oxido/commit/e3923b3e819570ab4d5977f73d4ffd453f1774e5))
+* **content:** add lesson 1 on getting started ([#10](https://github.com/felipeeuzebio/oxido/issues/10)) ([393f2b0](https://github.com/felipeeuzebio/oxido/commit/393f2b00a202a79d8e3098ffd58bf579df01a275))
+* **lesson:** open outside links in a new tab and style inline code ([#12](https://github.com/felipeeuzebio/oxido/issues/12)) ([e28d7d1](https://github.com/felipeeuzebio/oxido/commit/e28d7d17fcce4be1b6c04540422673d05d7eae6f))
+* **ui:** show every error on one page that reads like rustc ([#11](https://github.com/felipeeuzebio/oxido/issues/11)) ([abf5403](https://github.com/felipeeuzebio/oxido/commit/abf5403f547612bd561b7c1ef48383771b6846a3))
+
+
+### Bug Fixes
+
+* serve newly compiled lessons without restarting the dev server ([#13](https://github.com/felipeeuzebio/oxido/issues/13)) ([54f8aff](https://github.com/felipeeuzebio/oxido/commit/54f8aff8fcd9d7b43a846baf7cc75101715db3a6))
+
 ## 0.1.0 (2026-10-01)
 
 
