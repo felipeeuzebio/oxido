@@ -4,6 +4,8 @@ import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
+import { CONTENT } from "./app/features/content/content.server.ts";
+import { contentReload } from "./app/features/content/content-reload.ts";
 
 const base = `${(process.env.BASE_PATH ?? "").replace(/\/+$/, "")}/`;
 
@@ -16,6 +18,7 @@ const plugins = process.env.VITEST
       // before React Router's plugin. Everything else is compiled by Oxc.
       babel({ presets: [reactCompilerPreset()] }),
       reactRouter(),
+      contentReload(CONTENT),
     ];
 
 export default defineConfig({
@@ -31,8 +34,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    // Tests next to the app code. Repository checks run from the root.
-    include: ["app/**/*.test.{ts,tsx}"],
+    // Tests next to the app code and this config. Repository checks run from the root.
+    include: ["app/**/*.test.{ts,tsx}", "*.test.ts"],
     setupFiles: ["app/test-setup.ts"],
   },
 });

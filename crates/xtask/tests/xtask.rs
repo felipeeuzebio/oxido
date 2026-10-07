@@ -33,11 +33,17 @@ impl Workspace {
     }
 
     fn xtask(&self, args: &[&str]) -> Output {
+        self.xtask_with(args, &[])
+    }
+
+    fn xtask_with(&self, args: &[&str], env: &[(&str, &str)]) -> Output {
         Command::new(env!("CARGO_BIN_EXE_xtask"))
             .args(args)
             .current_dir(self.dir.path())
             .env_remove("OXIDO_CONTENT")
+            .env_remove("OXIDO_CONTENT_OUT")
             .env_remove("BASE_PATH")
+            .envs(env.iter().copied())
             .output()
             .expect("xtask runs")
     }
@@ -80,6 +86,20 @@ fn content_writes_the_json_the_frontend_reads() {
         stdout.contains("Not written yet: 1 lesson and 1 quiz"),
         "{stdout}"
     );
+}
+
+#[test]
+fn content_writes_where_oxido_content_out_says() {
+    // The e2e build sets it, so the fixture course never replaces web/.content,
+    // which a running dev server reads.
+    let ws = Workspace::new();
+    let output = ws.xtask_with(
+        &["content", "--content", "content"],
+        &[("OXIDO_CONTENT_OUT", "elsewhere")],
+    );
+    assert!(output.status.success(), "{}", text(&output.stderr));
+    assert!(ws.path("elsewhere/course.json").is_file());
+    assert!(ws.path("elsewhere/lessons/p01/01-hello.json").is_file());
 }
 
 #[test]

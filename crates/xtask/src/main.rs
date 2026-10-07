@@ -25,7 +25,8 @@ enum Command {
         #[arg(long, env = "OXIDO_CONTENT")]
         content: Option<PathBuf>,
         /// Where to write the output; replaced on every run [default: web/.content].
-        #[arg(long)]
+        /// The frontend reads OXIDO_CONTENT_OUT too, so both agree on the folder.
+        #[arg(long, env = "OXIDO_CONTENT_OUT")]
         out: Option<PathBuf>,
         /// Fail on lessons and quizzes course.toml plans that aren't written yet.
         #[arg(long)]

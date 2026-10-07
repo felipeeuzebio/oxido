@@ -40,7 +40,7 @@ The project is built test first (see the TDD rule in [roadmap-platform.md](roadm
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome bun run test:e2e
 ```
 
-The Playwright config builds the frontend, then starts `cargo run -p oxido -- serve --port 4173 --no-open` with a fixed `OXIDO_TOKEN` and a throwaway project (an `oxido.toml` in `target/e2e-project`). The first run compiles `oxido`, so allow a minute. The build compiles the content compiler's fixture course (`OXIDO_CONTENT` in the config), so the lesson tests don't depend on which lessons are written.
+The Playwright config builds the frontend, then starts `cargo run -p oxido -- serve --port 4173 --no-open` with a fixed `OXIDO_TOKEN` and a throwaway project (an `oxido.toml` in `target/e2e-project`). The first run compiles `oxido`, so allow a minute. The build compiles the content compiler's fixture course (`OXIDO_CONTENT` in the config) into `web/.content-e2e` (`OXIDO_CONTENT_OUT`), so the lesson tests don't depend on which lessons are written and a running dev server keeps its own course. The build itself still writes `web/build/client`, so run `bun run build` again before using a debug `oxido serve` after the e2e tests.
 
 ## Before pushing
 

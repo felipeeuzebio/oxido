@@ -25,6 +25,7 @@ vite.config.ts.timestamp-*
 
 # Compiled content: `bun run content` (cargo xtask content) writes it on every build
 /web/.content
+/web/.content-e2e
 
 # Python bytecode
 __pycache__/

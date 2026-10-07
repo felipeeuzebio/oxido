@@ -3,10 +3,14 @@
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import type { Course, Lesson } from "./types";
+import type { Course, Lesson } from "./types.ts";
 
-/** Where `bun run content` writes; the build runs in web/. */
-export const CONTENT = resolve(process.cwd(), ".content");
+/**
+ * Where `bun run content` writes; the build runs in web/. OXIDO_CONTENT_OUT
+ * moves it, for `cargo xtask content` too: the e2e build uses its own folder so
+ * it never replaces the course a running dev server reads.
+ */
+export const CONTENT = resolve(process.cwd(), process.env.OXIDO_CONTENT_OUT || ".content");
 
 const SEGMENT = /^[a-z0-9-]+$/;
 

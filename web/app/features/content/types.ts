@@ -1,6 +1,6 @@
 // The compiled course, as `cargo xtask content` writes it (crates/oxido-content).
 // contract.test.ts checks these types against the compiler's golden output.
-import type { Question } from "../quiz/types";
+import type { Question } from "../quiz/types.ts";
 
 export interface Course {
   title: string;
