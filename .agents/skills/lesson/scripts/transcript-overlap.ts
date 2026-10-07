@@ -3,7 +3,7 @@
 // Skips front matter, code blocks and timestamps. Exits with 1 when it finds a
 // run. Transcripts are git-ignored, so this runs locally, not in CI.
 //
-//   bun .agents/skills/lesson/scripts/transcript-overlap.ts transcripts/12_<videoId>.md <file>...
+//   node .agents/skills/lesson/scripts/transcript-overlap.ts transcripts/12_<videoId>.md <file>...
 import { readFileSync } from "node:fs";
 
 const TIMESTAMP = /\[\d{1,2}:\d{2}(?::\d{2})?\]/g;
@@ -45,7 +45,7 @@ if (import.meta.main) {
   const [transcriptPath, ...files] = process.argv.slice(2);
   if (!transcriptPath || files.length === 0) {
     console.error(
-      "Usage: bun .agents/skills/lesson/scripts/transcript-overlap.ts <transcript.md> <file>...",
+      "Usage: node .agents/skills/lesson/scripts/transcript-overlap.ts <transcript.md> <file>...",
     );
     process.exit(2);
   }

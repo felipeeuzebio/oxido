@@ -1,0 +1,4 @@
+{
+  "//": "Added in Oxidō: the vendored scripts are CommonJS, and the repository root is \"type\": \"module\".",
+  "type": "commonjs"
+}

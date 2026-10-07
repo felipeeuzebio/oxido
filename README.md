@@ -78,8 +78,9 @@ The repository layout, architecture and conventions are described in [docs/](doc
 ## Credits
 
 - Bogdan Pshonyak of [Let's Get Rusty](https://www.youtube.com/@letsgetrusty), for the video course this project is built around.
-- Steve Klabnik, Carol Nichols and the Rust community, for [_The Rust Programming Language_](https://doc.rust-lang.org/book/), which the videos follow.
+- Steve Klabnik, Carol Nichols and the Rust community, for [_The Rust Programming Language_](https://doc.rust-lang.org/book/), which the videos follow and the lessons take as their model.
 - Will Crichton and the Cognitive Engineering Lab at Brown University, for [mdbook-quiz](https://github.com/cognitive-engineering-lab/mdbook-quiz). The quizzes use its question format.
+- Jason Walton, for [The Rust Book (Abridged)](https://jasonwalton.ca/rust-book-abridged/), the model for how short a lesson can be.
 - Connor Stack, for [Let's Build a Simple Database](https://github.com/cstack/db_tutorial), and the authors of [_500 Lines or Less_](https://github.com/aosabook/500lines). Both inspired the Mini SQL project.
 
 Every reference used while planning the project is listed in [docs/sources.md](docs/sources.md).
