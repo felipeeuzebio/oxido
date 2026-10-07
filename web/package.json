@@ -1,6 +1,6 @@
 {
   "name": "oxido",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Oxidō's frontend: the course UI that oxido serves and GitHub Pages hosts",
   "type": "module",
   "private": true,
