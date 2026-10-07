@@ -184,7 +184,7 @@ No gradients, no emoji, no brush fonts, no cards with a colored left border.
 Every error in the app lands on one page, the root `ErrorBoundary` (`web/app/features/errors/`), with the header kept so the way home is always there. Ferris panicking, the Rust Book's `panics.svg`, sits beside the error, which is printed the way rustc prints a diagnostic, in a `pre.code` panel with the code colors: `error[404]` or `error` in `--code-fail`, the `-->`, `|` and `=` gutter in `--code-constant`, then the place and any `help:` or `note:` lines.
 
 - A missing page, or a lesson that was never compiled, is "Page not found" (`error[404]: no page at this address`) and leads with "Go to the roadmap". A lesson path adds `help: lessons live at /lesson/<phase>/<slug>`.
-- A crash is "Something went wrong" (`error: this page panicked`, with the error's message as the `note:`) and leads with "Try again". In development only, its stack follows as a Rust-style backtrace, and ` -->` points at its first frame; the published site never shows a stack.
+- A crash is "Something went wrong" (`error: this page panicked`, with the error's message as the `note:`) and leads with "Try again". In development only, its stack follows as a Rust-style backtrace of up to 12 frames, ending with how many it leaves out, and ` -->` points at its first frame; the published site never shows a stack.
 - The tab title is the heading: "Page not found · Oxidō".
 
 The buttons are plain markup shaped like shadcn's `Button` (primary, then `outline`) until the component is added. When the rail arrives in P2, the same content can move into a `Card` next to it.

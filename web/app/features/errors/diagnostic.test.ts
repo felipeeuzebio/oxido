@@ -91,6 +91,27 @@ describe("diagnose", () => {
     );
   });
 
+  it("says how many frames a long backtrace leaves out", () => {
+    const deep = (count: number) =>
+      [
+        "Error: deep",
+        ...Array.from(
+          { length: count },
+          (_, i) => `    at f${i} (http://127.0.0.1:5173/app/x.tsx:${i + 1}:1)`,
+        ),
+      ].join("\n");
+    const cut = diagnose(crash(deep(15)), "/", true).backtrace ?? "";
+    expect(cut).toContain("  11: f11\n");
+    expect(cut).not.toContain("f12");
+    expect(cut.split("\n").at(-1)).toBe("      ... 3 more frames");
+    expect(
+      diagnose(crash(deep(13)), "/", true)
+        .backtrace?.split("\n")
+        .at(-1),
+    ).toBe("      ... 1 more frame");
+    expect(diagnose(crash(deep(12)), "/", true).backtrace).not.toContain("more frame");
+  });
+
   it("reads Firefox and Safari stacks too", () => {
     const stack =
       "LessonPage@http://127.0.0.1:5173/app/routes/lesson.tsx:18:11\n@http://127.0.0.1:5173/app/root.tsx:40:3";

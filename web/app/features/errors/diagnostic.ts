@@ -44,11 +44,15 @@ function frames(stack: string): Frame[] {
   });
 }
 
-const backtrace = (list: Frame[]) =>
-  list
+// Frames past MAX_FRAMES are counted, so a cut trace doesn't pass for a whole one.
+function backtrace(list: Frame[]): string {
+  const shown = list
     .slice(0, MAX_FRAMES)
-    .map((f, i) => `${String(i).padStart(4)}: ${f.name}\n${" ".repeat(13)}at ${f.file}`)
-    .join("\n");
+    .map((f, i) => `${String(i).padStart(4)}: ${f.name}\n${" ".repeat(13)}at ${f.file}`);
+  const hidden = list.length - MAX_FRAMES;
+  if (hidden > 0) shown.push(`      ... ${hidden} more frame${hidden === 1 ? "" : "s"}`);
+  return shown.join("\n");
+}
 
 const crashed = (location: string, note: string, trace?: string): Diagnostic => ({
   title: "Something went wrong",
