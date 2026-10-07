@@ -118,6 +118,7 @@ pub struct Phase {
     pub title: String,
     pub chapters: Vec<u32>,
     pub build: String,
+    pub summary: String,
     pub stripes: Vec<String>,
     pub quiz: Option<String>,
     pub student_tdd: bool,

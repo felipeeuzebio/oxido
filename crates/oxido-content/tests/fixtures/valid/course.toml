@@ -20,12 +20,14 @@ id = "kickoff"
 title = "Kickoff"
 chapters = []
 build = "A demo of the finished project"
+summary = "A tour of the finished project."
 
 [[phases]]
 id = "p01"
 title = "First Steps"
 chapters = [1, 3]
 build = "A prompt that reads commands"
+summary = "A `db > ` prompt that reads commands."
 stripes = ["a prompt that reads lines", ".exit ends the program"]
 quiz = "quiz-01"
 videos = ["helloVideo1", "shadowVid02"]
@@ -35,6 +37,7 @@ id = "p02"
 title = "Ownership"
 chapters = [4]
 build = "Rows in a table"
+summary = "Store rows in a table."
 stripes = ["rows"]
 quiz = "quiz-02"
 student_tdd = true

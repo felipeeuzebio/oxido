@@ -53,12 +53,14 @@ id = "kickoff"
 title = "Kickoff: what we'll build"
 chapters = []
 build = "Demo of the finished minisql (terminal and web), the roadmap, how belts and tests work"
+summary = "A tour of the finished minisql, in the terminal and in the browser, and how its tests earn you stripes and belts."
 
 [[phases]]
 id = "p01"
 title = "First Steps"
 chapters = [1, 2, 3]
 build = "cargo new minisql; a `db > ` prompt that reads commands, `.exit` and `.help`"
+summary = "Start minisql with `cargo new`: a `db > ` prompt that reads commands, with `.exit` and `.help`."
 stripes = [
   "`db > ` prompt that reads lines in a loop",
   "`.exit` ends the program",
@@ -77,6 +79,7 @@ id = "p02"
 title = "Rows and Statements"
 chapters = [4, 5, 6]
 build = "Row struct, Statement enum, insert/select into a fixed-size table of Option<Row>"
+summary = "A `Row` struct and a `Statement` enum, so `insert` and `select` can fill and read a table of fixed size."
 stripes = [
   "Row struct parsed from `insert 1 alice alice@example.com`",
   "Statement enum and prepare() returning Option",
@@ -95,6 +98,7 @@ id = "p03"
 title = "Organize and Persist"
 chapters = [7, 8, 9]
 build = "Modules, Vec + HashMap index, PrepareError with Result and ?, save and load a file"
+summary = "Split the code into modules, look rows up through a `HashMap`, report errors with `Result` and `?`, and save the table to a file."
 stripes = [
   "code split into modules",
   "Vec storage and String length checks",
@@ -114,6 +118,7 @@ id = "p04"
 title = "Traits, Lifetimes and Tests"
 chapters = [10, 11]
 build = "Record trait, generic Table<R>, Token<'a> tokenizer, unit and integration tests"
+summary = "A `Record` trait, a generic `Table`, and a tokenizer that borrows from the line you typed. From here on, you write a failing test before each feature."
 stripes = [
   "Record trait and generic Table<R>",
   "Token<'a> tokenizer that borrows from the input line",
@@ -135,6 +140,7 @@ id = "p05"
 title = "The minisql CLI"
 chapters = [12, 13]
 build = "minisql <file.db>, errors to stderr, WHERE ... CONTAINS with MINISQL_IGNORE_CASE, Cursor iterator"
+summary = "minisql becomes a command line tool: `minisql <file.db>`, errors on stderr, `select where … contains`, and a `Cursor` that implements `Iterator`."
 stripes = [
   "minisql <file.db> with Config::build",
   "errors on stderr with a non-zero exit code",
@@ -156,6 +162,7 @@ id = "p06"
 title = "Ship It"
 chapters = [14]
 build = "Workspace (minisql-core + minisql-cli), doc tests, release profile, cargo install"
+summary = "Split minisql into a library and a binary in one workspace, add doc tests, and install it with `cargo install`."
 stripes = [
   "workspace with minisql-core and minisql-cli",
   "doc tests, release profile, cargo install",
@@ -170,6 +177,7 @@ id = "p07"
 title = "Smart Pointers"
 chapters = [15]
 build = "Box'd index tree, Rc/Weak schema catalog, Drop saves the database on close"
+summary = "Rebuild the index as a tree of `Box` nodes, point columns back to their table with `Weak`, and save on close with `Drop`."
 stripes = [
   "index rebuilt as a tree of Box<Node>",
   "Drop saves the database on close",
@@ -191,6 +199,7 @@ id = "p08"
 title = "Going Parallel"
 chapters = [16]
 build = "Parallel .import (worker threads + mpsc), Arc<Mutex<Database>> for concurrent sessions"
+summary = "Import CSV files on worker threads that send rows through a channel, and share the database between sessions with `Arc<Mutex<Database>>`."
 stripes = [
   "parallel .import: one worker thread per file",
   "rows sent over mpsc to a single writer",
@@ -208,6 +217,7 @@ id = "p09"
 title = "Objects and Patterns"
 chapters = [17, 18]
 build = "Box<dyn Storage> backends, BEGIN/COMMIT/ROLLBACK state pattern, richer match patterns"
+summary = "Storage backends as trait objects, transactions as a state pattern, and a parser rewritten with richer `match` patterns."
 stripes = [
   "Box<dyn Storage> with memory and file backends",
   "BEGIN/COMMIT/ROLLBACK as a state pattern",
@@ -227,6 +237,7 @@ id = "p10"
 title = "Advanced Rust"
 chapters = [19]
 build = "Newtypes, Result alias, Index<RowId> for Table, fn-pointer aggregates, a test macro"
+summary = "Newtypes, a `Result` alias, `Index` for `Table`, aggregate functions as function pointers, and a macro for test scripts."
 stripes = [
   "newtypes (RowId, ColumnName) and a Result alias",
   "Index<RowId> for Table",
@@ -248,6 +259,7 @@ id = "p11"
 title = "Database Server"
 chapters = [20]
 build = "minisql serve: TcpListener, query page, POST /query, ThreadPool, graceful shutdown"
+summary = "`minisql serve`: a query page in the browser, answered by your own thread pool, with a clean shutdown that saves the database."
 stripes = [
   "minisql serve: TcpListener, query page and POST /query",
   "ThreadPool and graceful shutdown that saves the database",

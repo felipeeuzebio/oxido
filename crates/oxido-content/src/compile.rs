@@ -303,6 +303,7 @@ fn output(course: &CourseFile, lessons: &[Lesson], quizzes: &[Quiz]) -> Course {
             title: phase.title.clone(),
             chapters: phase.chapters.clone(),
             build: phase.build.clone(),
+            summary: phase.summary.clone(),
             stripes: phase.stripes.clone(),
             quiz: phase.quiz.clone(),
             student_tdd: phase.student_tdd,
