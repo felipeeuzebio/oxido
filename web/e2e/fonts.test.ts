@@ -9,7 +9,7 @@ test("a lesson renders in the self-hosted fonts, served by the page's own server
   page.on("request", (request) => {
     if (request.resourceType() === "font") fonts.push(request.url());
   });
-  await page.goto("/lesson/p01/01-hello", { waitUntil: "networkidle" });
+  await page.goto("/lesson/p01/01-hello");
   const loaded = await page.evaluate(async () => {
     await document.fonts.ready;
     return [...document.fonts]
