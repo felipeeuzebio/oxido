@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
 import { lessonRoutes, readLesson } from "./content.server";
 
@@ -39,9 +39,13 @@ describe("reading compiled content at build time", () => {
 });
 
 describe("where the compiled content lives", () => {
+  // CONTENT is read once, when the module loads, and this file already loaded
+  // it above. Each test loads a fresh copy after stubbing the environment.
+  beforeEach(() => {
+    vi.resetModules();
+  });
   afterEach(() => {
     vi.unstubAllEnvs();
-    vi.resetModules();
   });
 
   it("reads web/.content by default", async () => {
