@@ -110,7 +110,7 @@ Each draft is a complete lesson file with its front matter. Code must be real: e
 For each draft:
 
 1. Run the `avoid-ai-writing` skill (`.agents/skills/avoid-ai-writing/`) in detect mode on the draft's prose (its front matter and code blocks aren't prose), with the `technical-blog` context. Tell it the text is a tutorial that walks the reader through each step: a "let's" that leads into a real step is an invitation to act, not a transition.
-2. Run these from the repository root. `transcript-overlap.ts` is TypeScript, which Node 24 or later runs as it is (`node --version`); an older one may exit without checking anything.
+2. Run these from the repository root. `transcript-overlap.ts` is TypeScript, which Node 24 or later runs as it is (`node --version`).
 
 ```sh
 # Wording shared with the transcript: must report none
@@ -175,7 +175,7 @@ Commit and open the PR only when the maintainer says to, following `.github/comm
 | --- | --- |
 | `references/judging.md` | Step 4: the judges' prompts, and the fidelity judge's rubric |
 | `references/voice.md` | Steps 2, 4 and 6: the lessons' voice, his way of teaching in the book's register, with a sample |
-| `scripts/transcript-overlap.ts` | Steps 3 and 6: wording shared with the transcript |
+| `scripts/transcript-overlap.ts` | Steps 3 and 6: wording shared with the transcript. The matching itself is in `scripts/copied-runs.ts`, which the tests import |
 
 It also uses two other skills in this repository, each copied unchanged from upstream with its license:
 

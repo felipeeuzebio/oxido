@@ -1,5 +1,9 @@
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { copiedRuns } from "../.agents/skills/lesson/scripts/transcript-overlap";
+import { copiedRuns } from "../.agents/skills/lesson/scripts/copied-runs";
 
 // A transcript as scripts/fetch_transcripts.py writes it: a title, the video
 // link, then one timestamped snippet per line, often cut mid-sentence.
@@ -64,5 +68,42 @@ describe("copiedRuns", () => {
     expect(copiedRuns(transcript, eight)).toEqual([
       "every reference points to valid memory at all",
     ]);
+  });
+});
+
+// The command runs on the maintainer's machine, under any Node that strips
+// TypeScript types. It has no entry-point check, so it can't load and exit 0
+// without checking, which would read as "nothing copied". A Node that can't
+// run TypeScript stops with an error instead; CI's may be one, so these skip there.
+describe.skipIf(!process.features.typescript)("the transcript-overlap command", () => {
+  const dir = mkdtempSync(join(tmpdir(), "overlap-"));
+  const file = (name: string, text: string) => {
+    writeFileSync(join(dir, name), text);
+    return join(dir, name);
+  };
+  const transcriptFile = file("transcript.md", transcript);
+  const run = (script: string, ...files: string[]) =>
+    spawnSync(process.execPath, [script, transcriptFile, ...files], { encoding: "utf8" });
+
+  it.each([
+    ".agents/skills/lesson/scripts/transcript-overlap.ts",
+    ".claude/skills/lesson/scripts/transcript-overlap.ts",
+  ])("names each copied run and exits 1, run as %s", (script) => {
+    const copied = file(
+      "copied.md",
+      "So the borrow checker makes sure that every reference points to valid memory.",
+    );
+    const result = run(script, copied);
+    expect(result.stdout).toContain(
+      `${copied}: "so the borrow checker makes sure that every reference points to valid memory"`,
+    );
+    expect(result.status).toBe(1);
+  });
+
+  it("says so and exits 0 when nothing is copied", () => {
+    const fresh = file("fresh.md", "Rust checks every borrow at compile time.");
+    const result = run(".agents/skills/lesson/scripts/transcript-overlap.ts", fresh);
+    expect(result.stdout).toContain("No wording shared with the transcript.");
+    expect(result.status).toBe(0);
   });
 });
