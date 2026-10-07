@@ -28,7 +28,7 @@ Rules:
 - **Give the hood a rim on dark backgrounds.** The hood is nearly black and vanishes into Forge's charcoal. In the app, `BrandMark` adds a 1px `drop-shadow` in `--muted-foreground` under `.dark` (the app's theme can differ from the system's, so an in-SVG media query won't do); outside the app, use `logo-on-dark.svg`. This is the one `dark:` treatment on an image, and it uses a token, not a color.
 - **Keep it at 32px tall or more.** The app header shows it at 40px. The 16px tab icon is the only smaller use.
 - **Don't recolor, outline, crop, rotate or stretch it**, don't add the name beside it, and don't put it on a photo or a pattern.
-- **Alt text:** "Oxidō". The logo is the only thing that names the site in the header, so it isn't decorative.
+- **Alt text:** "Oxidō". The logo is the only thing that names the site on the page, so it isn't decorative.
 
 ## Themes
 
@@ -115,6 +115,8 @@ Labels and button text are medium weight (500), never bold; bold is for headings
 
 The navigation stays a custom rail (icon over label, 92px, the rust tatami edge) rather than shadcn's `Sidebar`, whose collapsed mode is icon-only; it was chosen over a syllabus sidebar or a class outline (decision D20). It uses the `--sidebar-*` colors: the rail is `--sidebar` (tatami) and its 4px edge is `--sidebar-primary` (rust), one plain line from top to bottom. Rail items are links styled with semantic classes, with no tile or background behind them. The current page's icon and label turn `--sidebar-current` and bold (the icon's stroke goes from 1.8 to 2.2), while the others stay `--muted-foreground`; `aria-current="page"` carries the meaning for screen readers. `--sidebar-current` is the edge's rust made readable as text on the rail: the same value in Forge, a little darker in Dojo (`#b23301`, with the same hue), because the edge's `#c04218` is only 4.1:1 on the rail. Nothing is added to the edge beside the current page: a notch, the edge growing into a tab there, was tried in several shapes and set aside for this (decision D20). Hover darkens the label to `--foreground`; keyboard focus gets the usual `--ring` outline around the item. The theme toggle (a sun or a moon) and the language picker (lucide's `Languages` icon) sit at the rail's foot as ghost icon buttons, 40px (`icon-lg`) with 22px icons at stroke 1.8, the same as the rail's links. That's a deliberate exception to Button's default 16px icons, so these two icons carry a `size-5.5` class. The design canvas's "Options: menu items" board keeps the three looks that weren't chosen, and "Options: current menu item" keeps A1, the ink label with the notch.
 
+The rail lists one item per page that exists, in the canvas's order (Kickoff, Roadmap, Lesson, Build, Quizzes). For now that's Roadmap (lucide's `Map`) and Lesson (`TvMinimalPlay`), which opens the first lesson until progress tracking can open the current one. Kickoff (`Flag`), Build (`CodeXml`) and Quizzes (`ListChecks`) join when their pages land, and the language picker joins the theme toggle with translations. On phones, below Tailwind's `md` breakpoint, the rail becomes a tab bar along the bottom (decision D30): the same items, icon over label, with the rust edge along its top, and the logo and the theme toggle sit in a bar above the page. The code is in `web/app/features/rail/`.
+
 Rules from the shadcn/ui guide that apply everywhere:
 
 - Option sets of 2 to 7 choices use `ToggleGroup`; related checkboxes use `FieldSet` + `FieldLegend`.
@@ -187,7 +189,7 @@ No gradients, no emoji, no brush fonts, no cards with a colored left border.
 
 ## Errors
 
-Every error in the app lands on one page, the root `ErrorBoundary` (`web/app/features/errors/`), with the header kept so the way home is always there. Ferris panicking, the Rust Book's `panics.svg`, sits beside the error, which is printed the way rustc prints a diagnostic, in a `pre.code` panel with the code colors: `error[404]` or `error` in `--code-fail`, the `-->`, `|` and `=` gutter in `--code-constant`, then the place and any `help:` or `note:` lines.
+Every error in the app lands on one page, the root `ErrorBoundary` (`web/app/features/errors/`), with the rail kept so the way home is always there. Ferris panicking, the Rust Book's `panics.svg`, sits beside the error, which is printed the way rustc prints a diagnostic, in a `pre.code` panel with the code colors: `error[404]` or `error` in `--code-fail`, the `-->`, `|` and `=` gutter in `--code-constant`, then the place and any `help:` or `note:` lines.
 
 - A missing page, or a lesson that was never compiled, is "Page not found" (`error[404]: no page at this address`) and leads with "Go to the roadmap". A lesson path adds `help: lessons live at /lesson/<phase>/<slug>`.
 - A crash is "Something went wrong" (`error: this page panicked`, with the error's message as the `note:`) and leads with "Try again". In development only, its stack follows as a Rust-style backtrace of up to 12 frames, ending with how many it leaves out, and ` -->` points at its first frame; the published site never shows a stack.

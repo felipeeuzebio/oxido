@@ -8,12 +8,16 @@ import {
   ScrollRestoration,
   useLocation,
   useRouteError,
+  useRouteLoaderData,
 } from "react-router";
 import "./app.css";
 import "./fonts";
 import { BrandMark } from "@/features/brand/BrandMark";
+import { lessonRoutes } from "@/features/content/content.server";
 import { diagnose } from "@/features/errors/diagnostic";
 import { ErrorPage } from "@/features/errors/ErrorPage";
+import { railItems } from "@/features/rail/items";
+import { Rail, TabBar } from "@/features/rail/Rail";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { PRE_PAINT_SCRIPT } from "@/features/theme/theme";
 import { useTheme } from "@/features/theme/use-theme";
@@ -60,37 +64,56 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-function Header() {
+// Runs once, when the pages are pre-rendered: the rail's Lesson item opens the
+// first compiled lesson.
+export function loader() {
+  return { firstLesson: lessonRoutes()[0] ?? null };
+}
+
+/**
+ * The rail beside every page on wide screens. On phones the logo and the theme
+ * toggle sit above the page, and the rail's items in a tab bar below it
+ * (decision D30); the tab bar's height is padded off the page's foot.
+ */
+function Shell({ children }: { children: ReactNode }) {
   const theme = useTheme();
+  const { pathname } = useLocation();
+  const items = railItems(useRouteLoaderData<typeof loader>("root")?.firstLesson ?? null);
+  const toggle = <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />;
   return (
-    <header className="flex items-center justify-between px-4 py-3">
-      <BrandMark />
-      <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />
-    </header>
+    <div className="md:flex">
+      <Rail items={items} pathname={pathname} foot={toggle} />
+      <div className="min-w-0 flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
+        <header className="flex items-center justify-between px-4 py-3 md:hidden">
+          <BrandMark />
+          {toggle}
+        </header>
+        {children}
+      </div>
+      <TabBar items={items} pathname={pathname} />
+    </div>
   );
 }
 
 export default function App() {
   return (
-    <>
-      <Header />
+    <Shell>
       <Outlet />
-    </>
+    </Shell>
   );
 }
 
 // Every error in the app lands here: a missing page, a lesson that isn't
-// compiled, a crash. The header stays, so the way home is always there.
+// compiled, a crash. The rail stays, so the way home is always there.
 export function ErrorBoundary() {
   const error = useRouteError();
   const { pathname } = useLocation();
   return (
-    <>
-      <Header />
+    <Shell>
       <ErrorPage
         diagnostic={diagnose(error, pathname, import.meta.env.DEV)}
         onRetry={() => window.location.reload()}
       />
-    </>
+    </Shell>
   );
 }

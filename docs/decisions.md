@@ -156,3 +156,9 @@ Considered, and given smaller roles or none:
 - **Jason Walton's abridged version** keeps the book's examples and stays the model for length, but it leans on comparisons with other languages (C, Java, JavaScript, Go, Python), which Bogdan rarely makes.
 - **Comprehensive Rust**, Google's course for developers, shares his method (live code, compiler errors as teaching material) but follows its own order and examples and compares Rust with C++ and Java throughout. It's a fallback for phrasing a point when the book's explanation is heavy going. An earlier version of this decision, made the same day and never merged, made it the model for phrasing and ownership; checking the videos against all four sources showed the book is closer.
 - **The Brown University version** shares the book's examples, but its chapter 4 reframes ownership around undefined behavior and read, write and own permissions, which he never uses. The lesson skill named it as the model for ownership before; that choice wasn't recorded here. It's no longer used for drafting.
+
+## D30. The rail on phones: a tab bar along the bottom (2026-10-07)
+
+The rail (D20) is drawn for wide screens, and at 92px it would take a quarter of a phone's width. Below Tailwind's `md` breakpoint, its items move to a tab bar along the bottom instead: the same links, icon over label, with the rust edge along the bar's top. The logo and the theme toggle sit in a bar above the page. Only one of the two navigations shows at a time, and the hidden one is out of the accessibility tree.
+
+Also considered: a top bar with a menu button that opens a sheet with the items. It keeps the page taller, but every move to another page takes an extra tap.

@@ -42,7 +42,7 @@ Tests first: valid and invalid content fixtures with expected errors; snapshot t
 
 Done when:
 - The home screen shows progress as one long belt (decision D20), the phases, and a "Continue" card, all from the compiled content.
-- Routes exist for kickoff, lesson, quiz and build step pages, and the rail from the design canvas.
+- The rail from the design canvas, with an item for each page that exists (Roadmap and Lesson), and a tab bar along the bottom on phones (decision D30). The kickoff, quiz and build step pages bring their routes and rail items in the phases that fill them (P10, P5, P8).
 - Keyboard navigation and a Ctrl+K command palette. Fonts are self-hosted.
 - Done early: every error, from an unknown address to a crash, lands on one error page under the header (design.md, "Errors").
 - The shadcn/ui components design.md lists are added with `shadcn add`, in one PR that settles the dependencies they bring, and the error page's buttons become `Button`.
@@ -79,6 +79,7 @@ Done when:
 - The quiz page shows one question per screen with no feedback until the end.
 - The results page (seeded in P0) is wired in, with retake, skip and mark as done.
 - Attempts are saved through the storage interface.
+- Quizzes joins the rail.
 
 Tests first: page flow component tests; an e2e test that finishes a quiz with one wrong answer and reveals it.
 
@@ -110,6 +111,7 @@ Done when:
 - `oxido` watches the student's files, reruns the current stripe's tests and `cargo clippy` on save (stale runs cancelled), parses the output, records stripe passes, and pushes results to the page with server-sent events.
 - The build step page shows Tests, Problems (clippy) and Output tabs. File and line references are `vscode://file/<path>:<line>` links, so the browser opens VS Code and `oxido` starts no process for it.
 - CI proves every reference solution passes its stripe tests and every starter fails them.
+- Build joins the rail.
 
 Tests first: the CI check above is written before any belt content; the test-output parser gets fixture outputs from real `cargo test` runs.
 
@@ -135,7 +137,7 @@ Tests first: one shape-check fixture per mismatch, each with its expected error.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done: the kickoff page, 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decisions D24 and D28), which ends with a pass of the Humanizer skill, and its PR goes through the content checklist in the PR template.
+Runs in parallel once P1 is done: the kickoff page (with its route and the rail's Kickoff item), 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decisions D24 and D28), which ends with a pass of the Humanizer skill, and its PR goes through the content checklist in the PR template.
 
 ### P11: Version 1.0
 
