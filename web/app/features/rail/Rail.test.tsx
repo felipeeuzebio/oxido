@@ -41,7 +41,7 @@ describe("Rail", () => {
       <Rail items={items} pathname="/" foot={<button type="button">Dark theme</button>} />,
       "/",
     );
-    expect(within(nav).getByRole("img", { name: "Oxidō" })).toBeTruthy();
+    expect(within(nav).getByRole("link", { name: "Oxidō" }).getAttribute("href")).toBe("/");
     expect(within(nav).getByRole("button", { name: "Dark theme" })).toBeTruthy();
   });
 });

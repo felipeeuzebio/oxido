@@ -44,7 +44,7 @@ Done when:
 - The home screen shows progress as one long belt (decision D20), the phases, and a "Continue" card, all from the compiled content.
 - The rail from the design canvas, with an item for each page that exists (Roadmap and Lesson), and a tab bar along the bottom on phones (decision D30). The kickoff, quiz and build step pages bring their routes and rail items in the phases that fill them (P10, P5, P8).
 - Keyboard navigation and a Ctrl+K command palette. Fonts are self-hosted.
-- Done early: every error, from an unknown address to a crash, lands on one error page under the header (design.md, "Errors").
+- Done early: every error, from an unknown address to a crash, lands on one error page, with the rail kept (design.md, "Errors").
 - The shadcn/ui components design.md lists are added with `shadcn add`, in one PR that settles the dependencies they bring, and the error page's buttons become `Button`.
 
 Tests first: component tests that render a fixture course; a Playwright test that goes home → lesson → back.
