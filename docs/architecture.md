@@ -104,6 +104,8 @@ Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies
 
 React 19 with React Router 8 in framework mode, `ssr: false`: a static single-page app whose pages are pre-rendered to HTML at build time. Vite 8 builds it (Rolldown and Oxc), with the React Compiler handling memoization. `BASE_PATH` sets the path prefix for GitHub Pages; the local server uses `/`.
 
+Errors anywhere in the app, from a missing page to a crash, land on the root `ErrorBoundary` in `root.tsx`, which shows the error page (`features/errors/`, see design.md, "Errors"). Unknown paths reach it because `oxido` answers them with the SPA fallback page and the Pages workflow copies that page to `404.html`.
+
 During development, `bun run dev:all` runs two scripts with `bun run --parallel`: `dev:oxido` (`oxido serve --dev` on the sandbox project) and `dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878. Ctrl+C stops both, and so does either one failing.
 
 ## Theme

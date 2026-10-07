@@ -1,15 +1,33 @@
 import type { ReactNode } from "react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import {
+  Links,
+  Meta,
+  type MetaFunction,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLocation,
+  useRouteError,
+} from "react-router";
 import "./app.css";
 import { BrandMark } from "@/features/brand/BrandMark";
+import { diagnose } from "@/features/errors/diagnostic";
+import { ErrorPage } from "@/features/errors/ErrorPage";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { PRE_PAINT_SCRIPT } from "@/features/theme/theme";
 import { useTheme } from "@/features/theme/use-theme";
 
 const base = import.meta.env.BASE_URL;
 
-// The name is the page title; routes without their own title inherit it.
-export const meta = () => [{ title: "Oxidō" }];
+// The name is the page title; routes without their own title inherit it. On
+// an error, the error page's heading leads ("Page not found · Oxidō").
+export const meta: MetaFunction = ({ error, location }) => [
+  {
+    title: error
+      ? `${diagnose(error, location.pathname, import.meta.env.DEV).title} · Oxidō`
+      : "Oxidō",
+  },
+];
 
 // The SVG tab icon comes last so browsers that support it pick it over the
 // PNG; Safari falls back to the PNG. The SVG adds a light rim in dark mode.
@@ -41,15 +59,37 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-export default function App() {
+function Header() {
   const theme = useTheme();
   return (
+    <header className="flex items-center justify-between px-4 py-3">
+      <BrandMark />
+      <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />
+    </header>
+  );
+}
+
+export default function App() {
+  return (
     <>
-      <header className="flex items-center justify-between px-4 py-3">
-        <BrandMark />
-        <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />
-      </header>
+      <Header />
       <Outlet />
+    </>
+  );
+}
+
+// Every error in the app lands here: a missing page, a lesson that isn't
+// compiled, a crash. The header stays, so the way home is always there.
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const { pathname } = useLocation();
+  return (
+    <>
+      <Header />
+      <ErrorPage
+        diagnostic={diagnose(error, pathname, import.meta.env.DEV)}
+        onRetry={() => window.location.reload()}
+      />
     </>
   );
 }
