@@ -43,6 +43,7 @@ References used to plan and build oxido. Checked in September 2026. When a decis
 - Rust Playground: https://github.com/rust-lang/rust-playground (endpoint list: https://github.com/kingananas20/playground-api)
 - Cargo JSON message format: https://doc.rust-lang.org/cargo/reference/external-tools.html#json-messages
 - Ferris panicking, `panics.svg`, from the book's own images (MIT or Apache-2.0), on the error page: https://github.com/rust-lang/book/tree/main/src/img/ferris. Ferris is by Karen Rustad Tölva, who released the crab into the public domain (CC0): https://rustacean.net. The copy in `web/app/features/errors/` drops only the file's Illustrator export header.
+- The fonts, self-hosted through Fontsource (https://fontsource.org), all under the SIL Open Font License 1.1: Zen Kaku Gothic New (https://fonts.google.com/specimen/Zen+Kaku+Gothic+New), Shippori Mincho B1 (https://fonts.google.com/specimen/Shippori+Mincho+B1) and JetBrains Mono (https://www.jetbrains.com/lp/mono/).
 
 ## Repository tooling
 

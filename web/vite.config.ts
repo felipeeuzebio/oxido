@@ -25,6 +25,11 @@ export default defineConfig({
   base,
   plugins,
   resolve: { alias: { "@": resolve(import.meta.dirname, "app") } },
+  build: {
+    // Fonts stay separate files, each loaded only when a page shows a
+    // character it covers. Inlined, they would all land in the stylesheet.
+    assetsInlineLimit: (file) => (/\.woff2?$/.test(file) ? false : undefined),
+  },
   server: {
     host: "127.0.0.1",
     port: 5173,

@@ -10,6 +10,7 @@ import {
   useRouteError,
 } from "react-router";
 import "./app.css";
+import "./fonts";
 import { BrandMark } from "@/features/brand/BrandMark";
 import { diagnose } from "@/features/errors/diagnostic";
 import { ErrorPage } from "@/features/errors/ErrorPage";

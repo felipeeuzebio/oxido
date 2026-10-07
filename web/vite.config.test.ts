@@ -17,3 +17,21 @@ it("loads with Vite's native config loader", async () => {
   );
   expect(loaded?.path).toMatch(/vite\.config\.ts$/);
 }, 30_000);
+
+it("never inlines a font into the CSS, so each one downloads only when a page needs it", async () => {
+  // Vite inlines small assets as data: URLs by default. For fonts that puts
+  // every small subset into the render-blocking stylesheet, used or not.
+  const loaded = await loadConfigFromFile(
+    { command: "build", mode: "production" },
+    undefined,
+    import.meta.dirname,
+    "silent",
+  );
+  const limit = loaded?.config.build?.assetsInlineLimit;
+  expect(typeof limit).toBe("function");
+  if (typeof limit !== "function") return;
+  const tiny = Buffer.alloc(100);
+  expect(limit("fonts/zen-kaku-gothic-new-latin-ext-400-normal.woff2", tiny)).toBe(false);
+  expect(limit("fonts/zen-kaku-gothic-new-latin-ext-400-normal.woff", tiny)).toBe(false);
+  expect(limit("public/favicon.svg", tiny)).toBeUndefined();
+}, 30_000);

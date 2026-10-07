@@ -171,7 +171,7 @@ Inline code in a lesson (`Cargo.toml`, `[dependencies]`, a name in a sentence) i
 | `font-sans` | Zen Kaku Gothic New | UI and lesson text (the default) |
 | `font-mono` | JetBrains Mono | code, timestamps |
 
-Both text faces come from Japanese type design and have full Latin sets, which gives the dojo feel without brush-script clichés. The fonts are self-hosted in platform phase P2 (no font requests to Google from the local app); until then the stacks fall back to system fonts.
+Both text faces come from Japanese type design and have full Latin sets, which gives the dojo feel without brush-script clichés. The fonts are self-hosted from Fontsource in `web/app/fonts.ts`, so no font request leaves the page's own server. It loads only the weights in use (text 400, 500 and 700; headings 400, 600 and 700; code 400 and 600) and only the Latin subsets, and a page downloads just the files its characters need: about 45 KB on the home page and 105 KB on a lesson, once. Add a weight there before using it in a class. Vite never inlines font files (`vite.config.ts`), so they stay out of the stylesheet.
 
 ## Links
 
