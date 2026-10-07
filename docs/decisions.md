@@ -162,3 +162,9 @@ Considered, and given smaller roles or none:
 The rail (D20) is drawn for wide screens, and at 92px it would take a quarter of a phone's width. Below Tailwind's `md` breakpoint, its items move to a tab bar along the bottom instead: the same links, icon over label, with the rust edge along the bar's top. The logo and the theme toggle sit in a bar above the page. Only one of the two navigations shows at a time, and the hidden one is out of the accessibility tree.
 
 Also considered: a top bar with a menu button that opens a sheet with the items. It keeps the page taller, but every move to another page takes an extra tap.
+
+## D31. The long belt stands up on narrow screens (2026-10-07)
+
+On a 390px phone, the long belt (D20) leaves each of the eight belts about 45px, too narrow for a name and its count. Beside the rail on a 768px tablet, a four-stripe belt still gets only about 50px. Below Tailwind's `lg` breakpoint, the belt runs top to bottom instead: each belt is as tall as its stripe count, with its name, count, mark and stripe bars beside it. It stays one ordered list, read in the same order.
+
+Also considered: the wide belt in a box that scrolls sideways, which hides most of the course until the student swipes; and the strip on one line with no labels, its names in a two-column legend under it, which separates each color from its name.

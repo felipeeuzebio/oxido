@@ -28,14 +28,28 @@ export async function readLesson(phase: string, slug: string, root = CONTENT): P
   }
 }
 
+/** The compiled course, for the roadmap. */
+export function readCourse(root = CONTENT): Course {
+  const course = courseIn(root);
+  if (!course) {
+    throw new Error(`${join(root, "course.json")} doesn't exist yet: run \`cargo xtask content\``);
+  }
+  return course;
+}
+
 /** Every lesson's route, for pre-rendering. None before the content is compiled. */
 export function lessonRoutes(root = CONTENT): string[] {
-  let course: Course;
+  const course = courseIn(root);
+  return course
+    ? course.phases.flatMap((phase) => phase.lessons.map((lesson) => lesson.route))
+    : [];
+}
+
+function courseIn(root: string): Course | null {
   try {
-    course = JSON.parse(readFileSync(join(root, "course.json"), "utf8"));
+    return JSON.parse(readFileSync(join(root, "course.json"), "utf8"));
   } catch (error) {
-    if (missing(error)) return [];
+    if (missing(error)) return null;
     throw error;
   }
-  return course.phases.flatMap((phase) => phase.lessons.map((lesson) => lesson.route));
 }

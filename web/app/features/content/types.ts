@@ -23,6 +23,8 @@ export interface Phase {
   title: string;
   chapters: number[];
   build: string;
+  /** One sentence for students, shown on the roadmap's phase card. */
+  summary: string;
   stripes: string[];
   quiz: string | null;
   studentTdd: boolean;

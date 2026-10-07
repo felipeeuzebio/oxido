@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
-import { lessonRoutes, readLesson } from "./content.server";
+import { lessonRoutes, readCourse, readLesson } from "./content.server";
 
 // A compiled-content folder like `cargo xtask content` writes.
 function compiled(): string {
@@ -35,6 +35,16 @@ describe("reading compiled content at build time", () => {
 
   it("lists no routes before the content is compiled", () => {
     expect(lessonRoutes(join(tmpdir(), "oxido-no-such-folder"))).toEqual([]);
+  });
+
+  it("reads the course for the roadmap", () => {
+    expect(readCourse(compiled()).phases).toHaveLength(2);
+  });
+
+  it("says how to compile the course when it isn't there", () => {
+    expect(() => readCourse(join(tmpdir(), "oxido-no-such-folder"))).toThrow(
+      /course\.json doesn't exist yet: run `cargo xtask content`/,
+    );
   });
 });
 

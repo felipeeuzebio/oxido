@@ -80,7 +80,7 @@ Transcripts are reference material for writing lessons. `uv run scripts/fetch_tr
 
 `cargo xtask content` checks all of this; the compiler's fixture course (`crates/oxido-content/tests/fixtures/valid/`) has one of each.
 
-- `content/course.toml` holds the phases, belts and quizzes, and each phase's `videos`: YouTube IDs, in playlist order.
+- `content/course.toml` holds the phases, belts and quizzes, and each phase's `videos`: YouTube IDs, in playlist order. Each phase has a `summary`, one sentence for students that the roadmap shows on the phase's card; `build` stays the planning note. In a summary or a stripe, code goes between a pair of backticks, and the compiler rejects an unmatched one.
 - A lesson is `content/en/<phase>/<NN>-<slug>.md`, where NN is its video's position in the playlist. It starts with TOML front matter between `+++` lines: `title`, `video`, and `outline` (the fingerprint of the outline it was written from). Sections start at `##`. Code blocks are `rust` (marked `ignore` or `compile_fail` when needed), `toml`, `bash`, `sh`, `console` or `text`. A link to another lesson points at its file: `[shadowing](02-variables.md#shadowing)`.
 - A quiz is `content/en/quizzes/<id>.toml`, with one `[[questions]]` table per question: `MultipleChoice` (`choices`, and `answer` as an index), `ShortAnswer` (`answer`, `alternatives`) or `Tracing` (`program`, `does_compile`, `stdout`).
 - An outline is `content/outlines/<NN>-<slug>.md`, with `video` and `title` in its front matter (decision D24).

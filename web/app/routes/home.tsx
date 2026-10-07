@@ -1,14 +1,13 @@
-// Placeholder home. The roadmap view replaces this in platform phase P2
-// (see docs/roadmap-platform.md).
+// The roadmap: where the student is on the path from white belt to black belt.
+import { readCourse } from "@/features/content/content.server";
+import { Roadmap } from "@/features/roadmap/Roadmap";
+import type { Route } from "./+types/home";
 
-export const meta = () => [{ title: "Oxidō" }];
+// Runs once, when the page is pre-rendered.
+export function loader() {
+  return readCourse();
+}
 
-export default function Home() {
-  return (
-    <main className="mx-auto my-12 flex max-w-2xl flex-col gap-4 px-4">
-      <h1 className="text-3xl font-bold">Oxidō</h1>
-      <p>A project-based Rust course: build a small SQL database from white belt to black belt.</p>
-      <p className="text-muted-foreground">The roadmap view lands in platform phase P2.</p>
-    </main>
-  );
+export default function Home({ loaderData }: Route.ComponentProps) {
+  return <Roadmap course={loaderData} />;
 }

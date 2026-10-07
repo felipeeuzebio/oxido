@@ -42,6 +42,8 @@ pub struct PhaseFile {
     pub title: String,
     pub chapters: Vec<u32>,
     pub build: String,
+    /// One sentence for students, on the roadmap's phase card.
+    pub summary: String,
     #[serde(default)]
     pub stripes: Vec<String>,
     pub quiz: Option<String>,
@@ -62,7 +64,8 @@ pub fn parse(text: &str) -> Result<CourseFile, Problem> {
 }
 
 /// References inside `course.toml` itself: belts name real phases, IDs are
-/// unique, and each video is a real ID listed once.
+/// unique, each video is a real ID listed once, and every phase has a summary.
+/// Code in a summary or a stripe sits between a pair of backticks.
 pub fn check(course: &CourseFile) -> Vec<Problem> {
     let mut problems = Vec::new();
     let mut error = |message: String| {
@@ -77,6 +80,25 @@ pub fn check(course: &CourseFile) -> Vec<Problem> {
     for phase in &course.phases {
         if phases.insert(phase.id.as_str(), ()).is_some() {
             error(format!("phase {} is defined twice", phase.id));
+        }
+        if phase.summary.trim().is_empty() {
+            error(format!(
+                "phase {} has a blank summary; the roadmap shows it on the phase's card",
+                phase.id
+            ));
+        }
+        // The roadmap sets code between a pair of backticks, so a lone one
+        // would turn the rest of the sentence into code.
+        let stripes = phase.stripes.iter().enumerate();
+        let shown = std::iter::once(("summary".to_string(), &phase.summary))
+            .chain(stripes.map(|(i, stripe)| (format!("stripe {}", i + 1), stripe)));
+        for (what, text) in shown {
+            if text.matches('`').count() % 2 == 1 {
+                error(format!(
+                    "phase {}'s {what} has an unmatched backtick; code goes between a pair of them",
+                    phase.id
+                ));
+            }
         }
     }
     let mut belt_of = BTreeMap::new();
