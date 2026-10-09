@@ -10,12 +10,12 @@ import { useLocation } from "react-router";
  */
 export function useFocusOnNavigate() {
   const { pathname, hash } = useLocation();
-  const shown = `${pathname}${hash}`;
   // Where focus last went, so a second run of the same effect (StrictMode)
   // does nothing.
-  const last = useRef(shown);
+  const last = useRef(`${pathname}${hash}`);
 
   useEffect(() => {
+    const shown = `${pathname}${hash}`;
     if (last.current === shown) return;
     last.current = shown;
     const target =
@@ -23,8 +23,12 @@ export function useFocusOnNavigate() {
       document.querySelector<HTMLElement>("main h1") ||
       document.getElementById("main");
     if (!target) return;
-    // Headings can't take focus until they're given a tabindex.
-    if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+    // Headings can't take focus until they're given a tabindex. What's made
+    // focusable here isn't a control, so app.css hides its focus ring.
+    if (!target.hasAttribute("tabindex")) {
+      target.setAttribute("tabindex", "-1");
+      target.setAttribute("data-focus-target", "");
+    }
     target.focus({ preventScroll: true });
-  }, [shown, hash]);
+  }, [pathname, hash]);
 }

@@ -277,8 +277,9 @@
     @apply bg-background font-sans text-foreground antialiased;
   }
   /* Focus moved by script (the skip link, useFocusOnNavigate) lands on the
-     content or its heading. They aren't controls, so they get no ring. */
-  [tabindex="-1"]:focus {
+     content or its heading. They aren't controls, so they get no ring. Only
+     elements marked as such: a dialog that focuses itself keeps its ring. */
+  [data-focus-target]:focus {
     @apply outline-none;
   }
   a {

@@ -11,6 +11,7 @@ function Layout() {
       <Link to="/b">To B</Link>
       <Link to="/b#later">To later in B</Link>
       <Link to="/c">To C</Link>
+      <Link to="/d#control">To a control in D</Link>
       <Outlet />
     </main>
   );
@@ -32,6 +33,17 @@ function show() {
           ),
         },
         { path: "/c", element: <p>No heading here</p> },
+        {
+          path: "/d",
+          element: (
+            <>
+              <h1>Page D</h1>
+              <button type="button" id="control" tabIndex={0}>
+                A control
+              </button>
+            </>
+          ),
+        },
       ],
     },
   ]);
@@ -54,6 +66,22 @@ describe("useFocusOnNavigate", () => {
     fireEvent.click(screen.getByRole("link", { name: "To B" }));
     const heading = await screen.findByRole("heading", { name: "Page B" });
     expect(document.activeElement).toBe(heading);
+  });
+
+  it("marks the heading it made focusable, so only it loses the focus ring", async () => {
+    show();
+    fireEvent.click(screen.getByRole("link", { name: "To B" }));
+    const heading = await screen.findByRole("heading", { name: "Page B" });
+    expect(heading.hasAttribute("data-focus-target")).toBe(true);
+  });
+
+  it("leaves a control it lands on as it was, focus ring and all", async () => {
+    show();
+    fireEvent.click(screen.getByRole("link", { name: "To a control in D" }));
+    const control = await screen.findByRole("button", { name: "A control" });
+    expect(document.activeElement).toBe(control);
+    expect(control.hasAttribute("data-focus-target")).toBe(false);
+    expect(control.getAttribute("tabindex")).toBe("0");
   });
 
   it("moves focus to the part a link names", async () => {

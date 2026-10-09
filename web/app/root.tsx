@@ -106,7 +106,7 @@ function Shell({ children }: { children: ReactNode }) {
           <BrandMark />
           <div className="flex items-center gap-1">{actions}</div>
         </header>
-        <main id="main" tabIndex={-1}>
+        <main id="main" tabIndex={-1} data-focus-target>
           {children}
         </main>
       </div>

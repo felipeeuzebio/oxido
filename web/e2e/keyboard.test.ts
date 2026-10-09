@@ -107,6 +107,7 @@ test.describe("moving around by keyboard", () => {
     await expect(skip).toBeVisible();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("main")).toBeFocused();
+    await expect(page.getByRole("main")).toHaveCSS("outline-style", "none");
   });
 
   test("after following a link, focus lands on the new page's heading", async ({ page }) => {
@@ -116,7 +117,10 @@ test.describe("moving around by keyboard", () => {
       .getByRole("navigation", { name: "Main" })
       .getByRole("link", { name: "Lesson" })
       .click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Hello, Cargo");
-    await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+    const heading = page.getByRole("heading", { level: 1 });
+    await expect(heading).toHaveText("Hello, Cargo");
+    await expect(heading).toBeFocused();
+    // It isn't a control, so it gets no focus ring.
+    await expect(heading).toHaveCSS("outline-style", "none");
   });
 });
