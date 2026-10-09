@@ -25,7 +25,8 @@ interface Callbacks {
   onError: (code: number) => void;
 }
 
-// The API has no time-update event, so the time is read this often.
+// The API has no time-update event, so while the video plays, the time is
+// read this often.
 const TICK_MS = 500;
 
 /**
@@ -44,11 +45,18 @@ export async function createPlayer(
   let timer: ReturnType<typeof setInterval> | undefined;
   let player: YTPlayer | undefined;
 
+  // Reads the time and keeps reading it only while the video plays, so a
+  // paused or finished video leaves the page idle.
   const report = () => {
     if (!player) return;
     const time = player.getCurrentTime();
     const playing = player.getPlayerState() === YT_STATE.PLAYING;
     if (playing) seen.add(Math.floor(time));
+    if (playing && timer === undefined) timer = setInterval(report, TICK_MS);
+    if (!playing && timer !== undefined) {
+      clearInterval(timer);
+      timer = undefined;
+    }
     onStatus({ time, duration: player.getDuration(), playing });
   };
 
@@ -64,7 +72,6 @@ export async function createPlayer(
         player = target;
         target.playVideo();
         report();
-        timer = setInterval(report, TICK_MS);
       },
       onStateChange: report,
       onError: ({ data }) => onError(data),

@@ -92,6 +92,20 @@ describe("createPlayer", () => {
     expect(onStatus).toHaveBeenLastCalledWith({ time: 61, duration: 928, playing: false });
   });
 
+  it("reads the time only while the video plays, so a paused page stays idle", async () => {
+    const { fake, onStatus } = await playing();
+    fake.setState(YT_STATE.PLAYING);
+    fake.setState(YT_STATE.PAUSED);
+    onStatus.mockClear();
+    vi.advanceTimersByTime(5000);
+    expect(onStatus).not.toHaveBeenCalled();
+
+    fake.setState(YT_STATE.PLAYING, 40);
+    fake.time = 41;
+    vi.advanceTimersByTime(500);
+    expect(onStatus).toHaveBeenLastCalledWith({ time: 41, duration: 928, playing: true });
+  });
+
   it("counts a second as watched only while the video plays, not during an ad", async () => {
     const { player, fake } = await playing();
     // An ad: YouTube reports the video as unstarted, its time held at 0.
