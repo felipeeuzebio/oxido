@@ -4,7 +4,7 @@
 
 | File | Runs on | What it does |
 |---|---|---|
-| `ci.yml` | every PR, pushes to `develop` and `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build, with Rust installed for the content compiler); Rust job (rustfmt, clippy, nextest, doc tests, then `cargo xtask content` and `check-code` on the real course); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
+| `ci.yml` | every PR, pushes to `develop` and `main`, merge queue | PR title lint (commitlint); frontend job (Biome, TypeScript 7, Vitest, build, with Rust installed for the content compiler); Rust job (rustfmt, clippy, nextest, doc tests, then `cargo xtask content` and `check-code` on the real course); minimum-Rust job (`cargo check` with the `rust-version` from `Cargo.toml`); dependency job (cargo-deny, from its release binary: advisories, licenses, sources, per `deny.toml`); end-to-end job (Playwright against `oxido`) |
 | `claude-review.yml` | PR opened, updated, reopened or marked ready | Claude reviews the diff and posts inline comments plus a summary |
 | `claude.yml` | comments, reviews and issues that mention `@claude` | Claude answers or makes the change (users with write access only) |
 | `release.yml` | pushes to `develop` | release-please keeps a release PR into `develop` up to date; merging it tags a version and creates the GitHub Release. Publishing `oxido` comes in P11 ([release.md](release.md)) |
@@ -15,6 +15,8 @@ Dependabot (`.github/dependabot.yml`) opens weekly update PRs for Cargo, Bun and
 Every action is pinned to a commit SHA, with its version in a comment (`actions/checkout@d234...f30af803 # v6.1.0`). A tag like `@v6` can be moved to other code at any time, so a compromised action would run in our CI with our secrets; a commit can't change. Dependabot updates the SHA and the comment together. `dtolnay/rust-toolchain` has a single tag, `v1`, that follows its `master` branch; it's pinned like the others and takes the toolchain as an input. `tooling.test.ts` fails on any `uses:` that isn't pinned this way.
 
 The cargo-deny job fails when a Rust dependency has a security advisory, a license outside the list in `deny.toml` (all permissive, so they fit an MIT binary), a `*` version, or comes from anywhere but crates.io. A new advisory can appear on any day, so it may fail a PR that didn't touch dependencies. Fix it in its own PR: update the crate (`cargo update -p <crate>`), or, if it doesn't affect `oxido` and there's no fixed version yet, add it to `ignore` in `deny.toml` with the reason.
+
+The job downloads cargo-deny's Linux binary from its GitHub release and checks it against the SHA-256 in `ci.yml`, rather than using cargo-deny's action, whose Docker image comes from Docker Hub and fails when the shared runner has hit Docker Hub's pull limit. Dependabot doesn't update the binary: to move to a new cargo-deny, change `DENY_VERSION` and `DENY_SHA256` together, taking the hash from the release's `.sha256` file.
 
 ## One-time setup
 

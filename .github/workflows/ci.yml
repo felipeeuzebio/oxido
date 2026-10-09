@@ -88,11 +88,26 @@ jobs:
   deny:
     name: Rust dependencies (cargo-deny)
     runs-on: ubuntu-latest
+    env:
+      # cargo-deny's Linux binary from its GitHub release. Its action builds a
+      # Docker image from Docker Hub instead, which fails whenever the shared
+      # runner has hit Docker Hub's pull limit. Dependabot doesn't update
+      # these: bump both together, the hash from the release's .sha256 file.
+      DENY_VERSION: 0.20.2
+      DENY_SHA256: 9f12ed4c49936e09b48bf862b595cde2fe64fcbd9d74dfacac6131ca824c8d5f
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Install cargo-deny
+        run: |
+          name="cargo-deny-$DENY_VERSION-x86_64-unknown-linux-musl"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/cargo-deny.tar.gz" \
+            "https://github.com/EmbarkStudios/cargo-deny/releases/download/$DENY_VERSION/$name.tar.gz"
+          echo "$DENY_SHA256  $RUNNER_TEMP/cargo-deny.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/cargo-deny.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/$name" >> "$GITHUB_PATH"
       # Security advisories, licenses, banned or duplicate crates and sources,
-      # as set in deny.toml.
-      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+      # as set in deny.toml. The same command the action ran.
+      - run: cargo deny --log-level warn --all-features check
 
   e2e:
     name: End to end (Playwright against oxido)
