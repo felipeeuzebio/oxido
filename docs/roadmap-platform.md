@@ -10,7 +10,7 @@ Every phase is built test first:
 2. Write the smallest implementation that makes them pass (green).
 3. Clean up with the tests still passing (refactor).
 
-A phase is finished when all of its "Done when" tests pass in CI on `develop`. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
+A phase is finished when all of its "Done when" tests pass in CI on `develop`. A ✅ at the end of a "Done when" line marks it as finished, and a phase's heading says "(done)" once every line has one. A PR that changes behavior without a test that would have failed before it is sent back in review, by Claude or by a human. Tools and conventions are in [testing.md](testing.md).
 
 ## Phases
 
@@ -19,33 +19,33 @@ A phase is finished when all of its "Done when" tests pass in CI on `develop`. A
 Repository, tooling, pipelines and the skeleton of both halves.
 
 Done when:
-- `main` builds in CI: Biome, TypeScript 7, Vitest, Playwright against `oxido`, rustfmt, clippy and cargo tests all pass.
-- Git hooks run formatting, commitlint and fast tests.
-- Every non-draft PR gets a Claude review, and release-please keeps a release PR.
-- First TDD seeds: the clippy diagnostics parser (`crates/oxido-core`), quiz grading and results (`web/app/features/quiz`), the theme (`web/app/features/theme`).
-- `oxido` serves the UI on 127.0.0.1 with the host, session and origin checks, and stores progress and notes in SQLite with versioned migrations (`crates/oxido`).
+- `main` builds in CI: Biome, TypeScript 7, Vitest, Playwright against `oxido`, rustfmt, clippy and cargo tests all pass. ✅
+- Git hooks run formatting, commitlint and fast tests. ✅
+- Every non-draft PR gets a Claude review, and release-please keeps a release PR. ✅
+- First TDD seeds: the clippy diagnostics parser (`crates/oxido-core`), quiz grading and results (`web/app/features/quiz`), the theme (`web/app/features/theme`). ✅
+- `oxido` serves the UI on 127.0.0.1 with the host, session and origin checks, and stores progress and notes in SQLite with versioned migrations (`crates/oxido`). ✅
 
 ### P1: Content pipeline (done)
 
 Lessons, quizzes and course structure become validated data the app can load.
 
 Done when:
-- `course.toml`, lesson front matter and quiz files have a schema, and a content compiler (Rust, run at build time) turns them into JSON plus lesson HTML: `markdown` (markdown-rs) for Markdown, `arborium` for code highlighting, its classes mapped to the `--code-*` colors (decision D21).
-- Invalid content fails with a clear message: unknown phase, a quiz file no phase uses (and, with `--complete`, a planned quiz or lesson that isn't written), answer index out of range, broken internal link, missing video ID.
-- Every ```` ```rust ```` block in a lesson compiles, unless marked `ignore` or `compile_fail`.
-- The 44 videos from `playlist.json` are mapped to phases, and each lesson route is pre-rendered.
-- Outlines in `content/outlines/` (decision D24) have a schema, aren't published, and the compiler warns when a lesson's `outline` fingerprint doesn't match its outline.
+- `course.toml`, lesson front matter and quiz files have a schema, and a content compiler (Rust, run at build time) turns them into JSON plus lesson HTML: `markdown` (markdown-rs) for Markdown, `arborium` for code highlighting, its classes mapped to the `--code-*` colors (decision D21). ✅
+- Invalid content fails with a clear message: unknown phase, a quiz file no phase uses (and, with `--complete`, a planned quiz or lesson that isn't written), answer index out of range, broken internal link, missing video ID. ✅
+- Every ```` ```rust ```` block in a lesson compiles, unless marked `ignore` or `compile_fail`. ✅
+- The 44 videos from `playlist.json` are mapped to phases, and each lesson route is pre-rendered. ✅
+- Outlines in `content/outlines/` (decision D24) have a schema, aren't published, and the compiler warns when a lesson's `outline` fingerprint doesn't match its outline. ✅
 
 Tests first: valid and invalid content fixtures with expected errors; snapshot tests (insta) of the compiled output.
 
-### P2: Roadmap home and navigation
+### P2: Roadmap home and navigation (done)
 
 Done when:
-- The home screen shows progress as one long belt (decision D20), the phases, and a "Continue" card, all from the compiled content.
-- The rail from the design canvas, with an item for each page that exists (Roadmap and Lesson), and a tab bar along the bottom on phones (decision D30). The kickoff, quiz and build step pages bring their routes and rail items in the phases that fill them (P10, P5, P8).
-- Keyboard navigation (a skip link, and focus moved to each new page's heading) and a Ctrl+K command palette, which a Search button also opens (decision D32). Fonts are self-hosted.
-- Done early: every error, from an unknown address to a crash, lands on one error page, with the rail kept (design.md, "Errors").
-- The shadcn/ui components design.md lists are added with `shadcn add`, in one PR that settles the dependencies they bring, and the error page's buttons become `Button`.
+- The home screen shows progress as one long belt (decision D20), the phases, and a "Continue" card, all from the compiled content. ✅
+- The rail from the design canvas, with an item for each page that exists (Roadmap and Lesson), and a tab bar along the bottom on phones (decision D30). The kickoff, quiz and build step pages bring their routes and rail items in the phases that fill them (P10, P5, P8). ✅
+- Keyboard navigation (a skip link, and focus moved to each new page's heading) and a Ctrl+K command palette, which a Search button also opens (decision D32). Fonts are self-hosted. ✅
+- Done early: every error, from an unknown address to a crash, lands on one error page, with the rail kept (design.md, "Errors"). ✅
+- The shadcn/ui components design.md lists are added with `shadcn add`, in one PR that settles the dependencies they bring, and the error page's buttons become `Button`. ✅
 
 Tests first: component tests that render a fixture course; a Playwright test that goes home → lesson → back.
 
@@ -56,8 +56,8 @@ Done when:
 - YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules); the saved position and note markers sit in a strip under it (decision D16).
 - The text lesson renders next to it with Video / Both / Text views and a mini player while scrolling.
 - Timestamp links in the text jump the video to that moment.
-- Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links").
-- YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Checked by hand before the phase (architecture.md, "YouTube embeds"): they do, as long as the player's iframe sends a referrer.
+- Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links"). ✅
+- YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Checked by hand before the phase (architecture.md, "YouTube embeds"): they do, as long as the player's iframe sends a referrer. ✅
 
 Tests first: the player wrapper against a fake YouTube API, including that the player's iframe keeps a referrer and that time during an ad doesn't count as watched; an e2e test where clicking a timestamp seeks the player.
 
