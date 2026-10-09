@@ -35,6 +35,17 @@ describe("GitHub workflows", () => {
     expect(read(".github/dependabot.yml")).toMatch(/package-ecosystem:\s*github-actions/);
   });
 
+  // cargo-deny's action builds a Docker image from Docker Hub, which refuses
+  // pulls once a shared runner hits its rate limit. The release binary comes
+  // from GitHub, and the hash written in the workflow vouches for it.
+  it("install cargo-deny from its release, checked against a SHA-256 pinned in the workflow", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).not.toMatch(/cargo-deny-action/);
+    expect(ci).toMatch(/DENY_VERSION: \d+\.\d+\.\d+\n/);
+    expect(ci).toMatch(/DENY_SHA256: [0-9a-f]{64}\n/);
+    expect(ci).toMatch(/sha256sum --check --strict/);
+  });
+
   // Work lands on develop, the default branch; main holds what has been
   // released (docs/conventions.md, decision D27).
   it("run CI on pushes to both long-lived branches", () => {
