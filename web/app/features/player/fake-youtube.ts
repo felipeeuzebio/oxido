@@ -16,6 +16,8 @@ export class FakePlayer implements YTPlayer {
     // The real API swaps the element it's given for its own iframe.
     this.frame = document.createElement("iframe");
     this.frame.title = "YouTube video player";
+    this.frame.width = options.width ?? "";
+    this.frame.height = options.height ?? "";
     element.replaceWith(this.frame);
   }
 

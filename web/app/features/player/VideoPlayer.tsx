@@ -10,6 +10,8 @@ interface VideoPlayerProps {
   /** The YouTube video ID. */
   video: string;
   title: string;
+  /** Called when the student presses play. */
+  onStart?: () => void;
 }
 
 /**
@@ -18,7 +20,7 @@ interface VideoPlayerProps {
  * YouTube's embed rules forbid drawing over the player, so what we add sits in
  * a strip under it: for now, where the video is (decision D16).
  */
-export function VideoPlayer({ video, title }: VideoPlayerProps) {
+export function VideoPlayer({ video, title, onStart }: VideoPlayerProps) {
   const [started, setStarted] = useState(false);
   const [status, setStatus] = useState<PlayerStatus | null>(null);
   const [failed, setFailed] = useState(false);
@@ -49,7 +51,9 @@ export function VideoPlayer({ video, title }: VideoPlayerProps) {
 
   return (
     <figure className="flex flex-col gap-2">
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+      {/* YouTube wants its player at least 200px each way; on the narrowest
+          phones that's taller than 16:9, and YouTube letterboxes the video. */}
+      <div className="relative aspect-video min-h-50 overflow-hidden rounded-lg bg-muted">
         {failed ? (
           <Unavailable video={video} />
         ) : started ? (
@@ -57,7 +61,10 @@ export function VideoPlayer({ video, title }: VideoPlayerProps) {
         ) : (
           <button
             type="button"
-            onClick={() => setStarted(true)}
+            onClick={() => {
+              setStarted(true);
+              onStart?.();
+            }}
             aria-label={`Play video: ${title}, from ${CHANNEL}`}
             className="group size-full cursor-pointer"
           >

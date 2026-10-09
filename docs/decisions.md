@@ -175,3 +175,11 @@ Ctrl+K, or ⌘K, opens a command palette that lists the pages, every written les
 
 Also considered: single-key shortcuts such as `g r` for the roadmap and `g l` for a lesson, with a `?` sheet listing them. They would fire while students type notes or code, WCAG 2.1.4 asks for a way to turn them off or remap them, and the palette reaches the same places. Previous and next lesson keys can come with the lesson page if it needs them.
 
+## D33. Lesson views: one grid, and the playing video pinned on narrow screens (2026-10-09)
+
+The lesson page shows Video, Both or Text, and the choice is remembered in the browser (`oxido:view`). Both and Video are the same two-column grid with the text column hidden in Video, so switching between them keeps the video playing: YouTube's player reloads, and restarts the video, whenever its iframe moves to another parent. That's why the views don't use `Resizable` panels, which design.md listed: the panels would differ between views. Text takes the player down.
+
+Where the text runs below the video (below Tailwind's `lg` breakpoint), the video pins to the top of the screen once it has started, at full width, and the text scrolls under it. YouTube wants an embedded player to be at least 200 by 200 pixels, so the video box never gets shorter than 200 pixels; on the narrowest phones, YouTube letterboxes the video in it. On wide screens in Both view, the video column stays put while the text scrolls.
+
+Also considered: a floating player in a corner, which at YouTube's minimum size covers most of a phone's width and sits over the text being read; and no mini player at all, which leaves students scrolling back up to see the video.
+
