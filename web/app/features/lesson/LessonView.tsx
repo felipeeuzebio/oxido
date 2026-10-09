@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   Breadcrumb,
@@ -11,7 +11,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "../content/types";
-import { VideoPlayer } from "../player/VideoPlayer";
+import { type SeekRequest, VideoPlayer } from "../player/VideoPlayer";
 import type { LessonPlace } from "./place";
 import { browserStorage, savedView, saveView, VIEWS, type View } from "./views";
 
@@ -30,6 +30,7 @@ const WIDTH: Record<View, string> = { video: "max-w-5xl", both: "max-w-7xl", tex
 export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPlace }) {
   const [view, setView] = useState<View>("both");
   const [started, setStarted] = useState(false);
+  const [seek, setSeek] = useState<SeekRequest>();
 
   // Pre-rendered pages can't read the browser's storage, so the saved view
   // applies once the page is running.
@@ -44,6 +45,18 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
     if (picked === "text") setStarted(false);
     setView(picked);
     saveView(picked, browserStorage());
+  };
+
+  // A time in the text (`#t=2:47`, compiled to data-seek) plays the video from
+  // there. From Text view it brings the video back, for this class only.
+  const playFrom = (event: MouseEvent<HTMLElement>) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-seek]");
+    if (!link) return;
+    event.preventDefault();
+    const seconds = Number(link.dataset.seek);
+    if (view === "text") setView("both");
+    setStarted(true);
+    setSeek((last) => ({ seconds, id: (last?.id ?? 0) + 1 }));
   };
 
   return (
@@ -98,14 +111,17 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
               video={lesson.video}
               title={lesson.title}
               onStart={() => setStarted(true)}
+              seek={seek}
             />
           </div>
         )}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: only the links inside react, and Enter on a link fires click too */}
         <article
           key="text"
           aria-label="Text lesson"
           hidden={view === "video"}
           className="lesson flex min-w-0 flex-col gap-4"
+          onClick={playFrom}
           // biome-ignore lint/security/noDangerouslySetInnerHtml: the content compiler's output; it escapes raw HTML in lessons (crates/oxido-content)
           dangerouslySetInnerHTML={{ __html: lesson.html }}
         />

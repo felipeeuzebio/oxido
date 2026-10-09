@@ -16,3 +16,4 @@ expression: "html(\"01-hello\")"
 <p>Read about <a href="/lesson/p01/02-variables#shadowing">shadowing</a> next, or the <a href="https://doc.rust-lang.org/book/" target="_blank" rel="noopener noreferrer">Rust Book<span class="new-tab"> (opens in a new tab)</span></a>.</p>
 <h2 id="your-first-program-2">Your first program</h2>
 <p>Run it with <code translate="no">cargo run</code>, then <em>try</em> <strong>again</strong>.</p>
+<p>The video builds one at <a href="#t=42" data-seek="42">0:42<span class="seek-label"> (plays the video from 0:42)</span></a>.</p>

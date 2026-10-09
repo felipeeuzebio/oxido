@@ -2,7 +2,8 @@
 //!
 //! Raw HTML in a lesson is escaped, so the page only ever shows what this
 //! module writes. Links to other lessons (`02-variables.md#shadowing`) become
-//! routes, checked against every lesson's headings.
+//! routes, checked against every lesson's headings, and links to a time in the
+//! video (`#t=2:47`) become links the page plays the video from.
 
 use std::collections::BTreeMap;
 
@@ -198,6 +199,10 @@ impl<'a> Writer<'a> {
             Node::Delete(d) => self.wrap("del", &d.children, out),
             Node::Break(_) => out.push_str("<br>"),
             Node::Link(link) => {
+                if let Some(time) = link.url.strip_prefix("#t=") {
+                    self.video_link(node, time, &link.children, out);
+                    return;
+                }
                 let href = self.href(node, &link.url);
                 // A link out of the course opens in a new tab, so the student
                 // keeps the lesson, and screen readers hear that it will.
@@ -219,6 +224,29 @@ impl<'a> Writer<'a> {
             }
             _ => {}
         }
+    }
+
+    /// `[2:47](#t=2:47)`: a moment in the class's video. The page plays the
+    /// video from there; screen readers hear that it will.
+    fn video_link(&mut self, node: &Node, time: &str, children: &[Node], out: &mut String) {
+        let Some(seconds) = video_time(time) else {
+            self.error(
+                node,
+                &format!(
+                    "the link to #t={time} isn't a time in the video: write it as #t=m:ss or #t=h:mm:ss"
+                ),
+            );
+            self.inlines(children, out);
+            return;
+        };
+        out.push_str(&format!(
+            r##"<a href="#t={seconds}" data-seek="{seconds}">"##
+        ));
+        self.inlines(children, out);
+        out.push_str(&format!(
+            r#"<span class="seek-label"> (plays the video from {})</span></a>"#,
+            escape(time)
+        ));
     }
 
     /// Where a link goes: web addresses as they are, lessons as routes.
@@ -294,6 +322,28 @@ fn is_web_address(url: &str) -> bool {
     url.starts_with("https://") || url.starts_with("http://")
 }
 
+/// A time in the video, written `m:ss` or `h:mm:ss`, in seconds.
+fn video_time(text: &str) -> Option<u32> {
+    let number = |part: &str| {
+        let digits = !part.is_empty() && part.bytes().all(|byte| byte.is_ascii_digit());
+        digits.then(|| part.parse::<u32>().ok()).flatten()
+    };
+    // Minutes after hours, and seconds, are two digits under 60.
+    let two = |part: &str| {
+        (part.len() == 2)
+            .then(|| number(part))
+            .flatten()
+            .filter(|n| *n < 60)
+    };
+    match text.split(':').collect::<Vec<_>>().as_slice() {
+        [minutes, seconds] => Some(number(minutes)? * 60 + two(seconds)?),
+        [hours, minutes, seconds] => {
+            Some(number(hours)? * 3600 + two(minutes)? * 60 + two(seconds)?)
+        }
+        _ => None,
+    }
+}
+
 /// `path` relative to the folder `from` is in, with `.` and `..` resolved.
 fn resolve(from: &str, path: &str) -> String {
     let mut parts: Vec<&str> = from.split('/').collect();
@@ -312,7 +362,36 @@ fn resolve(from: &str, path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::resolve;
+    use super::{resolve, video_time};
+
+    #[test]
+    fn reads_video_times_written_as_minutes_or_hours() {
+        for (text, seconds) in [
+            ("0:42", 42),
+            ("2:47", 167),
+            ("15:28", 928),
+            ("1:02:05", 3725),
+        ] {
+            assert_eq!(video_time(text), Some(seconds), "{text}");
+        }
+    }
+
+    #[test]
+    fn refuses_what_isnt_a_video_time() {
+        for text in [
+            "",
+            "42",
+            "0:4",
+            "2:60",
+            "1:2:05",
+            "1:02:60",
+            "a:bc",
+            "-1:00",
+            "1:00:00:00",
+        ] {
+            assert_eq!(video_time(text), None, "{text}");
+        }
+    }
 
     #[test]
     fn resolves_links_relative_to_the_lesson() {

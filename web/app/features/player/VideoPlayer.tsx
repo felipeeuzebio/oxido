@@ -1,10 +1,16 @@
 import { PlayIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { createPlayer, formatTime, type PlayerStatus } from "./player";
+import { createPlayer, formatTime, type Player, type PlayerStatus } from "./player";
 
 /** Every video in the course is from his channel (decision D16). */
 export const CHANNEL = "Let's Get Rusty";
+
+/** A request to play from a moment; `id` tells two clicks on the same time apart. */
+export interface SeekRequest {
+  seconds: number;
+  id: number;
+}
 
 interface VideoPlayerProps {
   /** The YouTube video ID. */
@@ -12,6 +18,8 @@ interface VideoPlayerProps {
   title: string;
   /** Called when the student presses play. */
   onStart?: () => void;
+  /** The latest moment to play from: it starts the video there, or moves it. */
+  seek?: SeekRequest;
 }
 
 /**
@@ -20,30 +28,52 @@ interface VideoPlayerProps {
  * YouTube's embed rules forbid drawing over the player, so what we add sits in
  * a strip under it: for now, where the video is (decision D16).
  */
-export function VideoPlayer({ video, title, onStart }: VideoPlayerProps) {
+export function VideoPlayer({ video, title, onStart, seek }: VideoPlayerProps) {
   const [started, setStarted] = useState(false);
   const [status, setStatus] = useState<PlayerStatus | null>(null);
   const [failed, setFailed] = useState(false);
   const host = useRef<HTMLDivElement>(null);
+  const player = useRef<Player | null>(null);
+  // Where the next player starts, when a seek is what starts it.
+  const startAt = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const element = host.current;
     // A failed player is taken down too: the message replaces it.
     if (!started || failed || !element) return;
-    let player: Awaited<ReturnType<typeof createPlayer>> | undefined;
+    let created: Player | undefined;
     let gone = false;
-    createPlayer(element, video, { onStatus: setStatus, onError: () => setFailed(true) }).then(
-      (created) => {
-        if (gone) created.destroy();
-        else player = created;
+    createPlayer(element, video, {
+      start: startAt.current,
+      onStatus: setStatus,
+      onError: () => setFailed(true),
+    }).then(
+      (made) => {
+        if (gone) {
+          made.destroy();
+        } else {
+          created = made;
+          player.current = made;
+        }
       },
       () => setFailed(true),
     );
     return () => {
       gone = true;
-      player?.destroy();
+      created?.destroy();
+      player.current = null;
     };
   }, [started, failed, video]);
+
+  useEffect(() => {
+    if (!seek) return;
+    if (player.current) {
+      player.current.seek(seek.seconds);
+    } else {
+      startAt.current = seek.seconds;
+      setStarted(true);
+    }
+  }, [seek]);
 
   const position = status && status.duration > 0 ? status : null;
   const where = position && `${formatTime(position.time)} of ${formatTime(position.duration)}`;

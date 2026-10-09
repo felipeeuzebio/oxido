@@ -231,6 +231,19 @@ fn rejects_a_link_to_a_heading_that_doesnt_exist() {
 }
 
 #[test]
+fn rejects_a_video_time_it_cant_read() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "(#t=0:42)", "(#t=0:4)");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "the link to #t=0:4 isn't a time in the video: write it as #t=m:ss or #t=h:mm:ss"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
 fn rejects_a_lesson_without_a_video_id() {
     let mut sources = valid();
     edit(&mut sources, HELLO, "video = \"helloVideo1\"\n", "");

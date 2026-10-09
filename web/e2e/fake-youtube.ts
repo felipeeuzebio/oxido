@@ -9,7 +9,7 @@ window.YT = {
     constructor(element, options) {
       this.options = options;
       this.state = -1;
-      this.at = 0;
+      this.at = options.playerVars?.start ?? 0;
       this.since = 0;
       this.frame = document.createElement("iframe");
       this.frame.title = "YouTube video player";

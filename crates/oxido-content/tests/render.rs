@@ -94,6 +94,18 @@ fn opens_links_that_leave_the_course_in_a_new_tab() {
 }
 
 #[test]
+fn turns_a_video_time_into_a_link_that_plays_the_video_from_there() {
+    let html = html("01-hello");
+    assert!(
+        html.contains(concat!(
+            r##"<a href="#t=42" data-seek="42">0:42"##,
+            r#"<span class="seek-label"> (plays the video from 0:42)</span></a>"#
+        )),
+        "{html}"
+    );
+}
+
+#[test]
 fn marks_code_so_page_translation_leaves_it_alone() {
     let html = html("01-hello");
     assert!(

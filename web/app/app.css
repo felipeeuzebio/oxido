@@ -311,6 +311,11 @@
   .lesson .new-tab {
     @apply sr-only;
   }
+  /* The compiler adds "(plays the video from 2:47)" to a link to a time in
+     the video, for screen readers. */
+  .lesson .seek-label {
+    @apply sr-only;
+  }
   pre.code {
     @apply overflow-x-auto rounded-lg border border-code-border bg-code p-4 font-mono text-sm leading-relaxed text-code-foreground;
   }

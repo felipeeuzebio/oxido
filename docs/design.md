@@ -181,7 +181,7 @@ Both text faces come from Japanese type design and have full Latin sets, which g
 
 ## Links
 
-A link that leaves the course opens in a new tab, so the student keeps their place: `target="_blank"` with `rel="noopener noreferrer"`, and "(opens in a new tab)" in an `sr-only` span for screen readers. The content compiler does this for every `http` and `https` link in a lesson; a component that links out does the same. Links within the course (another lesson, a heading, home, the roadmap) stay in the same tab, where the app keeps its state.
+A link that leaves the course opens in a new tab, so the student keeps their place: `target="_blank"` with `rel="noopener noreferrer"`, and "(opens in a new tab)" in an `sr-only` span for screen readers. The content compiler does this for every `http` and `https` link in a lesson; a component that links out does the same. Links within the course (another lesson, a heading, home, the roadmap) stay in the same tab, where the app keeps its state. A link to a time in the video (`#t=2:47` in the lesson's Markdown) plays the class's video from that moment, starting it if needed and bringing it back from Text view; screen readers hear "(plays the video from 2:47)" after its text.
 
 ## Keyboard
 

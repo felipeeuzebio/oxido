@@ -19,7 +19,9 @@ export interface Player {
   destroy(): void;
 }
 
-interface Callbacks {
+interface Options {
+  /** Where to start, in seconds; from the beginning if left out. */
+  start?: number;
   onStatus: (status: PlayerStatus) => void;
   /** One of YouTube's error codes (see YTPlayerOptions). */
   onError: (code: number) => void;
@@ -38,7 +40,7 @@ const TICK_MS = 500;
 export async function createPlayer(
   host: HTMLElement,
   video: string,
-  { onStatus, onError }: Callbacks,
+  { start, onStatus, onError }: Options,
 ): Promise<Player> {
   const YT = await loadYouTubeApi();
   const seen = new Set<number>();
@@ -66,7 +68,13 @@ export async function createPlayer(
     videoId: video,
     width: "100%",
     height: "100%",
-    playerVars: { autoplay: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+    playerVars: {
+      autoplay: 1,
+      playsinline: 1,
+      rel: 0,
+      origin: window.location.origin,
+      ...(start === undefined ? {} : { start: Math.floor(start) }),
+    },
     events: {
       onReady: ({ target }) => {
         player = target;

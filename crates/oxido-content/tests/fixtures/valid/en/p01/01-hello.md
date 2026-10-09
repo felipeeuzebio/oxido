@@ -31,3 +31,5 @@ Read about [shadowing](02-variables.md#shadowing) next, or the [Rust Book](https
 ## Your first program
 
 Run it with `cargo run`, then *try* **again**.
+
+The video builds one at [0:42](#t=0:42).

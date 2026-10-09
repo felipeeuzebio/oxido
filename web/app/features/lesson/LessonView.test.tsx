@@ -72,6 +72,38 @@ describe("LessonView", () => {
     expect(screen.getByTitle("YouTube video player")).toBe(player.frame);
   });
 
+  describe("a time in the text", () => {
+    // jsdom drops the space before the label that browsers keep.
+    const time = () => screen.getByRole("link", { name: /^0:42 ?\(plays the video from 0:42\)$/ });
+
+    it("starts the video from that moment", async () => {
+      await show();
+      fireEvent.click(time());
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      expect(players[0].options.playerVars).toMatchObject({ start: 42 });
+    });
+
+    it("moves a video that's already playing to that moment", async () => {
+      await show();
+      const player = await startVideo();
+      player.playRequested = false;
+      fireEvent.click(time());
+      expect(player.time).toBe(42);
+      expect(player.playRequested).toBe(true);
+    });
+
+    it("brings the video back from Text view to play it", async () => {
+      await show();
+      fireEvent.click(view("Text"));
+      fireEvent.click(time());
+      expect(view("Both").getAttribute("aria-checked")).toBe("true");
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      expect(players[0].options.playerVars).toMatchObject({ start: 42 });
+    });
+  });
+
   it("remembers the view for the next class", async () => {
     const first = await show();
     fireEvent.click(view("Text"));
