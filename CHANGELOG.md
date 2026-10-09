@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/felipeeuzebio/oxido/compare/v0.6.0...v0.7.0) (2026-10-09)
+
+
+### Features
+
+* **ui:** add a Ctrl+K command palette, a skip link and moved focus ([#28](https://github.com/felipeeuzebio/oxido/issues/28)) ([d8b7335](https://github.com/felipeeuzebio/oxido/commit/d8b73359452f869d80fe9ef262ab22fe193d356c))
+
 ## [0.6.0](https://github.com/felipeeuzebio/oxido/compare/v0.5.0...v0.6.0) (2026-10-07)
 
 
