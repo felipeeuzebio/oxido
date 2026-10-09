@@ -6,10 +6,9 @@ import { createPlayer, formatTime, type Player, type PlayerStatus } from "./play
 /** Every video in the course is from his channel (decision D16). */
 export const CHANNEL = "Let's Get Rusty";
 
-/** A request to play from a moment; `id` tells two clicks on the same time apart. */
+/** A request to play from a moment. Each click makes a new one, so the same time twice plays from it twice. */
 export interface SeekRequest {
   seconds: number;
-  id: number;
 }
 
 interface VideoPlayerProps {
@@ -34,8 +33,8 @@ export function VideoPlayer({ video, title, onStart, seek }: VideoPlayerProps) {
   const [failed, setFailed] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const player = useRef<Player | null>(null);
-  // Where the next player starts, when a seek is what starts it.
-  const startAt = useRef<number | undefined>(undefined);
+  // A seek asked for before there's a player, made as soon as there is one.
+  const pending = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const element = host.current;
@@ -44,7 +43,6 @@ export function VideoPlayer({ video, title, onStart, seek }: VideoPlayerProps) {
     let created: Player | undefined;
     let gone = false;
     createPlayer(element, video, {
-      start: startAt.current,
       onStatus: setStatus,
       onError: () => setFailed(true),
     }).then(
@@ -54,6 +52,8 @@ export function VideoPlayer({ video, title, onStart, seek }: VideoPlayerProps) {
         } else {
           created = made;
           player.current = made;
+          if (pending.current !== undefined) made.seek(pending.current);
+          pending.current = undefined;
         }
       },
       () => setFailed(true),
@@ -70,7 +70,8 @@ export function VideoPlayer({ video, title, onStart, seek }: VideoPlayerProps) {
     if (player.current) {
       player.current.seek(seek.seconds);
     } else {
-      startAt.current = seek.seconds;
+      // Not started, or still loading: the player takes it once it exists.
+      pending.current = seek.seconds;
       setStarted(true);
     }
   }, [seek]);

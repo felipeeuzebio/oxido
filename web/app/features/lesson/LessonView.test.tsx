@@ -81,7 +81,9 @@ describe("LessonView", () => {
       fireEvent.click(time());
       const { players } = finishLoading();
       await waitFor(() => expect(players).toHaveLength(1));
-      expect(players[0].options.playerVars).toMatchObject({ start: 42 });
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(42);
+      expect(players[0].playRequested).toBe(true);
     });
 
     it("moves a video that's already playing to that moment", async () => {
@@ -93,6 +95,16 @@ describe("LessonView", () => {
       expect(player.playRequested).toBe(true);
     });
 
+    it("still plays from that moment when clicked while YouTube's player loads", async () => {
+      await show();
+      fireEvent.click(screen.getByRole("button", { name: /Play video/ }));
+      fireEvent.click(time());
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(42);
+    });
+
     it("brings the video back from Text view to play it", async () => {
       await show();
       fireEvent.click(view("Text"));
@@ -100,7 +112,8 @@ describe("LessonView", () => {
       expect(view("Both").getAttribute("aria-checked")).toBe("true");
       const { players } = finishLoading();
       await waitFor(() => expect(players).toHaveLength(1));
-      expect(players[0].options.playerVars).toMatchObject({ start: 42 });
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(42);
     });
   });
 

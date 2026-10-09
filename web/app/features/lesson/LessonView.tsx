@@ -55,7 +55,7 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
     const seconds = Number(link.dataset.seek);
     if (view === "text") setView("both");
     setStarted(true);
-    setSeek((last) => ({ seconds, id: (last?.id ?? 0) + 1 }));
+    setSeek({ seconds });
   };
 
   return (
