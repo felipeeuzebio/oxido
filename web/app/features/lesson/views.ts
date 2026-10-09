@@ -8,7 +8,7 @@ const KEY = "oxido:view";
 
 type Store = Pick<Storage, "getItem" | "setItem">;
 
-const isView = (value: unknown): value is View => VIEWS.includes(value as View);
+export const isView = (value: unknown): value is View => VIEWS.includes(value as View);
 
 /** The view picked last, or Both. Storage can be missing or refuse access. */
 export function savedView(storage: Store | undefined): View {

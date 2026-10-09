@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import type { Lesson } from "../content/types";
 import { type SeekRequest, VideoPlayer } from "../player/VideoPlayer";
 import type { LessonPlace } from "./place";
-import { browserStorage, savedView, saveView, VIEWS, type View } from "./views";
+import { browserStorage, isView, savedView, saveView, VIEWS, type View } from "./views";
 
 const NAMES: Record<View, string> = { video: "Video", both: "Both", text: "Text" };
 
@@ -40,11 +40,10 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
 
   const pick = (next: string) => {
     // Pressing the selected view again unselects it in a ToggleGroup; keep it.
-    const picked = VIEWS.find((candidate) => candidate === next);
-    if (!picked) return;
-    if (picked === "text") setStarted(false);
-    setView(picked);
-    saveView(picked, browserStorage());
+    if (!isView(next)) return;
+    if (next === "text") setStarted(false);
+    setView(next);
+    saveView(next, browserStorage());
   };
 
   // A time in the text (`#t=2:47`, compiled to data-seek) plays the video from
