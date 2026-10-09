@@ -57,7 +57,7 @@ export function ErrorPage({ diagnostic: d, onRetry }: ErrorPageProps) {
   );
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 py-12 md:flex-row md:items-start md:gap-12 md:py-16">
+    <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 py-12 md:flex-row md:items-start md:gap-12 md:py-16">
       <img
         src={panics}
         alt="Ferris the crab, panicking"
@@ -94,6 +94,6 @@ export function ErrorPage({ diagnostic: d, onRetry }: ErrorPageProps) {
             : [retry("default"), roadmap("outline")]}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

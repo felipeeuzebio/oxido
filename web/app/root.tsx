@@ -13,9 +13,15 @@ import {
 import "./app.css";
 import "./fonts";
 import { BrandMark } from "@/features/brand/BrandMark";
-import { lessonRoutes } from "@/features/content/content.server";
+import { lessonIndex } from "@/features/content/content.server";
 import { diagnose } from "@/features/errors/diagnostic";
 import { ErrorPage } from "@/features/errors/ErrorPage";
+import { SkipLink } from "@/features/navigation/SkipLink";
+import { useFocusOnNavigate } from "@/features/navigation/use-focus-on-navigate";
+import { CommandPalette } from "@/features/palette/CommandPalette";
+import { paletteGroups } from "@/features/palette/entries";
+import { SearchButton } from "@/features/palette/SearchButton";
+import { usePalette } from "@/features/palette/use-palette";
 import { railItems } from "@/features/rail/items";
 import { Rail, TabBar } from "@/features/rail/Rail";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -65,32 +71,52 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 // Runs once, when the pages are pre-rendered: the rail's Lesson item opens the
-// first compiled lesson.
+// first compiled lesson, and the command palette lists them all.
 export function loader() {
-  return { firstLesson: lessonRoutes()[0] ?? null };
+  const lessons = lessonIndex();
+  return { firstLesson: lessons[0]?.lessons[0]?.route ?? null, lessons };
 }
 
 /**
- * The rail beside every page on wide screens. On phones the logo and the theme
- * toggle sit above the page, and the rail's items in a tab bar below it
- * (decision D30); the tab bar's height is padded off the page's foot.
+ * The rail beside every page on wide screens. On phones the logo, the Search
+ * button and the theme toggle sit above the page, and the rail's items in a
+ * tab bar below it (decision D30); the tab bar's height is padded off the
+ * page's foot. The skip link, the focus moved after each navigation and the
+ * command palette are the keyboard's way around (decision D32).
  */
 function Shell({ children }: { children: ReactNode }) {
   const theme = useTheme();
   const { pathname } = useLocation();
-  const items = railItems(useRouteLoaderData<typeof loader>("root")?.firstLesson ?? null);
-  const toggle = <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />;
+  const data = useRouteLoaderData<typeof loader>("root");
+  const items = railItems(data?.firstLesson ?? null);
+  const palette = usePalette();
+  useFocusOnNavigate();
+  const actions = (
+    <>
+      <SearchButton onClick={() => palette.setOpen(true)} />
+      <ThemeToggle dark={theme.resolved === "dark"} onToggle={theme.toggle} />
+    </>
+  );
   return (
     <div className="md:flex">
-      <Rail items={items} pathname={pathname} foot={toggle} />
+      <SkipLink />
+      <Rail items={items} pathname={pathname} foot={actions} />
       <div className="min-w-0 flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <header className="flex items-center justify-between px-4 py-3 md:hidden">
           <BrandMark />
-          {toggle}
+          <div className="flex items-center gap-1">{actions}</div>
         </header>
-        {children}
+        <main id="main" tabIndex={-1} data-focus-target>
+          {children}
+        </main>
       </div>
       <TabBar items={items} pathname={pathname} />
+      <CommandPalette
+        open={palette.open}
+        onOpenChange={palette.setOpen}
+        groups={paletteGroups(data?.lessons ?? [], theme.resolved)}
+        onToggleTheme={theme.toggle}
+      />
     </div>
   );
 }

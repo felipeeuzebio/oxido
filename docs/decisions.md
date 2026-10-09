@@ -168,3 +168,10 @@ Also considered: a top bar with a menu button that opens a sheet with the items.
 On a 390px phone, the long belt (D20) leaves each of the eight belts about 45px, too narrow for a name and its count. Beside the rail on a 768px tablet, a four-stripe belt still gets only about 50px. Below Tailwind's `lg` breakpoint, the belt runs top to bottom instead: each belt is as tall as its stripe count, with its name, count, mark and stripe bars beside it. It stays one ordered list, read in the same order.
 
 Also considered: the wide belt in a box that scrolls sideways, which hides most of the course until the student swipes; and the strip on one line with no labels, its names in a two-column legend under it, which separates each color from its name.
+
+## D32. Keyboard: a command palette and moved focus, no single-key shortcuts (2026-10-09)
+
+Ctrl+K, or ⌘K, opens a command palette that lists the pages, every written lesson under its phase, and the theme switch. It's shadcn's `Command`, built on cmdk, inside a `Dialog`, and its code loads the first time it opens. A Search button at the rail's foot and in the phone's top bar opens it too, since touch screens have no Ctrl+K. Around it, a "Skip to content" link comes first on every page, and after each in-app navigation focus moves to the new page's heading, so screen readers announce the page and Tab starts from there.
+
+Also considered: single-key shortcuts such as `g r` for the roadmap and `g l` for a lesson, with a `?` sheet listing them. They would fire while students type notes or code, WCAG 2.1.4 asks for a way to turn them off or remap them, and the palette reaches the same places. Previous and next lesson keys can come with the lesson page if it needs them.
+

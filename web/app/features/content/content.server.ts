@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import type { Course, Lesson } from "./types.ts";
+import type { Course, Lesson, PhaseLessons } from "./types.ts";
 
 /**
  * Where `bun run content` writes; the build runs in web/. OXIDO_CONTENT_OUT
@@ -43,6 +43,17 @@ export function lessonRoutes(root = CONTENT): string[] {
   return course
     ? course.phases.flatMap((phase) => phase.lessons.map((lesson) => lesson.route))
     : [];
+}
+
+/** The phases with written lessons, for the command palette. None before the content is compiled. */
+export function lessonIndex(root = CONTENT): PhaseLessons[] {
+  return (courseIn(root)?.phases ?? [])
+    .filter((phase) => phase.lessons.length > 0)
+    .map(({ id, title, lessons }) => ({
+      id,
+      title,
+      lessons: lessons.map((lesson) => ({ title: lesson.title, route: lesson.route })),
+    }));
 }
 
 function courseIn(root: string): Course | null {
