@@ -276,6 +276,11 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
+  /* Focus moved by script (the skip link, useFocusOnNavigate) lands on the
+     content or its heading. They aren't controls, so they get no ring. */
+  [tabindex="-1"]:focus {
+    @apply outline-none;
+  }
   a {
     @apply text-info;
   }

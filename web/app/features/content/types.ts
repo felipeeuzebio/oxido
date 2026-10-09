@@ -57,3 +57,10 @@ export interface Quiz {
   id: string;
   questions: Question[];
 }
+
+/** A phase and its written lessons: what the command palette searches. */
+export interface PhaseLessons {
+  id: string;
+  title: string;
+  lessons: { title: string; route: string }[];
+}

@@ -3,14 +3,23 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
-import { lessonRoutes, readCourse, readLesson } from "./content.server";
+import { lessonIndex, lessonRoutes, readCourse, readLesson } from "./content.server";
 
 // A compiled-content folder like `cargo xtask content` writes.
 function compiled(): string {
   const root = mkdtempSync(join(tmpdir(), "oxido-content-"));
   mkdirSync(join(root, "lessons", "p01"), { recursive: true });
   writeFileSync(join(root, "lessons", "p01", "01-hello.json"), JSON.stringify(lesson));
-  const course = { phases: [{ lessons: [{ route: "/lesson/p01/01-hello" }] }, { lessons: [] }] };
+  const course = {
+    phases: [
+      {
+        id: "p01",
+        title: "First Steps",
+        lessons: [{ title: "Hello, Cargo", route: "/lesson/p01/01-hello" }],
+      },
+      { id: "p02", title: "Ownership", lessons: [] },
+    ],
+  };
   writeFileSync(join(root, "course.json"), JSON.stringify(course));
   return root;
 }
@@ -35,6 +44,20 @@ describe("reading compiled content at build time", () => {
 
   it("lists no routes before the content is compiled", () => {
     expect(lessonRoutes(join(tmpdir(), "oxido-no-such-folder"))).toEqual([]);
+  });
+
+  it("lists the written lessons by phase, for the command palette", () => {
+    expect(lessonIndex(compiled())).toEqual([
+      {
+        id: "p01",
+        title: "First Steps",
+        lessons: [{ title: "Hello, Cargo", route: "/lesson/p01/01-hello" }],
+      },
+    ]);
+  });
+
+  it("lists no lessons for the palette before the content is compiled", () => {
+    expect(lessonIndex(join(tmpdir(), "oxido-no-such-folder"))).toEqual([]);
   });
 
   it("reads the course for the roadmap", () => {

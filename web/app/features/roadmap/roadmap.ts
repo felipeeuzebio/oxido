@@ -1,6 +1,7 @@
 // What the roadmap shows, worked out from the compiled course and the student's
 // progress: the belts joined end to end (decision D20), the phases, and the
 // lesson to continue with.
+import { phaseNumber } from "../content/phase";
 import type { Course, LessonSummary, Phase } from "../content/types";
 
 /**
@@ -114,12 +115,11 @@ export function roadmap(course: Course, progress: Progress = NO_PROGRESS): Roadm
   const phases = course.phases.map((phase): PhaseView => {
     const earned = earnedIn(phase);
     const total = phase.stripes.length;
-    const number = /^p(\d+)$/.exec(phase.id);
     return {
       id: phase.id,
       title: phase.title,
       summary: phase.summary,
-      number: number ? Number(number[1]) : null,
+      number: phaseNumber(phase.id),
       chapters: chapterRange(phase.chapters),
       belt: beltOf.get(phase.id) ?? null,
       earned,

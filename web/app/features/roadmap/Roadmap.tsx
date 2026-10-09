@@ -10,7 +10,7 @@ export function Roadmap({ course, progress }: { course: Course; progress?: Progr
   const first = view.belts.at(0)?.id;
   const last = view.belts.at(-1)?.id;
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-8 md:px-10 md:py-12">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-8 md:px-10 md:py-12">
       <header className="flex flex-col gap-2">
         <h1 className="text-4xl font-bold">
           {first && last ? `From ${first} belt to ${last} belt` : course.title}
@@ -41,6 +41,6 @@ export function Roadmap({ course, progress }: { course: Course; progress?: Progr
         </h2>
         <PhaseCards phases={view.phases} belts={view.belts} />
       </section>
-    </main>
+    </div>
   );
 }
