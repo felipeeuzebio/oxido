@@ -72,6 +72,65 @@ describe("LessonView", () => {
     expect(screen.getByTitle("YouTube video player")).toBe(player.frame);
   });
 
+  describe("a section's time", () => {
+    // The golden lesson's first section, "Your first program", starts at 01:30.
+    const time = () =>
+      screen.getByRole("link", { name: "Watch “Your first program” in the video, from 01:30" });
+
+    it("starts the video from that moment", async () => {
+      await show();
+      fireEvent.click(time());
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(90);
+      expect(players[0].playRequested).toBe(true);
+    });
+
+    it("moves a video that's already playing to that moment", async () => {
+      await show();
+      const player = await startVideo();
+      player.playRequested = false;
+      fireEvent.click(time());
+      expect(player.time).toBe(90);
+      expect(player.playRequested).toBe(true);
+    });
+
+    it("still plays from that moment when clicked while YouTube's player loads", async () => {
+      await show();
+      fireEvent.click(screen.getByRole("button", { name: /Play video/ }));
+      fireEvent.click(time());
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(90);
+    });
+
+    it("brings the video back from Text view to play it", async () => {
+      await show();
+      fireEvent.click(view("Text"));
+      fireEvent.click(time());
+      expect(view("Both").getAttribute("aria-checked")).toBe("true");
+      const { players } = finishLoading();
+      await waitFor(() => expect(players).toHaveLength(1));
+      act(() => players[0].ready());
+      expect(players[0].time).toBe(90);
+    });
+  });
+
+  it("puts the lesson's chapters on the strip under the video", async () => {
+    await show();
+    expect(
+      screen
+        .getAllByRole("button", { name: /^Chapter: / })
+        .map((chapter) => chapter.getAttribute("aria-label")),
+    ).toEqual([
+      "Chapter: Hello, Cargo, 00:10",
+      "Chapter: Your first program, 01:30",
+      "Chapter: Your first program, 02:40",
+    ]);
+  });
+
   it("remembers the view for the next class", async () => {
     const first = await show();
     fireEvent.click(view("Text"));

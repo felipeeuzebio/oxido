@@ -144,6 +144,20 @@ pub struct Lesson {
     pub route: String,
     pub headings: Vec<Heading>,
     pub html: String,
+    /// The video's length in seconds, from its outline.
+    pub duration: u32,
+    /// Where each part of the lesson starts in the video (decision D34).
+    pub chapters: Vec<Chapter>,
+}
+
+/// A part of the lesson and its moment in the video: the opening text (no
+/// heading, so no ID, and the lesson's title), then each `##` section.
+#[derive(Debug, Clone, Serialize)]
+pub struct Chapter {
+    pub title: String,
+    pub id: Option<String>,
+    /// Seconds into the video.
+    pub start: u32,
 }
 
 #[derive(Debug, Clone, Serialize)]

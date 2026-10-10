@@ -141,6 +141,20 @@ describe("createPlayer", () => {
     expect(onStatus).toHaveBeenLastCalledWith({ time: 167, duration: 928, playing: false });
   });
 
+  it("holds a seek asked for before the player is ready, and makes it once it is", async () => {
+    vi.useFakeTimers();
+    const { createPlayer } = await modules();
+    const host = document.createElement("div");
+    document.body.append(host);
+    const created = createPlayer(host, "OX9HJsJUDxA", { onStatus: vi.fn(), onError: vi.fn() });
+    const { players } = finishLoading();
+    const player = await created;
+    player.seek(167);
+    expect(players[0].time).toBe(0);
+    players[0].ready();
+    expect(players[0].time).toBe(167);
+  });
+
   it("passes on YouTube's errors, such as a video that can't be embedded", async () => {
     const { fake, onError } = await playing();
     fake.fail(150);

@@ -45,6 +45,18 @@ export interface Lesson extends LessonSummary {
   headings: Heading[];
   /** Compiled from the lesson's Markdown; raw HTML in it was escaped. */
   html: string;
+  /** The video's length in seconds, from its outline. */
+  duration: number;
+  /** Where each part of the lesson starts in the video (decision D34). */
+  chapters: Chapter[];
+}
+
+/** A part of the lesson: the opening text (no heading, so no ID), then each `##` section. */
+export interface Chapter {
+  title: string;
+  id: string | null;
+  /** Seconds into the video. */
+  start: number;
 }
 
 export interface Heading {

@@ -208,7 +208,7 @@ fn rejects_a_link_to_a_lesson_that_doesnt_exist() {
     let errors = errors(&sources, &Options::default());
     assert!(
         errors.contains(
-            "en/p01/02-variables.md:9: the link to 01-helo.md points to a lesson that doesn't exist"
+            "en/p01/02-variables.md:10: the link to 01-helo.md points to a lesson that doesn't exist"
         ),
         "{errors}"
     );
@@ -225,7 +225,176 @@ fn rejects_a_link_to_a_heading_that_doesnt_exist() {
     );
     let errors = errors(&sources, &Options::default());
     assert!(
-        errors.contains("en/p01/01-hello.md:29: the link to 02-variables.md#shadows points to a heading that doesn't exist (en/p01/02-variables.md has: shadowing)"),
+        errors.contains("en/p01/01-hello.md:30: the link to 02-variables.md#shadows points to a heading that doesn't exist (en/p01/02-variables.md has: shadowing)"),
+        "{errors}"
+    );
+}
+
+const OUTLINE: &str = "outlines/01-hello.md";
+
+#[test]
+fn gives_each_part_of_a_lesson_its_time_in_the_video() {
+    let compiled = compiled(&valid());
+    let hello = compiled
+        .lessons
+        .iter()
+        .find(|lesson| lesson.slug == "01-hello")
+        .unwrap();
+    assert_eq!(hello.duration, 928);
+    let chapters: Vec<_> = hello
+        .chapters
+        .iter()
+        .map(|chapter| (chapter.title.as_str(), chapter.id.as_deref(), chapter.start))
+        .collect();
+    assert_eq!(
+        chapters,
+        [
+            ("Hello, Cargo", None, 10),
+            ("Your first program", Some("your-first-program"), 90),
+            ("Your first program", Some("your-first-program-2"), 160),
+        ]
+    );
+}
+
+#[test]
+fn rejects_a_time_written_by_hand() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        HELLO,
+        "then *try*",
+        "then [at 0:42](#t=0:42) *try*",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "lessons don't write times: each section gets its time from the outline point it starts at (sections, in the front matter)"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_an_outline_without_the_videos_length() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "duration = \"15:28\"\n", "");
+    let errors = errors(&sources, &Options::default());
+    assert!(errors.contains("missing field `duration`"), "{errors}");
+}
+
+#[test]
+fn rejects_an_outline_point_without_a_time() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "2. [01:30] Demo", "2. Demo");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:8: point 2 has no time: start it with [m:ss], when he makes it in the video"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_outline_points_out_of_the_videos_order() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "2. [01:30]", "2. [00:05]");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:8: point 2 starts at 00:05, before point 1 (00:10): the points follow the video"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_an_outline_point_after_the_video_ends() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "3. [02:40]", "3. [16:00]");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:9: point 3 starts at 16:00, after the video ends (15:28)"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_outline_points_numbered_out_of_order() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "2. [01:30]", "4. [01:30]");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains("outlines/01-hello.md:8: point 4 comes after point 1: number the points 1, 2, 3 in order"),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_lesson_without_sections() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "sections = [1, 2, 3]\n", "");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: the front matter has no sections: list the outline point each part of the lesson starts at, the opening text first, then each ## section"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_sections_that_dont_match_the_lessons_parts() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        HELLO,
+        "sections = [1, 2, 3]",
+        "sections = [1, 2]",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: sections lists 2 points, but the lesson has 3 parts: the opening text and 2 ## sections"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_section_at_a_point_the_outline_doesnt_have() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        HELLO,
+        "sections = [1, 2, 3]",
+        "sections = [1, 2, 9]",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: sections names point 9, but outlines/01-hello.md has points 1 to 3"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_sections_out_of_the_videos_order() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        HELLO,
+        "sections = [1, 2, 3]",
+        "sections = [1, 3, 2]",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: sections follow the video: point 2 can't come after point 3"
+        ),
         "{errors}"
     );
 }
@@ -306,7 +475,7 @@ fn rejects_unknown_front_matter_fields() {
     let mut sources = valid();
     edit(&mut sources, HELLO, "title = ", "tittle = \"x\"\ntitle = ");
     let errors = errors(&sources, &Options::default());
-    assert!(errors.contains("en/p01/01-hello.md:2: unknown field `tittle`, expected one of `title`, `video`, `outline`"), "{errors}");
+    assert!(errors.contains("en/p01/01-hello.md:2: unknown field `tittle`, expected one of `title`, `video`, `outline`, `sections`"), "{errors}");
 }
 
 #[test]
@@ -374,7 +543,7 @@ fn rejects_a_level_one_heading_in_a_lesson() {
     let mut sources = valid();
     edit(&mut sources, VARIABLES, "## Shadowing", "# Shadowing");
     let errors = errors(&sources, &Options::default());
-    assert!(errors.contains("en/p01/02-variables.md:7: use ## and below for sections; the title comes from the front matter"), "{errors}");
+    assert!(errors.contains("en/p01/02-variables.md:8: use ## and below for sections; the title comes from the front matter"), "{errors}");
 }
 
 #[test]
@@ -383,7 +552,7 @@ fn rejects_code_in_a_language_it_cant_highlight() {
     edit(&mut sources, VARIABLES, "```console", "```cobol");
     let errors = errors(&sources, &Options::default());
     assert!(
-        errors.contains("en/p01/02-variables.md:29: code blocks can be rust, toml, bash, sh, console or text, not cobol"),
+        errors.contains("en/p01/02-variables.md:30: code blocks can be rust, toml, bash, sh, console or text, not cobol"),
         "{errors}"
     );
 }
@@ -399,7 +568,7 @@ fn rejects_markdown_it_doesnt_render() {
     );
     let errors = errors(&sources, &Options::default());
     assert!(
-        errors.contains("en/p01/02-variables.md:11: images aren't supported in lessons yet"),
+        errors.contains("en/p01/02-variables.md:12: images aren't supported in lessons yet"),
         "{errors}"
     );
 }
@@ -430,9 +599,9 @@ fn lists_the_rust_blocks_to_compile() {
     assert_eq!(
         found,
         [
-            (HELLO, 11, CodeMode::Compile),
-            (HELLO, 20, CodeMode::CompileFail),
-            (VARIABLES, 25, CodeMode::Ignore),
+            (HELLO, 12, CodeMode::Compile),
+            (HELLO, 21, CodeMode::CompileFail),
+            (VARIABLES, 26, CodeMode::Ignore),
         ]
     );
     assert!(blocks[1].code.contains("let count: i32"));

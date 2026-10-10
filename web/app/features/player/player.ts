@@ -9,7 +9,7 @@ export interface PlayerStatus {
 }
 
 export interface Player {
-  /** Jumps to a moment and asks YouTube to play from there. */
+  /** Jumps to a moment and asks YouTube to play from there; before the player is ready, once it is. */
   seek(seconds: number): void;
   /**
    * Seconds of the video seen at least once while it played. Ads (when YouTube
@@ -19,7 +19,7 @@ export interface Player {
   destroy(): void;
 }
 
-interface Callbacks {
+interface Options {
   onStatus: (status: PlayerStatus) => void;
   /** One of YouTube's error codes (see YTPlayerOptions). */
   onError: (code: number) => void;
@@ -38,12 +38,14 @@ const TICK_MS = 500;
 export async function createPlayer(
   host: HTMLElement,
   video: string,
-  { onStatus, onError }: Callbacks,
+  { onStatus, onError }: Options,
 ): Promise<Player> {
   const YT = await loadYouTubeApi();
   const seen = new Set<number>();
   let timer: ReturnType<typeof setInterval> | undefined;
   let player: YTPlayer | undefined;
+  // A seek asked for before the player was ready; made when it is.
+  let queued: number | undefined;
 
   // Reads the time and keeps reading it only while the video plays, so a
   // paused or finished video leaves the page idle.
@@ -66,10 +68,16 @@ export async function createPlayer(
     videoId: video,
     width: "100%",
     height: "100%",
-    playerVars: { autoplay: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+    playerVars: {
+      autoplay: 1,
+      playsinline: 1,
+      rel: 0,
+      origin: window.location.origin,
+    },
     events: {
       onReady: ({ target }) => {
         player = target;
+        if (queued !== undefined) target.seekTo(queued, true);
         target.playVideo();
         report();
       },
@@ -80,7 +88,10 @@ export async function createPlayer(
 
   return {
     seek(seconds) {
-      if (!player) return;
+      if (!player) {
+        queued = seconds;
+        return;
+      }
       player.seekTo(seconds, true);
       player.playVideo();
       report();

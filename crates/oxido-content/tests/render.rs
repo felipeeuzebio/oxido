@@ -94,6 +94,19 @@ fn opens_links_that_leave_the_course_in_a_new_tab() {
 }
 
 #[test]
+fn puts_each_sections_time_in_the_video_beside_its_heading() {
+    let html = html("01-hello");
+    assert!(
+        html.contains(concat!(
+            r#"<div class="section-head"><h2 id="your-first-program">Your first program</h2>"#,
+            r##"<a class="section-time" href="#t=90" data-seek="90" "##,
+            r#"aria-label="Watch “Your first program” in the video, from 01:30">01:30</a></div>"#
+        )),
+        "{html}"
+    );
+}
+
+#[test]
 fn marks_code_so_page_translation_leaves_it_alone() {
     let html = html("01-hello");
     assert!(

@@ -55,7 +55,7 @@ Done when:
 - The video loads only when the student presses play (facade), through a typed wrapper around the YouTube IFrame API, and unmounts in the text-only view. ✅
 - YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules); the saved position and note markers sit in a strip under it (decision D16).
 - The text lesson renders next to it with Video / Both / Text views, and the playing video stays in view while the text scrolls (decision D33). ✅
-- Timestamp links in the text jump the video to that moment.
+- Each section of the text shows its time in the video, from the outline, and plays the video from there; the strip under the player marks the sections as chapters (decision D34). ✅
 - Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links"). ✅
 - YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Checked by hand before the phase (architecture.md, "YouTube embeds"): they do, as long as the player's iframe sends a referrer. ✅
 

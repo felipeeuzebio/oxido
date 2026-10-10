@@ -2,16 +2,18 @@
 //!
 //! Raw HTML in a lesson is escaped, so the page only ever shows what this
 //! module writes. Links to other lessons (`02-variables.md#shadowing`) become
-//! routes, checked against every lesson's headings.
+//! routes, checked against every lesson's headings. Each `##` section shows
+//! its time in the video, from the outline point it starts at.
 
 use std::collections::BTreeMap;
 
 use markdown::mdast::{AlignKind, Node};
 
+use crate::Chapter;
 use crate::Problem;
 use crate::highlight::Highlighter;
 use crate::lesson::{Parsed, code_info};
-use crate::text::escape;
+use crate::text::{escape, format_time};
 
 /// Every lesson by path, with its route and heading IDs, for checking links.
 pub type Index = BTreeMap<String, (String, Vec<String>)>;
@@ -37,6 +39,9 @@ pub struct Writer<'a> {
     pub highlighter: &'a mut Highlighter,
     pub problems: Vec<Problem>,
     headings: usize,
+    /// When each `##` section starts in the video, in order.
+    section_starts: Vec<u32>,
+    sections: usize,
 }
 
 impl<'a> Writer<'a> {
@@ -45,6 +50,7 @@ impl<'a> Writer<'a> {
         index: &'a Index,
         base_path: &'a str,
         highlighter: &'a mut Highlighter,
+        chapters: &[Chapter],
     ) -> Self {
         Self {
             lesson,
@@ -53,6 +59,12 @@ impl<'a> Writer<'a> {
             highlighter,
             problems: Vec::new(),
             headings: 0,
+            section_starts: chapters
+                .iter()
+                .filter(|chapter| chapter.id.is_some())
+                .map(|chapter| chapter.start)
+                .collect(),
+            sections: 0,
         }
     }
 
@@ -77,11 +89,30 @@ impl<'a> Writer<'a> {
         match node {
             Node::Paragraph(p) => self.wrap("p", &p.children, out),
             Node::Heading(heading) => {
-                let id = &self.lesson.headings[self.headings].id;
+                let found = &self.lesson.headings[self.headings];
+                let (id, text) = (found.id.clone(), found.text.clone());
                 self.headings += 1;
-                out.push_str(&format!("<h{} id=\"{}\">", heading.depth, escape(id)));
+                // A `##` section shows its time in the video beside its
+                // heading, from the outline point it starts at (decision D34).
+                let start = if heading.depth == 2 {
+                    self.sections += 1;
+                    self.section_starts.get(self.sections - 1).copied()
+                } else {
+                    None
+                };
+                if start.is_some() {
+                    out.push_str(r#"<div class="section-head">"#);
+                }
+                out.push_str(&format!("<h{} id=\"{}\">", heading.depth, escape(&id)));
                 self.inlines(&heading.children, out);
                 out.push_str(&format!("</h{}>", heading.depth));
+                if let Some(start) = start {
+                    let time = format_time(start);
+                    out.push_str(&format!(
+                        r##"<a class="section-time" href="#t={start}" data-seek="{start}" aria-label="Watch “{}” in the video, from {time}">{time}</a></div>"##,
+                        escape(&text)
+                    ));
+                }
             }
             Node::Code(code) => {
                 let (language, _) = code_info(code.lang.as_deref(), code.meta.as_deref());
@@ -198,6 +229,14 @@ impl<'a> Writer<'a> {
             Node::Delete(d) => self.wrap("del", &d.children, out),
             Node::Break(_) => out.push_str("<br>"),
             Node::Link(link) => {
+                if link.url.starts_with("#t=") {
+                    self.error(
+                        node,
+                        "lessons don't write times: each section gets its time from the outline point it starts at (sections, in the front matter)",
+                    );
+                    self.inlines(&link.children, out);
+                    return;
+                }
                 let href = self.href(node, &link.url);
                 // A link out of the course opens in a new tab, so the student
                 // keeps the lesson, and screen readers hear that it will.

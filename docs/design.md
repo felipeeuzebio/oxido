@@ -183,6 +183,8 @@ Both text faces come from Japanese type design and have full Latin sets, which g
 
 A link that leaves the course opens in a new tab, so the student keeps their place: `target="_blank"` with `rel="noopener noreferrer"`, and "(opens in a new tab)" in an `sr-only` span for screen readers. The content compiler does this for every `http` and `https` link in a lesson; a component that links out does the same. Links within the course (another lesson, a heading, home, the roadmap) stay in the same tab, where the app keeps its state.
 
+Each `##` section of a lesson shows its time in the video on the right of its heading, in `font-mono` and `--info`, the way timestamps look everywhere. It's a link named "Watch “Install Rust” in the video, from 00:52" that plays the video from there, starting it if needed and bringing it back from Text view. The strip under the player marks the same moments as chapters: a short tick per part of the lesson, a 24px target named "Chapter: Install Rust, 00:52", with a `Tooltip` naming it on hover and focus. The video's length comes from the outline, so the strip shows it and its chapters before the student presses play (decision D34).
+
 ## Keyboard
 
 Everything works from the keyboard (decision D32). The first Tab on every page reaches "Skip to content", hidden until it has focus, which jumps past the rail to the page's `<main>`. After an in-app navigation, focus moves to the new page's `h1`, or to the element a link's hash names, so screen readers announce where the student landed and Tab carries on from there. The skip link's target and those headings get no focus ring, since they aren't controls. The code is in `web/app/features/navigation/`.

@@ -311,6 +311,13 @@
   .lesson .new-tab {
     @apply sr-only;
   }
+  /* A ## section, with its time in the video on the right (decision D34). */
+  .lesson .section-head {
+    @apply flex items-baseline justify-between gap-4;
+  }
+  .lesson .section-time {
+    @apply shrink-0 font-mono text-sm text-info tabular-nums no-underline hover:underline;
+  }
   pre.code {
     @apply overflow-x-auto rounded-lg border border-code-border bg-code p-4 font-mono text-sm leading-relaxed text-code-foreground;
   }
