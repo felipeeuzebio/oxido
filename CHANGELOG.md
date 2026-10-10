@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0](https://github.com/felipeeuzebio/oxido/compare/v0.7.0...v0.8.0) (2026-10-10)
+
+
+### Features
+
+* **lesson:** add the Video, Both and Text views ([#33](https://github.com/felipeeuzebio/oxido/issues/33)) ([f65ef52](https://github.com/felipeeuzebio/oxido/commit/f65ef52cdf71eb8aca523fb83a9de7a047ea1227))
+* **lesson:** give each section its time in the video, from the outline ([#34](https://github.com/felipeeuzebio/oxido/issues/34)) ([c38a76b](https://github.com/felipeeuzebio/oxido/commit/c38a76b720387933f015c88db15af1c54eb00e34))
+* **lesson:** play the lesson's video behind a facade ([#32](https://github.com/felipeeuzebio/oxido/issues/32)) ([ee060a5](https://github.com/felipeeuzebio/oxido/commit/ee060a59d1ab6dd91933f2aa4394a86bba09d2ed))
+* **web:** add a content security policy to every page ([#35](https://github.com/felipeeuzebio/oxido/issues/35)) ([0e31f65](https://github.com/felipeeuzebio/oxido/commit/0e31f6577a86a95435a8ca7ec80ea06865a79c8d))
+
 ## [0.7.0](https://github.com/felipeeuzebio/oxido/compare/v0.6.0...v0.7.0) (2026-10-09)
 
 
