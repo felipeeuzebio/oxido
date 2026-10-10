@@ -1,19 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
+import { load } from "./hydrated";
 
 // The e2e build compiles the content compiler's fixture course, whose first
 // phase has two lessons: "Hello, Cargo" and "Variables".
 
 const palette = (page: Page) => page.getByRole("dialog", { name: "Search the course" });
-
-// The shortcut and the focus moves are React's, so they start working once the
-// pre-rendered page is hydrated. React tags the nodes it has hydrated.
-async function load(page: Page, path = "/") {
-  await page.goto(path);
-  await page.waitForFunction(() => {
-    const main = document.getElementById("main");
-    return main !== null && Object.keys(main).some((key) => key.startsWith("__reactFiber"));
-  });
-}
 
 // The listener goes on in an effect just after hydration, so a press can still
 // land a moment too early; press again until the palette shows.
