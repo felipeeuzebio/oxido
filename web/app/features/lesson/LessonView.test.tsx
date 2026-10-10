@@ -72,9 +72,10 @@ describe("LessonView", () => {
     expect(screen.getByTitle("YouTube video player")).toBe(player.frame);
   });
 
-  describe("a time in the text", () => {
-    // jsdom drops the space before the label that browsers keep.
-    const time = () => screen.getByRole("link", { name: /^0:42 ?\(plays the video from 0:42\)$/ });
+  describe("a section's time", () => {
+    // The golden lesson's first section, "Your first program", starts at 01:30.
+    const time = () =>
+      screen.getByRole("link", { name: "Watch “Your first program” in the video, from 01:30" });
 
     it("starts the video from that moment", async () => {
       await show();
@@ -82,7 +83,7 @@ describe("LessonView", () => {
       const { players } = finishLoading();
       await waitFor(() => expect(players).toHaveLength(1));
       act(() => players[0].ready());
-      expect(players[0].time).toBe(42);
+      expect(players[0].time).toBe(90);
       expect(players[0].playRequested).toBe(true);
     });
 
@@ -91,7 +92,7 @@ describe("LessonView", () => {
       const player = await startVideo();
       player.playRequested = false;
       fireEvent.click(time());
-      expect(player.time).toBe(42);
+      expect(player.time).toBe(90);
       expect(player.playRequested).toBe(true);
     });
 
@@ -102,7 +103,7 @@ describe("LessonView", () => {
       const { players } = finishLoading();
       await waitFor(() => expect(players).toHaveLength(1));
       act(() => players[0].ready());
-      expect(players[0].time).toBe(42);
+      expect(players[0].time).toBe(90);
     });
 
     it("brings the video back from Text view to play it", async () => {
@@ -113,8 +114,21 @@ describe("LessonView", () => {
       const { players } = finishLoading();
       await waitFor(() => expect(players).toHaveLength(1));
       act(() => players[0].ready());
-      expect(players[0].time).toBe(42);
+      expect(players[0].time).toBe(90);
     });
+  });
+
+  it("puts the lesson's chapters on the strip under the video", async () => {
+    await show();
+    expect(
+      screen
+        .getAllByRole("button", { name: /^Chapter: / })
+        .map((chapter) => chapter.getAttribute("aria-label")),
+    ).toEqual([
+      "Chapter: Hello, Cargo, 00:10",
+      "Chapter: Your first program, 01:30",
+      "Chapter: Your first program, 02:40",
+    ]);
   });
 
   it("remembers the view for the next class", async () => {

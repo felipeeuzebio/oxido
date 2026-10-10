@@ -132,7 +132,7 @@ fn content_fails_with_every_problem_and_writes_nothing() {
     let stderr = text(&output.stderr);
     assert!(
         stderr.contains(
-            "en/p01/02-variables.md:9: the link to 01-helo.md points to a lesson that doesn't exist"
+            "en/p01/02-variables.md:10: the link to 01-helo.md points to a lesson that doesn't exist"
         ),
         "{stderr}"
     );
@@ -199,7 +199,7 @@ fn check_code_fails_on_a_block_that_doesnt_compile() {
     assert_eq!(output.status.code(), Some(1));
     let stderr = text(&output.stderr);
     assert!(
-        stderr.contains("en/p01/01-hello.md:11: this block doesn't compile"),
+        stderr.contains("en/p01/01-hello.md:12: this block doesn't compile"),
         "{stderr}"
     );
     assert!(stderr.contains("cannot find value `minisql`"), "{stderr}");
@@ -218,7 +218,7 @@ fn check_code_fails_on_a_compile_fail_block_that_compiles() {
     let stderr = text(&output.stderr);
     assert!(
         stderr
-            .contains("en/p01/01-hello.md:20: this block is marked compile_fail, but it compiles"),
+            .contains("en/p01/01-hello.md:21: this block is marked compile_fail, but it compiles"),
         "{stderr}"
     );
 }

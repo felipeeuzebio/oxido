@@ -1,7 +1,8 @@
 +++
 title = "Hello, Cargo"
 video = "helloVideo1"
-outline = "sha256:030f10cc4e0795125116a779910427846e40f0e081af4845bd7916b92a966858"
+outline = "sha256:dccd19568119a9c648758d964f8dd15024c49c7dae683b7183559f720d2ca7be"
+sections = [1, 2, 3]
 +++
 
 Cargo builds and runs a project. A tag like <b>this</b> stays plain text.
@@ -31,5 +32,3 @@ Read about [shadowing](02-variables.md#shadowing) next, or the [Rust Book](https
 ## Your first program
 
 Run it with `cargo run`, then *try* **again**.
-
-The video builds one at [0:42](#t=0:42).

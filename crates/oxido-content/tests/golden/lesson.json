@@ -16,5 +16,23 @@
       "text": "Your first program"
     }
   ],
-  "html": "<p>Cargo builds and runs a project. A tag like &lt;b&gt;this&lt;/b&gt; stays plain text.</p>\n<h2 id=\"your-first-program\">Your first program</h2>\n<pre class=\"code\" data-lang=\"rust\" translate=\"no\"><code><a-k>fn</a-k> <a-f>main</a-f><a-p>()</a-p> <a-p>{</a-p>\n    <a-k>let</a-k> name = <a-s>&quot;minisql&quot;</a-s><a-p>;</a-p>\n    <a-kc>if</a-kc> name<a-p>.</a-p><a-f>len</a-f><a-p>()</a-p> &gt; <a-n>3</a-n> <a-p>{</a-p>\n        <a-m>println!</a-m><a-p>(</a-p><a-s>&quot;hello, {name}! {}&quot;</a-s><a-p>,</a-p> <a-n>42</a-n><a-p>);</a-p>\n    <a-p>}</a-p>\n<a-p>}</a-p></code></pre>\n<pre class=\"code\" data-lang=\"rust\" translate=\"no\"><code><a-k>let</a-k> count<a-p>:</a-p> <a-t>i32</a-t> = <a-s>&quot;three&quot;</a-s><a-p>;</a-p></code></pre>\n<pre class=\"code\" data-lang=\"toml\" translate=\"no\"><code><a-p>[</a-p><a-pr>package</a-pr><a-p>]</a-p>\n<a-pr>name</a-pr> <a-o>=</a-o> <a-s>&quot;minisql&quot;</a-s></code></pre>\n<p>Read about <a href=\"/lesson/p01/02-variables#shadowing\">shadowing</a> next, or the <a href=\"https://doc.rust-lang.org/book/\" target=\"_blank\" rel=\"noopener noreferrer\">Rust Book<span class=\"new-tab\"> (opens in a new tab)</span></a>.</p>\n<h2 id=\"your-first-program-2\">Your first program</h2>\n<p>Run it with <code translate=\"no\">cargo run</code>, then <em>try</em> <strong>again</strong>.</p>\n<p>The video builds one at <a href=\"#t=42\" data-seek=\"42\">0:42<span class=\"seek-label\"> (plays the video from 0:42)</span></a>.</p>\n"
+  "html": "<p>Cargo builds and runs a project. A tag like &lt;b&gt;this&lt;/b&gt; stays plain text.</p>\n<div class=\"section-head\"><h2 id=\"your-first-program\">Your first program</h2><a class=\"section-time\" href=\"#t=90\" data-seek=\"90\" aria-label=\"Watch “Your first program” in the video, from 01:30\">01:30</a></div>\n<pre class=\"code\" data-lang=\"rust\" translate=\"no\"><code><a-k>fn</a-k> <a-f>main</a-f><a-p>()</a-p> <a-p>{</a-p>\n    <a-k>let</a-k> name = <a-s>&quot;minisql&quot;</a-s><a-p>;</a-p>\n    <a-kc>if</a-kc> name<a-p>.</a-p><a-f>len</a-f><a-p>()</a-p> &gt; <a-n>3</a-n> <a-p>{</a-p>\n        <a-m>println!</a-m><a-p>(</a-p><a-s>&quot;hello, {name}! {}&quot;</a-s><a-p>,</a-p> <a-n>42</a-n><a-p>);</a-p>\n    <a-p>}</a-p>\n<a-p>}</a-p></code></pre>\n<pre class=\"code\" data-lang=\"rust\" translate=\"no\"><code><a-k>let</a-k> count<a-p>:</a-p> <a-t>i32</a-t> = <a-s>&quot;three&quot;</a-s><a-p>;</a-p></code></pre>\n<pre class=\"code\" data-lang=\"toml\" translate=\"no\"><code><a-p>[</a-p><a-pr>package</a-pr><a-p>]</a-p>\n<a-pr>name</a-pr> <a-o>=</a-o> <a-s>&quot;minisql&quot;</a-s></code></pre>\n<p>Read about <a href=\"/lesson/p01/02-variables#shadowing\">shadowing</a> next, or the <a href=\"https://doc.rust-lang.org/book/\" target=\"_blank\" rel=\"noopener noreferrer\">Rust Book<span class=\"new-tab\"> (opens in a new tab)</span></a>.</p>\n<div class=\"section-head\"><h2 id=\"your-first-program-2\">Your first program</h2><a class=\"section-time\" href=\"#t=160\" data-seek=\"160\" aria-label=\"Watch “Your first program” in the video, from 02:40\">02:40</a></div>\n<p>Run it with <code translate=\"no\">cargo run</code>, then <em>try</em> <strong>again</strong>.</p>\n",
+  "duration": 928,
+  "chapters": [
+    {
+      "title": "Hello, Cargo",
+      "id": null,
+      "start": 10
+    },
+    {
+      "title": "Your first program",
+      "id": "your-first-program",
+      "start": 90
+    },
+    {
+      "title": "Your first program",
+      "id": "your-first-program-2",
+      "start": 160
+    }
+  ]
 }

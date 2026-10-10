@@ -45,6 +45,7 @@ Write `content/outlines/NN-<slug>.md`, with the playlist position and a short sl
 +++
 video = "<videoId>"
 title = "<the video's title>"
+duration = "<m:ss>"
 +++
 
 1. [mm:ss] <one point Bogdan makes, in your own words>
@@ -58,7 +59,7 @@ title = "<the video's title>"
 - <each Rust feature or tool this video teaches for the first time, e.g. `&mut`, `cargo test`>
 ```
 
-- One line per point, in the video's order, with the time he makes it. Cover every point he teaches, including asides that teach something.
+- One line per point, in the video's order, with the time he makes it, read from the transcript's timings. Cover every point he teaches, including asides that teach something. `duration` is the video's length, the transcript JSON's `duration` in m:ss. The compiler checks that the times follow the video and end before it does, and the lesson's sections take their times from these points, so get them right.
 - Record his claims as he states them, mistakes included. Flag a mistake with a `Note:` line under the point; don't fix the point itself.
 - Record how he says it, too: each joke, reaction or framing that shows his personality ("luckily, Rust has this built in", a joke about putting Rust on your resume) goes in an `Aside:` line under its point, described in new words. Leave out channel talk (subscribe, see you next time). Writers never see the transcript, so this is the only way his personality reaches them.
 - Describe his code; don't reproduce it.
@@ -103,7 +104,7 @@ Spawn 3 general-purpose subagents in one message. Each gets those inputs; the pa
 - **Writer 2, Narrator:** closest to his walkthrough. Take the reader through each step the way he does on screen, in the lessons' voice, with code blocks only where the student types or copies something.
 - **Writer 3, Demo:** closest to how he shows things. Run each step, then point at what we see; try a variant ("let's say we…") where he does; carry the error and the fix where he hits one.
 
-Each draft is a complete lesson file with its front matter. Code must be real: every `rust` block compiles, any output shown was produced by running it, and every command works as written in a fresh folder. A writer that thinks the lesson needs something the video doesn't have says so in its report and leaves it out.
+Each draft is a complete lesson file with its front matter, including `sections`: the outline point each part of the lesson starts at, the opening text first, then each `##` section (`docs/roadmap-course.md`, "Content format"). That's where each section's time in the video comes from; never write a time in the lesson. Code must be real: every `rust` block compiles, any output shown was produced by running it, and every command works as written in a fresh folder. A writer that thinks the lesson needs something the video doesn't have says so in its report and leaves it out.
 
 ## Step 3: the gate
 

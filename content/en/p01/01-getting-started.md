@@ -1,7 +1,8 @@
 +++
 title = "Getting started"
 video = "OX9HJsJUDxA"
-outline = "sha256:8c6710ca57fcef19f1f559431a8b44f1f1aa5eecf5619e503c5ab9887cd35f36"
+outline = "sha256:fa9e2a097146acb00146e311528157b87c002fed1aaa9c270c605f03779a9af2"
+sections = [1, 2, 3, 4, 9]
 +++
 
 This series goes through [*The Rust Programming Language*](https://doc.rust-lang.org/book/), known as "the book", one chapter per video. The book is free to read online, and the videos are for those of us who would rather watch than read. This one covers [chapter 1](https://doc.rust-lang.org/book/ch01-00-getting-started.html).
