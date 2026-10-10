@@ -14,6 +14,9 @@ window.YT = {
       this.frame = document.createElement("iframe");
       this.frame.title = "YouTube video player";
       this.frame.dataset.video = options.videoId;
+      // Like the real API, size the iframe from the options ("100%").
+      this.frame.width = options.width;
+      this.frame.height = options.height;
       element.replaceWith(this.frame);
       window.fakePlayer = this;
       setTimeout(() => options.events.onReady({ target: this }), 50);

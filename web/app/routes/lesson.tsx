@@ -1,31 +1,22 @@
-// A lesson's text, pre-rendered from the compiled content (platform phase P1).
-// The Video / Both / Text views and the notes come later in P3 and in P6.
+// A class: its video and text lesson, pre-rendered from the compiled content.
 //
 // routes.ts registers this route only once there are lessons, so it uses React
 // Router's generic types rather than the generated ./+types/lesson.
 import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from "react-router";
-import { readLesson } from "@/features/content/content.server";
-import { VideoPlayer } from "@/features/player/VideoPlayer";
+import { readCourse, readLesson } from "@/features/content/content.server";
+import { LessonView } from "@/features/lesson/LessonView";
+import { lessonPlace } from "@/features/lesson/place";
 
 export async function loader({ params }: LoaderFunctionArgs) {
-  return readLesson(params.phase ?? "", params.slug ?? "");
+  const lesson = await readLesson(params.phase ?? "", params.slug ?? "");
+  return { lesson, place: lessonPlace(readCourse(), lesson) };
 }
 
 export const meta: MetaFunction<typeof loader> = ({ loaderData }) => [
-  { title: loaderData ? `${loaderData.title} · Oxidō` : "Oxidō" },
+  { title: loaderData ? `${loaderData.lesson.title} · Oxidō` : "Oxidō" },
 ];
 
 export default function LessonPage() {
-  const lesson = useLoaderData<typeof loader>();
-  return (
-    <div className="mx-auto my-12 flex max-w-3xl flex-col gap-6 px-4">
-      <h1 className="text-3xl font-bold">{lesson.title}</h1>
-      <VideoPlayer video={lesson.video} title={lesson.title} />
-      <article
-        className="lesson flex flex-col gap-4"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: the content compiler's output; it escapes raw HTML in lessons (crates/oxido-content)
-        dangerouslySetInnerHTML={{ __html: lesson.html }}
-      />
-    </div>
-  );
+  const { lesson, place } = useLoaderData<typeof loader>();
+  return <LessonView lesson={lesson} place={place} />;
 }
