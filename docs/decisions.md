@@ -183,3 +183,9 @@ Where the text runs below the video (below Tailwind's `lg` breakpoint), the vide
 
 Also considered: a floating player in a corner, which at YouTube's minimum size covers most of a phone's width and sits over the text being read; and no mini player at all, which leaves students scrolling back up to see the video.
 
+## D34. Video times come from the outline: each section's time, and chapters on the strip (2026-10-09)
+
+The outline already records when Bogdan makes each point, taken from the transcript (D24). A lesson's front matter lists the outline point each part starts at, `sections = [1, 2, 3, 4, 9]`: the opening text, then each `##` section. The compiler takes each part's time from that point and checks the list: one point per part, points the outline has, in the video's order. It also checks the outline's times: numbered in order, following the video, inside its length, which the outline now records as `duration`. Nobody types a time into a lesson. Each section heading shows its time and plays the video from there, and the strip under the player marks the parts as chapters, named on hover and focus. With the length known at build time, the strip shows the chapters before the video has loaded.
+
+Also considered: times typed into the lesson's Markdown (`[2:47](#t=2:47)`), which nothing filled in and which would drift from the outline; a marker on each paragraph, which follows the video more closely but puts a marker in every paragraph; and marking the part being played, or scrolling the text along with the video, which are left out for now.
+

@@ -46,8 +46,9 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
     saveView(next, browserStorage());
   };
 
-  // A time in the text (`#t=2:47`, compiled to data-seek) plays the video from
-  // there. From Text view it brings the video back, for this class only.
+  // A section's time (the compiler's data-seek link beside its heading) plays
+  // the video from there. From Text view it brings the video back, for this
+  // class only.
   const playFrom = (event: MouseEvent<HTMLElement>) => {
     const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-seek]");
     if (!link) return;
@@ -109,6 +110,8 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
             <VideoPlayer
               video={lesson.video}
               title={lesson.title}
+              duration={lesson.duration}
+              chapters={lesson.chapters}
               onStart={() => setStarted(true)}
               seek={seek}
             />

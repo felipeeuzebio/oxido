@@ -2,17 +2,18 @@
 //!
 //! Raw HTML in a lesson is escaped, so the page only ever shows what this
 //! module writes. Links to other lessons (`02-variables.md#shadowing`) become
-//! routes, checked against every lesson's headings, and links to a time in the
-//! video (`#t=2:47`) become links the page plays the video from.
+//! routes, checked against every lesson's headings. Each `##` section shows
+//! its time in the video, from the outline point it starts at.
 
 use std::collections::BTreeMap;
 
 use markdown::mdast::{AlignKind, Node};
 
+use crate::Chapter;
 use crate::Problem;
 use crate::highlight::Highlighter;
 use crate::lesson::{Parsed, code_info};
-use crate::text::escape;
+use crate::text::{escape, format_time};
 
 /// Every lesson by path, with its route and heading IDs, for checking links.
 pub type Index = BTreeMap<String, (String, Vec<String>)>;
@@ -38,6 +39,9 @@ pub struct Writer<'a> {
     pub highlighter: &'a mut Highlighter,
     pub problems: Vec<Problem>,
     headings: usize,
+    /// When each `##` section starts in the video, in order.
+    section_starts: Vec<u32>,
+    sections: usize,
 }
 
 impl<'a> Writer<'a> {
@@ -46,6 +50,7 @@ impl<'a> Writer<'a> {
         index: &'a Index,
         base_path: &'a str,
         highlighter: &'a mut Highlighter,
+        chapters: &[Chapter],
     ) -> Self {
         Self {
             lesson,
@@ -54,6 +59,12 @@ impl<'a> Writer<'a> {
             highlighter,
             problems: Vec::new(),
             headings: 0,
+            section_starts: chapters
+                .iter()
+                .filter(|chapter| chapter.id.is_some())
+                .map(|chapter| chapter.start)
+                .collect(),
+            sections: 0,
         }
     }
 
@@ -78,11 +89,30 @@ impl<'a> Writer<'a> {
         match node {
             Node::Paragraph(p) => self.wrap("p", &p.children, out),
             Node::Heading(heading) => {
-                let id = &self.lesson.headings[self.headings].id;
+                let found = &self.lesson.headings[self.headings];
+                let (id, text) = (found.id.clone(), found.text.clone());
                 self.headings += 1;
-                out.push_str(&format!("<h{} id=\"{}\">", heading.depth, escape(id)));
+                // A `##` section shows its time in the video beside its
+                // heading, from the outline point it starts at (decision D34).
+                let start = if heading.depth == 2 {
+                    self.sections += 1;
+                    self.section_starts.get(self.sections - 1).copied()
+                } else {
+                    None
+                };
+                if start.is_some() {
+                    out.push_str(r#"<div class="section-head">"#);
+                }
+                out.push_str(&format!("<h{} id=\"{}\">", heading.depth, escape(&id)));
                 self.inlines(&heading.children, out);
                 out.push_str(&format!("</h{}>", heading.depth));
+                if let Some(start) = start {
+                    let time = format_time(start);
+                    out.push_str(&format!(
+                        r##"<a class="section-time" href="#t={start}" data-seek="{start}" aria-label="Watch “{}” in the video, from {time}">{time}</a></div>"##,
+                        escape(&text)
+                    ));
+                }
             }
             Node::Code(code) => {
                 let (language, _) = code_info(code.lang.as_deref(), code.meta.as_deref());
@@ -199,8 +229,12 @@ impl<'a> Writer<'a> {
             Node::Delete(d) => self.wrap("del", &d.children, out),
             Node::Break(_) => out.push_str("<br>"),
             Node::Link(link) => {
-                if let Some(time) = link.url.strip_prefix("#t=") {
-                    self.video_link(node, time, &link.children, out);
+                if link.url.starts_with("#t=") {
+                    self.error(
+                        node,
+                        "lessons don't write times: each section gets its time from the outline point it starts at (sections, in the front matter)",
+                    );
+                    self.inlines(&link.children, out);
                     return;
                 }
                 let href = self.href(node, &link.url);
@@ -224,29 +258,6 @@ impl<'a> Writer<'a> {
             }
             _ => {}
         }
-    }
-
-    /// `[2:47](#t=2:47)`: a moment in the class's video. The page plays the
-    /// video from there; screen readers hear that it will.
-    fn video_link(&mut self, node: &Node, time: &str, children: &[Node], out: &mut String) {
-        let Some(seconds) = video_time(time) else {
-            self.error(
-                node,
-                &format!(
-                    "the link to #t={time} isn't a time in the video: write it as #t=m:ss or #t=h:mm:ss"
-                ),
-            );
-            self.inlines(children, out);
-            return;
-        };
-        out.push_str(&format!(
-            r##"<a href="#t={seconds}" data-seek="{seconds}">"##
-        ));
-        self.inlines(children, out);
-        out.push_str(&format!(
-            r#"<span class="seek-label"> (plays the video from {})</span></a>"#,
-            escape(time)
-        ));
     }
 
     /// Where a link goes: web addresses as they are, lessons as routes.
@@ -322,28 +333,6 @@ fn is_web_address(url: &str) -> bool {
     url.starts_with("https://") || url.starts_with("http://")
 }
 
-/// A time in the video, written `m:ss` or `h:mm:ss`, in seconds.
-fn video_time(text: &str) -> Option<u32> {
-    let number = |part: &str| {
-        let digits = !part.is_empty() && part.bytes().all(|byte| byte.is_ascii_digit());
-        digits.then(|| part.parse::<u32>().ok()).flatten()
-    };
-    // Minutes after hours, and seconds, are two digits under 60.
-    let two = |part: &str| {
-        (part.len() == 2)
-            .then(|| number(part))
-            .flatten()
-            .filter(|n| *n < 60)
-    };
-    match text.split(':').collect::<Vec<_>>().as_slice() {
-        [minutes, seconds] => Some(number(minutes)? * 60 + two(seconds)?),
-        [hours, minutes, seconds] => {
-            Some(number(hours)? * 3600 + two(minutes)? * 60 + two(seconds)?)
-        }
-        _ => None,
-    }
-}
-
 /// `path` relative to the folder `from` is in, with `.` and `..` resolved.
 fn resolve(from: &str, path: &str) -> String {
     let mut parts: Vec<&str> = from.split('/').collect();
@@ -362,36 +351,7 @@ fn resolve(from: &str, path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{resolve, video_time};
-
-    #[test]
-    fn reads_video_times_written_as_minutes_or_hours() {
-        for (text, seconds) in [
-            ("0:42", 42),
-            ("2:47", 167),
-            ("15:28", 928),
-            ("1:02:05", 3725),
-        ] {
-            assert_eq!(video_time(text), Some(seconds), "{text}");
-        }
-    }
-
-    #[test]
-    fn refuses_what_isnt_a_video_time() {
-        for text in [
-            "",
-            "42",
-            "0:4",
-            "2:60",
-            "1:2:05",
-            "1:02:60",
-            "a:bc",
-            "-1:00",
-            "1:00:00:00",
-        ] {
-            assert_eq!(video_time(text), None, "{text}");
-        }
-    }
+    use super::resolve;
 
     #[test]
     fn resolves_links_relative_to_the_lesson() {

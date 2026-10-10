@@ -1,6 +1,7 @@
 +++
 video = "OX9HJsJUDxA"
 title = "ULTIMATE Rust Lang Tutorial! - Getting Started"
+duration = "07:10"
 +++
 
 1. [00:28] This series goes through *The Rust Programming Language*, "the book", one chapter per video. The book is free online, and the videos go with it for people who learn better from video. This video is chapter 1.

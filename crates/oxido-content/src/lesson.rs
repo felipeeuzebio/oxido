@@ -15,6 +15,8 @@ struct Front {
     title: String,
     video: Option<String>,
     outline: Option<String>,
+    /// The outline point each part starts at: the opening text, then each `##` section.
+    sections: Option<Vec<u32>>,
 }
 
 /// A lesson, parsed and checked on its own (links are checked when rendering,
@@ -26,6 +28,9 @@ pub struct Parsed {
     pub title: String,
     pub video: Option<String>,
     pub outline: Option<String>,
+    pub sections: Option<Vec<u32>>,
+    /// Whether text comes before the first `##` section.
+    pub has_opening: bool,
     pub root: Node,
     /// Lines before the Markdown body, to report file line numbers.
     pub offset: usize,
@@ -68,6 +73,10 @@ pub fn parse(path: &str, phase: &str, slug: &str, text: &str) -> Result<Parsed, 
         problems: Vec::new(),
     };
     walker.walk(&root);
+    let has_opening = root
+        .children()
+        .and_then(|children| children.first())
+        .is_some_and(|first| !matches!(first, Node::Heading(heading) if heading.depth == 2));
     if !walker.problems.is_empty() {
         return Err(walker.problems);
     }
@@ -78,6 +87,8 @@ pub fn parse(path: &str, phase: &str, slug: &str, text: &str) -> Result<Parsed, 
         title: front.title,
         video: front.video,
         outline: front.outline,
+        sections: front.sections,
+        has_opening,
         root,
         offset: doc.offset,
         headings: walker.headings,

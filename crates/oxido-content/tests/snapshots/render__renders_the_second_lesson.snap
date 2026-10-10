@@ -2,7 +2,7 @@
 source: crates/oxido-content/tests/render.rs
 expression: "html(\"02-variables\")"
 ---
-<h2 id="shadowing">Shadowing</h2>
+<div class="section-head"><h2 id="shadowing">Shadowing</h2><a class="section-time" href="#t=20" data-seek="20" aria-label="Watch “Shadowing” in the video, from 00:20">00:20</a></div>
 <p>A second <code translate="no">let</code> can reuse a name. Go back to <a href="/lesson/p01/01-hello">the first lesson</a>.</p>
 <ul>
 <li>one</li>

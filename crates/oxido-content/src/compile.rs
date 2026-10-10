@@ -10,8 +10,8 @@ use crate::lesson::{self, Parsed};
 use crate::outline::{self, Outline};
 use crate::text::{fingerprint, is_numbered_slug};
 use crate::{
-    Belt, CodeBlock, Compiled, Course, Lesson, LessonSummary, Options, Phase, Problem, Quiz,
-    Sources, quiz,
+    Belt, Chapter, CodeBlock, Compiled, Course, Lesson, LessonSummary, Options, Phase, Problem,
+    Quiz, Sources, quiz,
 };
 
 /// What a path in the content folder is.
@@ -71,7 +71,7 @@ pub fn compile(sources: &Sources, options: &Options) -> Result<Compiled, Vec<Pro
     errors.extend(course::check(&course));
 
     let (lessons, quiz_files, outlines) = read(sources, &course, &mut errors);
-    check_lessons(
+    let timings = check_lessons(
         &lessons,
         &course,
         &outlines,
@@ -106,8 +106,17 @@ pub fn compile(sources: &Sources, options: &Options) -> Result<Compiled, Vec<Pro
         let index = html::index(&lessons);
         let mut highlighter = Highlighter::new();
         for lesson in &lessons {
-            let (html, problems) =
-                Writer::new(lesson, &index, &options.base_path, &mut highlighter).write();
+            let Some(timing) = timings.get(&lesson.path) else {
+                continue;
+            };
+            let (html, problems) = Writer::new(
+                lesson,
+                &index,
+                &options.base_path,
+                &mut highlighter,
+                &timing.chapters,
+            )
+            .write();
             errors.extend(problems);
             rendered.push(Lesson {
                 phase: lesson.phase.clone(),
@@ -117,6 +126,8 @@ pub fn compile(sources: &Sources, options: &Options) -> Result<Compiled, Vec<Pro
                 route: lesson.route(),
                 headings: lesson.headings.clone(),
                 html,
+                duration: timing.duration,
+                chapters: timing.chapters.clone(),
             });
         }
     }
@@ -176,7 +187,8 @@ fn check_lessons(
     sources: &Sources,
     errors: &mut Vec<Problem>,
     warnings: &mut Vec<Problem>,
-) {
+) -> BTreeMap<String, Timing> {
+    let mut timings = BTreeMap::new();
     let mut lesson_of = BTreeMap::new();
     let mut parsed_outlines: BTreeMap<&str, Outline> = BTreeMap::new();
     for (slug, (path, text)) in outlines {
@@ -184,7 +196,7 @@ fn check_lessons(
             Ok(outline) => {
                 parsed_outlines.insert(slug, outline);
             }
-            Err(problem) => errors.push(problem),
+            Err(problems) => errors.extend(problems),
         }
     }
 
@@ -245,7 +257,104 @@ fn check_lessons(
             )),
             Some(_) => {}
         }
+        if let Some(timing) = timing(lesson, outline, &outline_path, errors) {
+            timings.insert(lesson.path.clone(), timing);
+        }
     }
+    timings
+}
+
+/// A lesson's video length and its chapters: when each of its parts starts.
+pub struct Timing {
+    pub duration: u32,
+    pub chapters: Vec<Chapter>,
+}
+
+/// Each part of the lesson (the opening text, then each `##` section) starts
+/// at an outline point, listed in `sections`; the time comes from the outline.
+fn timing(
+    lesson: &Parsed,
+    outline: &Outline,
+    outline_path: &str,
+    errors: &mut Vec<Problem>,
+) -> Option<Timing> {
+    let path = lesson.path.as_str();
+    let Some(sections) = &lesson.sections else {
+        errors.push(problem(
+            path,
+            "the front matter has no sections: list the outline point each part of the lesson starts at, the opening text first, then each ## section",
+        ));
+        return None;
+    };
+    let titled: Vec<_> = lesson
+        .headings
+        .iter()
+        .filter(|heading| heading.depth == 2)
+        .collect();
+    let parts = titled.len() + usize::from(lesson.has_opening);
+    if sections.len() != parts {
+        let opening = if lesson.has_opening {
+            "the opening text and "
+        } else {
+            ""
+        };
+        errors.push(problem(
+            path,
+            format!(
+                "sections lists {} points, but the lesson has {parts} parts: {opening}{} ## sections",
+                sections.len(),
+                titled.len()
+            ),
+        ));
+        return None;
+    }
+    let mut starts = Vec::new();
+    for (index, &point) in sections.iter().enumerate() {
+        let Some(&start) = (point as usize)
+            .checked_sub(1)
+            .and_then(|i| outline.starts.get(i))
+        else {
+            errors.push(problem(
+                path,
+                format!(
+                    "sections names point {point}, but {outline_path} has points 1 to {}",
+                    outline.starts.len()
+                ),
+            ));
+            return None;
+        };
+        if index > 0 && point <= sections[index - 1] {
+            errors.push(problem(
+                path,
+                format!(
+                    "sections follow the video: point {point} can't come after point {}",
+                    sections[index - 1]
+                ),
+            ));
+            return None;
+        }
+        starts.push(start);
+    }
+    let mut chapters = Vec::new();
+    let mut starts = starts.into_iter();
+    if lesson.has_opening {
+        chapters.push(Chapter {
+            title: lesson.title.clone(),
+            id: None,
+            start: starts.next()?,
+        });
+    }
+    for (heading, start) in titled.into_iter().zip(starts) {
+        chapters.push(Chapter {
+            title: heading.text.clone(),
+            id: Some(heading.id.clone()),
+            start,
+        });
+    }
+    Some(Timing {
+        duration: outline.duration,
+        chapters,
+    })
 }
 
 /// Lessons and quizzes `course.toml` plans that don't exist yet: listed while

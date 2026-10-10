@@ -109,6 +109,38 @@ pub fn is_numbered_slug(stem: &str) -> bool {
         })
 }
 
+/// A time in a video, written `m:ss` or `h:mm:ss`, in seconds.
+pub fn video_time(text: &str) -> Option<u32> {
+    let number = |part: &str| {
+        let digits = !part.is_empty() && part.bytes().all(|byte| byte.is_ascii_digit());
+        digits.then(|| part.parse::<u32>().ok()).flatten()
+    };
+    // Minutes after hours, and seconds, are two digits under 60.
+    let two = |part: &str| {
+        (part.len() == 2)
+            .then(|| number(part))
+            .flatten()
+            .filter(|n| *n < 60)
+    };
+    match text.split(':').collect::<Vec<_>>().as_slice() {
+        [minutes, seconds] => Some(number(minutes)? * 60 + two(seconds)?),
+        [hours, minutes, seconds] => {
+            Some(number(hours)? * 3600 + two(minutes)? * 60 + two(seconds)?)
+        }
+        _ => None,
+    }
+}
+
+/// Seconds as the app writes a time: `01:30`, or `1:02:05` past an hour.
+pub fn format_time(seconds: u32) -> String {
+    let (hours, minutes, rest) = (seconds / 3600, seconds % 3600 / 60, seconds % 60);
+    if hours > 0 {
+        format!("{hours}:{minutes:02}:{rest:02}")
+    } else {
+        format!("{minutes:02}:{rest:02}")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,5 +170,46 @@ mod tests {
         assert!(!is_numbered_slug("hello"));
         assert!(!is_numbered_slug("1-hello"));
         assert!(!is_numbered_slug("01-Hello"));
+    }
+
+    #[test]
+    fn reads_video_times_written_as_minutes_or_hours() {
+        for (text, seconds) in [
+            ("0:42", 42),
+            ("2:47", 167),
+            ("15:28", 928),
+            ("1:02:05", 3725),
+        ] {
+            assert_eq!(video_time(text), Some(seconds), "{text}");
+        }
+    }
+
+    #[test]
+    fn refuses_what_isnt_a_video_time() {
+        for text in [
+            "",
+            "42",
+            "0:4",
+            "2:60",
+            "1:2:05",
+            "1:02:60",
+            "a:bc",
+            "-1:00",
+            "1:00:00:00",
+        ] {
+            assert_eq!(video_time(text), None, "{text}");
+        }
+    }
+
+    #[test]
+    fn writes_times_the_way_the_app_shows_them() {
+        for (seconds, text) in [
+            (0, "00:00"),
+            (90, "01:30"),
+            (928, "15:28"),
+            (3725, "1:02:05"),
+        ] {
+            assert_eq!(format_time(seconds), text);
+        }
     }
 }
