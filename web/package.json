@@ -8,7 +8,7 @@
   "scripts": {
     "content": "cargo xtask content",
     "dev": "bun run content && react-router dev",
-    "build": "bun run content && react-router build",
+    "build": "bun run content && react-router build && bun csp.ts",
     "check": "react-router typegen && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
