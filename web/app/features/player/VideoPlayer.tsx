@@ -1,7 +1,7 @@
 import { PlayIcon } from "lucide-react";
 import { type RefObject, useEffect, useRef, useState } from "react";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ChapterBar } from "./ChapterBar";
+import type { ChapterMark } from "./chapter-bar";
 import { createPlayer, formatTime, type Player, type PlayerStatus } from "./player";
 
 /** Every video in the course is from his channel (decision D16). */
@@ -10,13 +10,6 @@ export const CHANNEL = "Let's Get Rusty";
 /** A request to play from a moment. Each click makes a new one, so the same time twice plays from it twice. */
 export interface SeekRequest {
   seconds: number;
-}
-
-/** A chapter on the strip: a part of the lesson and when it starts, in seconds. */
-export interface ChapterMark {
-  title: string;
-  id: string | null;
-  start: number;
 }
 
 interface VideoPlayerProps {
@@ -36,8 +29,8 @@ interface VideoPlayerProps {
  * The lesson's video. Until the student presses play it's a facade, the
  * thumbnail and a play button, and nothing loads from YouTube but the image.
  * YouTube's embed rules forbid drawing over the player, so what we add sits in
- * a strip under it: where the video is, and a marker per chapter that plays
- * from there (decisions D16 and D34).
+ * a strip under it: where the video is, split into the lesson's chapters
+ * (ChapterBar, decisions D16 and D34).
  */
 export function VideoPlayer({
   video,
@@ -92,7 +85,6 @@ export function VideoPlayer({
   const length = status && status.duration > 0 ? status.duration : duration;
   const time = status?.time ?? 0;
   const where = length > 0 ? `${formatTime(time)} of ${formatTime(length)}` : null;
-  const percent = length > 0 ? (time / length) * 100 : 0;
 
   return (
     <figure className="flex flex-col gap-2">
@@ -124,47 +116,22 @@ export function VideoPlayer({
           </button>
         )}
       </div>
-      <div className="relative">
-        {/* shadcn's Progress draws `value` but doesn't hand it to Radix's root,
-            so the value screen readers get is set here. */}
-        <Progress
-          aria-label="Position in the video"
-          value={percent}
-          aria-valuenow={Math.round(percent)}
-          aria-valuetext={where ?? "Not started"}
-          className="h-1.5"
+      {length > 0 ? (
+        <ChapterBar
+          title={title}
+          chapters={chapters}
+          length={length}
+          time={time}
+          onSeek={(seconds) =>
+            playAt(seconds, player, pending, () => {
+              setStarted(true);
+              onStart?.();
+            })
+          }
         />
-        {length > 0 && (
-          <TooltipProvider delayDuration={150}>
-            {chapters.map((chapter) => (
-              <Tooltip key={chapter.id ?? "opening"}>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label={`Chapter: ${chapter.title}, ${formatTime(chapter.start)}`}
-                    onClick={() =>
-                      playAt(chapter.start, player, pending, () => {
-                        setStarted(true);
-                        onStart?.();
-                      })
-                    }
-                    style={{ left: `${(chapter.start / length) * 100}%` }}
-                    className="group absolute top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="h-3 w-0.5 rounded-full bg-foreground/50 transition-colors group-hover:bg-foreground group-focus-visible:bg-foreground"
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {chapter.title} · {formatTime(chapter.start)}
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </TooltipProvider>
-        )}
-      </div>
+      ) : (
+        <div className="h-6" />
+      )}
       <figcaption className="flex flex-wrap justify-between gap-x-4 text-sm text-muted-foreground">
         {where && <span className="tabular-nums">{where}</span>}
         <span>

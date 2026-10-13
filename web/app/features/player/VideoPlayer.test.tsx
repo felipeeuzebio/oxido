@@ -72,10 +72,17 @@ describe("VideoPlayer", () => {
     expect(screen.getByText("00:00 of 07:10")).toBeTruthy();
   });
 
-  it("marks each chapter on the strip at its moment, named for screen readers", async () => {
+  it("splits the strip under it into the lesson's chapters", async () => {
     await show();
-    expect(marker("Install Rust, 00:52").style.left).toBe(`${(52 / 430) * 100}%`);
-    expect(screen.getAllByRole("button", { name: /^Chapter: / })).toHaveLength(3);
+    expect(
+      screen
+        .getAllByRole("button", { name: /^Chapter: / })
+        .map((chapter) => chapter.getAttribute("aria-label")),
+    ).toEqual([
+      "Chapter: Getting started, 00:28",
+      "Chapter: Install Rust, 00:52",
+      "Chapter: Cargo, 03:54",
+    ]);
   });
 
   it("starts the video at a chapter picked before it plays", async () => {
