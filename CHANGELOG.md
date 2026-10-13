@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/felipeeuzebio/oxido/compare/v0.8.0...v0.9.0) (2026-10-13)
+
+
+### Features
+
+* **lesson:** split the video's strip into chapters, as YouTube does ([#39](https://github.com/felipeeuzebio/oxido/issues/39)) ([9249c7b](https://github.com/felipeeuzebio/oxido/commit/9249c7b3ee754d002e8704984d3eabd96b2f7d2c))
+
 ## [0.8.0](https://github.com/felipeeuzebio/oxido/compare/v0.7.0...v0.8.0) (2026-10-10)
 
 
