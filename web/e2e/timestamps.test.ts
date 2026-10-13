@@ -62,6 +62,31 @@ test("clicking the strip plays from the point clicked", async ({ page }) => {
   await expect(page.getByText(/^09:0\d of 15:28$/)).toBeVisible();
 });
 
+test("dragging along the strip scrubs across chapters and plays from where it's let go", async ({
+  page,
+}) => {
+  await fakeYouTube(page);
+  await load(page, LESSON);
+  await page.getByRole("button", { name: /Play video/ }).click();
+  await expect(page.getByText(/^00:0\d of 15:28$/)).toBeVisible();
+
+  const from = await chapter(page, "Hello, Cargo, 00:10").boundingBox();
+  const to = await chapter(page, "Your first program, 02:40").boundingBox();
+  if (!from || !to) throw new Error("no chapter boxes");
+  const y = from.y + from.height / 2;
+  await page.mouse.move(from.x + from.width / 2, y);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, y, { steps: 8 });
+  // While dragging, the tip names the chapter under the pointer, a handle
+  // marks the spot, and the video hasn't moved yet.
+  await expect(page.locator("[data-slot=chapter-tip]")).toContainText("Your first program");
+  await expect(page.locator("[data-slot=handle]")).toBeVisible();
+  await expect(page.getByText(/^00:\d\d of 15:28$/)).toBeVisible();
+  await page.mouse.up();
+  // The last chapter runs from 02:40 to 15:28; its middle is 09:04.
+  await expect(page.getByText(/^09:0\d of 15:28$/)).toBeVisible();
+});
+
 test("Enter on a chapter plays it from its start", async ({ page }) => {
   await fakeYouTube(page);
   await load(page, LESSON);
@@ -69,4 +94,18 @@ test("Enter on a chapter plays it from its start", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.getByTitle("YouTube video player")).toBeVisible();
   await expect(page.getByText(/^02:4\d of 15:28$/)).toBeVisible();
+});
+
+test.describe("on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test("tapping the strip plays from the point tapped", async ({ page }) => {
+    await fakeYouTube(page);
+    await load(page, LESSON);
+    const last = await chapter(page, "Your first program, 02:40").boundingBox();
+    if (!last) throw new Error("no chapter box");
+    await page.touchscreen.tap(last.x + last.width / 2, last.y + last.height / 2);
+    await expect(page.getByTitle("YouTube video player")).toBeVisible();
+    await expect(page.getByText(/^09:0\d of 15:28$/)).toBeVisible();
+  });
 });
