@@ -136,7 +136,6 @@ pub fn router(state: AppState) -> Router {
     let api = Router::new()
         .route("/progress", get(progress))
         .route("/classes/{id}/video", put(save_video))
-        .route("/classes/{id}/text", put(save_text))
         .route("/classes/{id}/notes", get(list_notes).post(add_note))
         .route("/notes/{id}", put(update_note).delete(delete_note))
         .route("/quizzes/{id}", put(save_quiz))
@@ -430,21 +429,6 @@ async fn save_video(
     state
         .store()
         .update_video(&id, update.seconds, update.watched)?;
-    no_content()
-}
-
-#[derive(Deserialize)]
-struct TextUpdate {
-    read: bool,
-}
-
-async fn save_text(
-    State(state): State<AppState>,
-    id: PathInput<String>,
-    update: JsonInput<TextUpdate>,
-) -> ApiResult {
-    let (id, update) = (path(id)?, body(update)?);
-    state.store().set_text_read(&id, update.read)?;
     no_content()
 }
 

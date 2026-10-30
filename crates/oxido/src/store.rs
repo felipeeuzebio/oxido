@@ -47,6 +47,66 @@ const MIGRATIONS: &[&str] = &[
         updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
     CREATE INDEX notes_by_class ON notes (class_id, id);",
+    // 2: a time for each value, so an imported file merges value by value with
+    // the newer change winning, and a global ID for each note with a marker for
+    // deleted ones, so an import can't mix notes up or bring one back (decision
+    // D18). The text lessons went with decision D35, and so did their read flag,
+    // the notes on their paragraphs, and a class row with nothing else in it.
+    // A time stays NULL until its value is first set; schema 1's one time per
+    // row goes to each value it held. SQLite can't change these columns in
+    // place, so the tables are rebuilt, as STRICT (decision D19).
+    "CREATE TABLE class_progress_v2 (
+        class_id         TEXT PRIMARY KEY,
+        video_seconds    INTEGER NOT NULL DEFAULT 0,
+        video_seconds_at TEXT,
+        video_watched    INTEGER NOT NULL DEFAULT 0,
+        video_watched_at TEXT,
+        task_marked      INTEGER NOT NULL DEFAULT 0,
+        task_marked_at   TEXT
+    ) STRICT;
+    INSERT INTO class_progress_v2
+        (class_id, video_seconds, video_seconds_at, video_watched, video_watched_at)
+        SELECT class_id,
+               video_seconds, CASE WHEN video_seconds > 0 THEN updated_at END,
+               video_watched, CASE WHEN video_watched THEN updated_at END
+        FROM class_progress WHERE video_seconds > 0 OR video_watched;
+    DROP TABLE class_progress;
+    ALTER TABLE class_progress_v2 RENAME TO class_progress;
+
+    CREATE TABLE quiz_results_v2 (
+        quiz_id      TEXT PRIMARY KEY,
+        last_correct INTEGER NOT NULL DEFAULT 0,
+        best_correct INTEGER NOT NULL DEFAULT 0,
+        total        INTEGER NOT NULL DEFAULT 0,
+        last_at      TEXT,
+        done         INTEGER NOT NULL DEFAULT 0,
+        done_at      TEXT
+    ) STRICT;
+    INSERT INTO quiz_results_v2
+        (quiz_id, last_correct, best_correct, total, last_at, done, done_at)
+        SELECT quiz_id, last_correct, best_correct, total,
+               CASE WHEN total > 0 THEN updated_at END,
+               done, CASE WHEN done THEN updated_at END
+        FROM quiz_results;
+    DROP TABLE quiz_results;
+    ALTER TABLE quiz_results_v2 RENAME TO quiz_results;
+
+    CREATE TABLE notes_v2 (
+        id         INTEGER PRIMARY KEY,
+        uid        TEXT NOT NULL UNIQUE DEFAULT (lower(hex(randomblob(16)))),
+        class_id   TEXT NOT NULL,
+        seconds    INTEGER NOT NULL,
+        body       TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        deleted_at TEXT
+    ) STRICT;
+    INSERT INTO notes_v2 (id, class_id, seconds, body, created_at, updated_at)
+        SELECT id, class_id, CAST(anchor AS INTEGER), body, created_at, updated_at
+        FROM notes WHERE anchor_kind = 'video';
+    DROP TABLE notes;
+    ALTER TABLE notes_v2 RENAME TO notes;
+    CREATE INDEX notes_by_class ON notes (class_id, id);",
 ];
 
 /// The schema version this build of `oxido` reads and writes.
@@ -84,7 +144,9 @@ pub struct Progress {
 pub struct ClassProgress {
     pub video_seconds: u32,
     pub video_watched: bool,
-    pub text_read: bool,
+    /// The class's task marked done by hand. Only the website, where tests
+    /// can't run, sets it; it's kept so an export file carries it both ways.
+    pub task_marked: bool,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
@@ -95,12 +157,11 @@ pub struct QuizProgress {
     pub done: bool,
 }
 
-/// Where a note is pinned: a moment in the video or a paragraph of the text lesson.
+/// Where a note is pinned: a moment in the video (decision D35).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum Anchor {
     Video { seconds: u32 },
-    Paragraph { id: String },
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -154,7 +215,7 @@ impl Store {
         let mut progress = Progress::default();
 
         let mut classes = self.conn.prepare(
-            "SELECT class_id, video_seconds, video_watched, text_read FROM class_progress",
+            "SELECT class_id, video_seconds, video_watched, task_marked FROM class_progress",
         )?;
         for row in classes.query_map([], |r| {
             Ok((
@@ -162,7 +223,7 @@ impl Store {
                 ClassProgress {
                     video_seconds: r.get("video_seconds")?,
                     video_watched: r.get("video_watched")?,
-                    text_read: r.get("text_read")?,
+                    task_marked: r.get("task_marked")?,
                 },
             ))
         })? {
@@ -204,9 +265,10 @@ impl Store {
     pub fn save_video_position(&self, class_id: &str, seconds: u32) -> Result<(), StoreError> {
         check_id("class", class_id)?;
         self.conn.execute(
-            "INSERT INTO class_progress (class_id, video_seconds) VALUES (?1, ?2)
+            "INSERT INTO class_progress (class_id, video_seconds, video_seconds_at)
+             VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
              ON CONFLICT (class_id) DO UPDATE SET video_seconds = excluded.video_seconds,
-               updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')",
+               video_seconds_at = excluded.video_seconds_at",
             params![class_id, seconds],
         )?;
         Ok(())
@@ -215,9 +277,10 @@ impl Store {
     pub fn mark_video_watched(&self, class_id: &str) -> Result<(), StoreError> {
         check_id("class", class_id)?;
         self.conn.execute(
-            "INSERT INTO class_progress (class_id, video_watched) VALUES (?1, 1)
+            "INSERT INTO class_progress (class_id, video_watched, video_watched_at)
+             VALUES (?1, 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
              ON CONFLICT (class_id) DO UPDATE SET video_watched = 1,
-               updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')",
+               video_watched_at = excluded.video_watched_at",
             params![class_id],
         )?;
         Ok(())
@@ -247,17 +310,6 @@ impl Store {
         Ok(())
     }
 
-    pub fn set_text_read(&self, class_id: &str, read: bool) -> Result<(), StoreError> {
-        check_id("class", class_id)?;
-        self.conn.execute(
-            "INSERT INTO class_progress (class_id, text_read) VALUES (?1, ?2)
-             ON CONFLICT (class_id) DO UPDATE SET text_read = excluded.text_read,
-               updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')",
-            params![class_id, read],
-        )?;
-        Ok(())
-    }
-
     /// Records an attempt. Keeps the latest score and the best one; if the quiz
     /// changed size since the best score, that score no longer counts.
     pub fn record_quiz(&self, quiz_id: &str, correct: u32, total: u32) -> Result<(), StoreError> {
@@ -268,15 +320,15 @@ impl Store {
             )));
         }
         self.conn.execute(
-            "INSERT INTO quiz_results (quiz_id, last_correct, best_correct, total)
-             VALUES (?1, ?2, ?2, ?3)
+            "INSERT INTO quiz_results (quiz_id, last_correct, best_correct, total, last_at)
+             VALUES (?1, ?2, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
              ON CONFLICT (quiz_id) DO UPDATE SET
                last_correct = excluded.last_correct,
                best_correct = CASE WHEN total = excluded.total
                  THEN max(best_correct, excluded.last_correct)
                  ELSE excluded.last_correct END,
                total = excluded.total,
-               updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')",
+               last_at = excluded.last_at",
             params![quiz_id, correct, total],
         )?;
         Ok(())
@@ -286,9 +338,9 @@ impl Store {
     pub fn mark_quiz_done(&self, quiz_id: &str) -> Result<(), StoreError> {
         check_id("quiz", quiz_id)?;
         self.conn.execute(
-            "INSERT INTO quiz_results (quiz_id, done) VALUES (?1, 1)
-             ON CONFLICT (quiz_id) DO UPDATE SET done = 1,
-               updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')",
+            "INSERT INTO quiz_results (quiz_id, done, done_at)
+             VALUES (?1, 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+             ON CONFLICT (quiz_id) DO UPDATE SET done = 1, done_at = excluded.done_at",
             params![quiz_id],
         )?;
         Ok(())
@@ -332,8 +384,8 @@ impl Store {
     pub fn notes(&self, class_id: &str) -> Result<Vec<Note>, StoreError> {
         check_id("class", class_id)?;
         let mut statement = self.conn.prepare(
-            "SELECT id, class_id, anchor_kind, anchor, body, created_at, updated_at
-             FROM notes WHERE class_id = ?1 ORDER BY id",
+            "SELECT id, class_id, seconds, body, created_at, updated_at
+             FROM notes WHERE class_id = ?1 AND deleted_at IS NULL ORDER BY id",
         )?;
         let notes = statement
             .query_map(params![class_id], note_from_row)?
@@ -344,16 +396,10 @@ impl Store {
     pub fn add_note(&self, new: NewNote) -> Result<Note, StoreError> {
         check_id("class", &new.class_id)?;
         let body = check_body(&new.body)?;
-        let (kind, anchor) = match &new.anchor {
-            Anchor::Video { seconds } => ("video", seconds.to_string()),
-            Anchor::Paragraph { id } => {
-                check_id("paragraph", id)?;
-                ("paragraph", id.clone())
-            }
-        };
+        let Anchor::Video { seconds } = new.anchor;
         self.conn.execute(
-            "INSERT INTO notes (class_id, anchor_kind, anchor, body) VALUES (?1, ?2, ?3, ?4)",
-            params![new.class_id, kind, anchor, body],
+            "INSERT INTO notes (class_id, seconds, body) VALUES (?1, ?2, ?3)",
+            params![new.class_id, seconds, body],
         )?;
         self.note(self.conn.last_insert_rowid())
     }
@@ -362,7 +408,7 @@ impl Store {
         let body = check_body(body)?;
         let changed = self.conn.execute(
             "UPDATE notes SET body = ?2, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-             WHERE id = ?1",
+             WHERE id = ?1 AND deleted_at IS NULL",
             params![id, body],
         )?;
         if changed == 0 {
@@ -372,9 +418,12 @@ impl Store {
     }
 
     pub fn delete_note(&self, id: i64) -> Result<(), StoreError> {
-        let changed = self
-            .conn
-            .execute("DELETE FROM notes WHERE id = ?1", params![id])?;
+        let changed = self.conn.execute(
+            // Keep the row as a marker, but drop what the note said.
+            "UPDATE notes SET body = '', deleted_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                 WHERE id = ?1 AND deleted_at IS NULL",
+            params![id],
+        )?;
         if changed == 0 {
             return Err(StoreError::NoteNotFound(id));
         }
@@ -384,8 +433,8 @@ impl Store {
     fn note(&self, id: i64) -> Result<Note, StoreError> {
         self.conn
             .query_row(
-                "SELECT id, class_id, anchor_kind, anchor, body, created_at, updated_at
-                 FROM notes WHERE id = ?1",
+                "SELECT id, class_id, seconds, body, created_at, updated_at
+                 FROM notes WHERE id = ?1 AND deleted_at IS NULL",
                 params![id],
                 note_from_row,
             )
@@ -448,18 +497,12 @@ fn migrate(conn: &mut Connection) -> Result<(), StoreError> {
 }
 
 fn note_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<Note> {
-    let kind: String = row.get("anchor_kind")?;
-    let anchor: String = row.get("anchor")?;
-    let anchor = match kind.as_str() {
-        "video" => Anchor::Video {
-            seconds: anchor.parse().unwrap_or(0),
-        },
-        _ => Anchor::Paragraph { id: anchor },
-    };
     Ok(Note {
         id: row.get("id")?,
         class_id: row.get("class_id")?,
-        anchor,
+        anchor: Anchor::Video {
+            seconds: row.get("seconds")?,
+        },
         body: row.get("body")?,
         created_at: row.get("created_at")?,
         updated_at: row.get("updated_at")?,
