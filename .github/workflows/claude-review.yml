@@ -69,11 +69,13 @@ jobs:
                remote content.
             4. Performance: the app must stay light (no heavy dependency without a reason,
                lazy-load the editor and the video player).
-            5. Course rules, when content/ or course/ changed: a text lesson covers
-               every point of its outline in content/outlines/ (the video's points, in
-               order) in the same order, without silent corrections, and never copies
-               transcripts; translations change prose and comments only and use the
-               glossary's terms.
+            5. Course rules, when content/ or course/ changed (CLAUDE.md, "Content
+               rules", decision D35): an outline in content/outlines/ lists the video's
+               points in order, in new words, with their times; a task's brief uses
+               only what the videos up to its class have taught, doesn't show the
+               solution, and corrects the video only in a clearly marked note; nothing
+               copies transcripts; translations change prose and comments only and use
+               the glossary's terms.
             6. Conventions: Conventional Commits title with a valid scope, docs updated
                when behavior or structure changed.
 
