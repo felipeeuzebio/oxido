@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/felipeeuzebio/oxido/compare/v0.10.0...v0.11.0) (2026-10-30)
+
+
+### Features
+
+* **lesson:** show the class's task beside the video ([#47](https://github.com/felipeeuzebio/oxido/issues/47)) ([69403e5](https://github.com/felipeeuzebio/oxido/commit/69403e574760a76a663d211a54d9747ca765eeee))
+
 ## [0.10.0](https://github.com/felipeeuzebio/oxido/compare/v0.9.0...v0.10.0) (2026-10-30)
 
 
