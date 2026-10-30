@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/felipeeuzebio/oxido/compare/v0.11.0...v0.12.0) (2026-10-30)
+
+
+### Features
+
+* **storage:** move the progress file to schema version 2 ([#50](https://github.com/felipeeuzebio/oxido/issues/50)) ([e8e55c7](https://github.com/felipeeuzebio/oxido/commit/e8e55c7cf4181516d5724d6ca83b362d86752bb9))
+
 ## [0.11.0](https://github.com/felipeeuzebio/oxido/compare/v0.10.0...v0.11.0) (2026-10-30)
 
 
