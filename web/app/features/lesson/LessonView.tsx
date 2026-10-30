@@ -46,8 +46,8 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
     saveView(next, browserStorage());
   };
 
-  // A section's time (the compiler's data-seek link beside its heading) plays
-  // the video from there. From Text view it brings the video back, for this
+  // A hint (the compiler's data-seek link, from `[text](video:N)`) plays the
+  // video from its moment. From Text view it brings the video back, for this
   // class only.
   const playFrom = (event: MouseEvent<HTMLElement>) => {
     const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-seek]");

@@ -4,18 +4,24 @@ import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
 import quiz from "../../../../crates/oxido-content/tests/golden/quiz.json";
 import { gradeQuiz } from "../quiz/scoring";
 import type { Question, Response } from "../quiz/types";
+import { goldenLesson } from "./golden";
 import type { Course, Lesson } from "./types";
 
 // The content compiler's golden output (crates/oxido-content/tests/golden),
 // read as the app reads it. If the compiler changes a field, `bun run check`
 // fails on these assignments until the types follow.
 const typedCourse: Course = course;
-const typedLesson: Lesson = lesson;
+const typedLesson: Lesson = goldenLesson;
 
 describe("the compiled content", () => {
   it("fits the app's course and lesson types", () => {
     expect(typedCourse.phases.map((phase) => phase.id)).toEqual(["kickoff", "p01", "p02"]);
     expect(typedLesson.route).toBe("/lesson/p01/01-hello");
+  });
+
+  // goldenLesson narrows the task's kind, which the JSON import widens.
+  it("gives the golden lesson a task of the kind it's typed as", () => {
+    expect(lesson.task.kind).toBe(goldenLesson.task.kind);
   });
 
   // JSON imports widen "MultipleChoice" to string, so quizzes are checked by

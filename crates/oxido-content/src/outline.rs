@@ -1,12 +1,13 @@
 //! Outlines, `outlines/<NN>-<slug>.md`: the points of a video in new words,
-//! which its lesson is written from and checked against (decision D24). They
-//! aren't published. The compiler reads their front matter and the time each
-//! numbered point starts at, which the lesson's sections take (decision D34).
+//! which its class is written from and checked against (decision D24). They
+//! aren't published. The compiler reads their front matter, with the video's
+//! chapters, and the time each numbered point starts at, which the chapters
+//! and the lesson's `video:N` hints take (decisions D34 and D35).
 
 use serde::Deserialize;
 
-use crate::Problem;
 use crate::text::{format_time, parse_toml, split, video_time};
+use crate::{Chapter, Problem};
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -19,6 +20,15 @@ struct Front {
     title: String,
     /// The video's length, `m:ss` or `h:mm:ss`, from the transcript.
     duration: String,
+    /// The video's chapters: the point each one starts at, and its title.
+    chapters: Option<Vec<ChapterFile>>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ChapterFile {
+    point: u32,
+    title: String,
 }
 
 pub struct Outline {
@@ -27,6 +37,8 @@ pub struct Outline {
     pub duration: u32,
     /// When each point starts, in seconds: point 1 first.
     pub starts: Vec<u32>,
+    /// The video's chapters, each starting at its point's time.
+    pub chapters: Vec<Chapter>,
 }
 
 pub fn parse(path: &str, text: &str) -> Result<Outline, Vec<Problem>> {
@@ -42,14 +54,9 @@ pub fn parse(path: &str, text: &str) -> Result<Outline, Vec<Problem>> {
         )]
     })?;
     let front: Front = parse_toml(path, doc.front_matter, 2).map_err(|problem| vec![problem])?;
-    let duration_line = doc
-        .front_matter
-        .lines()
-        .position(|line| line.trim_start().starts_with("duration"))
-        .map(|index| index + 2);
     let duration = video_time(&front.duration).ok_or_else(|| {
         vec![problem(
-            duration_line,
+            line_of(doc.front_matter, "duration"),
             format!(
                 "duration = \"{}\" isn't a length: write it as m:ss or h:mm:ss, from the transcript",
                 front.duration
@@ -110,11 +117,73 @@ pub fn parse(path: &str, text: &str) -> Result<Outline, Vec<Problem>> {
     if !problems.is_empty() {
         return Err(problems);
     }
+    let line = line_of(doc.front_matter, "chapters");
+    let chapters = chapters(front.chapters, &starts).map_err(|messages| {
+        messages
+            .into_iter()
+            .map(|message| problem(line, message))
+            .collect::<Vec<_>>()
+    })?;
     Ok(Outline {
         video: front.video,
         duration,
         starts,
+        chapters,
     })
+}
+
+/// The chapters, checked against the points: the first starts at point 1, so
+/// the strip covers the whole video, and the rest follow the video.
+fn chapters(
+    chapters: Option<Vec<ChapterFile>>,
+    starts: &[u32],
+) -> Result<Vec<Chapter>, Vec<String>> {
+    let chapters = chapters.unwrap_or_default();
+    let Some(first) = chapters.first() else {
+        return Err(vec![
+            "the front matter has no chapters: name each chapter and the point it starts at, as chapters = [{ point = 1, title = \"…\" }]".into(),
+        ]);
+    };
+    let mut problems = Vec::new();
+    if first.point != 1 {
+        problems.push(format!(
+            "the first chapter starts at point {}: start it at point 1, so the chapters cover the whole video",
+            first.point
+        ));
+    }
+    let mut out = Vec::new();
+    for (index, chapter) in chapters.iter().enumerate() {
+        let ChapterFile { point, title } = chapter;
+        if index > 0 && *point <= chapters[index - 1].point {
+            problems.push(format!(
+                "chapter “{title}” starts at point {point}, but the chapter before it starts at point {}: chapters follow the video",
+                chapters[index - 1].point
+            ));
+        }
+        match (*point as usize).checked_sub(1).and_then(|i| starts.get(i)) {
+            Some(&start) => out.push(Chapter {
+                title: title.clone(),
+                start,
+            }),
+            None => problems.push(format!(
+                "chapter “{title}” starts at point {point}, but the outline has points 1 to {}",
+                starts.len()
+            )),
+        }
+    }
+    if problems.is_empty() {
+        Ok(out)
+    } else {
+        Err(problems)
+    }
+}
+
+/// The file line a front matter key is on (the front matter starts on line 2).
+fn line_of(front_matter: &str, key: &str) -> Option<usize> {
+    front_matter
+        .lines()
+        .position(|line| line.trim_start().starts_with(key))
+        .map(|index| index + 2)
 }
 
 /// A numbered point, `12. …` at the start of a line: its number and the rest.

@@ -2,6 +2,13 @@
 video = "OX9HJsJUDxA"
 title = "ULTIMATE Rust Lang Tutorial! - Getting Started"
 duration = "07:10"
+chapters = [
+  { point = 1, title = "Getting started" },
+  { point = 2, title = "Install Rust" },
+  { point = 3, title = "Set up your editor" },
+  { point = 4, title = "Your first program" },
+  { point = 9, title = "Cargo" },
+]
 +++
 
 1. [00:28] This series goes through *The Rust Programming Language*, "the book", one chapter per video. The book is free online, and the videos go with it for people who learn better from video. This video is chapter 1.

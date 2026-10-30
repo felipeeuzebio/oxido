@@ -8,9 +8,9 @@ const apiScripts = () =>
 
 // Loaded fresh for each test, so YouTube's API starts out not loaded.
 const CHAPTERS = [
-  { title: "Getting started", id: null, start: 28 },
-  { title: "Install Rust", id: "install-rust", start: 52 },
-  { title: "Cargo", id: "cargo", start: 234 },
+  { title: "Getting started", start: 28 },
+  { title: "Install Rust", start: 52 },
+  { title: "Cargo", start: 234 },
 ];
 
 async function show() {

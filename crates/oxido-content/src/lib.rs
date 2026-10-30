@@ -18,6 +18,7 @@ mod html;
 mod lesson;
 mod outline;
 mod quiz;
+mod task;
 mod text;
 
 pub use compile::{code_blocks, compile};
@@ -146,18 +147,38 @@ pub struct Lesson {
     pub html: String,
     /// The video's length in seconds, from its outline.
     pub duration: u32,
-    /// Where each part of the lesson starts in the video (decision D34).
+    /// The video's chapters, as its outline names them (decision D35).
     pub chapters: Vec<Chapter>,
+    /// What the class asks of the student once the video is done (decision D35).
+    pub task: Task,
 }
 
-/// A part of the lesson and its moment in the video: the opening text (no
-/// heading, so no ID, and the lesson's title), then each `##` section.
+/// A chapter of the video and when it starts: the time of the outline point
+/// it starts at.
 #[derive(Debug, Clone, Serialize)]
 pub struct Chapter {
     pub title: String,
-    pub id: Option<String>,
     /// Seconds into the video.
     pub start: u32,
+}
+
+/// What a class asks of the student after the video (decision D35).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum Task {
+    /// Stripes of the class's belt, numbered as the belt numbers them.
+    Stripes { belt: String, stripes: Vec<Stripe> },
+    /// A short exercise outside minisql, for a topic it has no use for.
+    Drill { name: String },
+    /// Class 1: installing Rust and `oxido`, then `oxido init`.
+    Setup,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Stripe {
+    pub number: u32,
+    /// What the stripe adds, as `course.toml` describes it.
+    pub title: String,
 }
 
 #[derive(Debug, Clone, Serialize)]

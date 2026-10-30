@@ -2,8 +2,9 @@ import { expect, type Page, test } from "@playwright/test";
 import { fakeYouTube } from "./fake-youtube";
 import { load } from "./hydrated";
 
-// The fixture course's first lesson has three parts, which its outline starts
-// at 00:10, 01:30 and 02:40 in a 15:28 video. YouTube is faked (fake-youtube.ts).
+// The fixture course's first video has three chapters, which its outline starts
+// at 00:10, 01:30 and 02:40 in a 15:28 video, and its lesson has a hint to the
+// second. YouTube is faked (fake-youtube.ts).
 const LESSON = "/lesson/p01/01-hello";
 
 const chapter = (page: Page, name: string) =>
@@ -41,12 +42,10 @@ test("a chapter with keyboard focus shows its name and start", async ({ page }) 
   await expect(tip(page)).toHaveText("Hello, Cargo00:10");
 });
 
-test("a section's time plays the video from there", async ({ page }) => {
+test("a hint plays the video from its moment", async ({ page }) => {
   await fakeYouTube(page);
   await load(page, LESSON);
-  await page
-    .getByRole("link", { name: "Watch “Your first program” in the video, from 01:30" })
-    .click();
+  await page.getByRole("link", { name: "the demo, in the video from 01:30" }).click();
   await expect(page.getByTitle("YouTube video player")).toBeVisible();
   await expect(page.getByText(/^01:3\d of 15:28$/)).toBeVisible();
   await expect(page).toHaveURL(/01-hello$/);

@@ -1,10 +1,9 @@
 // The strip under the video, split into chapters the way YouTube splits its
 // progress bar (decision D34).
 
-/** A part of the lesson and when it starts in the video, in seconds. */
+/** A chapter of the video, as its outline names it, and when it starts, in seconds. */
 export interface ChapterMark {
   title: string;
-  id: string | null;
   start: number;
 }
 
