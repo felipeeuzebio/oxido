@@ -4,7 +4,7 @@ Reference for contributors and coding agents. Start with [`CLAUDE.md`](../CLAUDE
 
 | File | Read it when |
 |---|---|
-| [roadmap-course.md](roadmap-course.md) | working on lessons, quizzes or the Mini SQL project |
+| [roadmap-course.md](roadmap-course.md) | working on tasks, drills, quizzes or the Mini SQL project |
 | [roadmap-platform.md](roadmap-platform.md) | picking up platform work; each phase lists its "Done when" tests |
 | [architecture.md](architecture.md) | adding code: where it goes and how the pieces talk |
 | [design.md](design.md) | touching the UI: themes, tokens, type, belt colors |

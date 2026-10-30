@@ -32,7 +32,7 @@ Run one by hand with `bunx lefthook run pre-commit`. CI runs the same checks, so
 
 ## Content contributions
 
-Lessons and quizzes follow the rules in [docs/roadmap-course.md](docs/roadmap-course.md#class-format). In short: same teachings as the video, in your own words, with no transcript text.
+Task briefs, outlines and quizzes follow the rules in [docs/roadmap-course.md](docs/roadmap-course.md#class-format). In short: a task uses only what the videos so far have taught, and nothing copies transcript text.
 
 ## Working with Claude
 

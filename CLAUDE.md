@@ -4,7 +4,7 @@ Guidance for Claude (and other coding agents) working in this repository. Other 
 
 ## What this is
 
-Oxidō is a course platform. Students run `oxido`, a small Rust server, in their minisql project folder; it serves the course in their own browser, keeps progress and notes in SQLite, and runs their stripe tests. The same React frontend is also published on GitHub Pages for reading, watching and quizzes. Students watch Let's Get Rusty's videos on *The Rust Programming Language*, read matching text lessons, take optional quizzes, and grow one project, `minisql`, from white belt to black belt. Read [docs/README.md](docs/README.md) for the map of the docs.
+Oxidō is a course platform. Students run `oxido`, a small Rust server, in their minisql project folder; it serves the course in their own browser, keeps progress and notes in SQLite, and runs their tasks' tests. The same React frontend is also published on GitHub Pages for watching, reading the tasks and quizzes. Students watch Let's Get Rusty's videos on *The Rust Programming Language*, and after each one do a task that grows one project, `minisql`, from white belt to black belt, or a short drill where the project has no use for the topic. Quizzes are optional. Read [docs/README.md](docs/README.md) for the map of the docs.
 
 ## Commands
 
@@ -47,17 +47,16 @@ Debug builds of `oxido` read the UI from `web/build/client` at runtime; release 
 7. **Let the React Compiler memoize.** Don't add `useMemo`, `useCallback` or `memo` by hand unless a profiler shows a need.
 8. **Write commits and PRs for the people reading them.** Commit messages, PR titles and PR descriptions can be as technical as the change needs, but they state what changed and why in plain sentences. Leave out AI writing patterns: staged contrasts ("not X, but Y"), lists of three for rhythm, inflated words, bold labels, one-line closers and filler. Check each one with the `humanizer` skill (`.agents/skills/humanizer/`) before committing or opening the PR. Don't mention the roadmaps or their phases (P3, P10) unless the change is about a roadmap itself: they're there to orient agents. The format is in `.github/commit-instructions.md` and `.github/pr-instructions.md`.
 
-## Content rules (lessons, quizzes, translations)
+## Content rules (tasks, outlines, quizzes, translations)
 
-- Text lessons teach exactly what Bogdan teaches in the matching video: same points, same order, same claims, including mistakes. Never correct him silently; a clearly marked note after his point is allowed.
-- A lesson is the video in text form, at his level: his steps, short and practical, with nothing he doesn't explain. Details of his setup that have changed since (editor menus, versions on his screen) are given as they are today, without a note.
-- The videos follow *The Rust Programming Language* chapter by chapter, and so do the lessons: the official book is the model for the facts, terms, examples and framing, ownership included, and for the register (decision D29), and Jason Walton's abridged version is the model for length. The lesson skill lists them.
-- Lessons link what they point to outside the course when it's docs, an extension, a tool or a library (the first mention, by name), never an editor or IDE.
-- Write lessons in new words with new, real-world examples. Never paste or lightly edit transcript text. Transcripts are local reference only (`transcripts/` is git-ignored).
-- Draft lessons with the `lesson` skill (`.agents/skills/lesson/`, decisions D24 and D28): an outline of the video's points first, then the lesson from it, drafted by three writers and picked by blind judges. The skill's `scripts/transcript-overlap.ts` flags wording copied from the transcript.
-- Build steps may only use Rust features taught up to that phase ([docs/roadmap-course.md](docs/roadmap-course.md)).
-- Run lesson prose through the `humanizer` skill (`.agents/skills/humanizer/`, in the repository so every agent has it) before opening the PR. The `lesson` skill does it as its last step.
-- Translations are drafted with Claude and edited by the maintainer (decision D23), in the same PR as the English lesson when possible. They change prose and comments only, never identifiers, string literals or program output, and they keep the English file's paragraphs (P9's shape check enforces this). Use the terms in [docs/glossary-pt-BR.md](docs/glossary-pt-BR.md), and add new ones there in the same PR.
+- A class is Bogdan's video followed by a task that puts it to use: one or more stripes of `minisql`, or a drill where the project has no use for the topic (decision D35). There are no text lessons.
+- A task uses only what the videos up to and including its class have taught, as the outlines' "Introduces" lists record ([docs/roadmap-course.md](docs/roadmap-course.md)).
+- A brief says what to build and what the tests check. It doesn't teach the topic again or show the solution. Its hints point at the book's section and at moments in the video, by outline point; nobody types a time.
+- Never correct Bogdan silently. When something he shows has changed since the video (an editor menu, a version on his screen) or he gets something wrong, the brief says so in a short, clearly marked note.
+- Briefs link what they point to outside the course when it's docs, an extension, a tool or a library (the first mention, by name), never an editor or IDE.
+- Outlines list his points in order, in new words, with their times, his asides and the Rust features each video introduces (decision D24). Write them with the `lesson` skill's outline step and stop there: its lesson drafting is retired (decision D35). Never paste or lightly edit transcript text. Transcripts are local reference only (`transcripts/` is git-ignored), and the skill's `scripts/transcript-overlap.ts` flags wording copied from them.
+- Run briefs through the `humanizer` skill (`.agents/skills/humanizer/`, in the repository so every agent has it) before opening the PR.
+- Translations are drafted with Claude and edited by the maintainer (decision D23), in the same PR as the English brief or quiz when possible. They change prose and comments only, never identifiers, string literals or program output, and they keep the English file's paragraphs (P9's shape check enforces this). Use the terms in [docs/glossary-pt-BR.md](docs/glossary-pt-BR.md), and add new ones there in the same PR.
 
 ## Commits by Claude
 
