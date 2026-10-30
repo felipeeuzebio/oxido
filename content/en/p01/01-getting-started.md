@@ -5,95 +5,33 @@ outline = "sha256:b28701bf8493321b9264d12d49120a30911979411f519485e9501e2e85dae0
 setup = true
 +++
 
-This series goes through [*The Rust Programming Language*](https://doc.rust-lang.org/book/), known as "the book", one chapter per video. The book is free to read online, and the videos are for those of us who would rather watch than read. This one covers [chapter 1](https://doc.rust-lang.org/book/ch01-00-getting-started.html).
+Your first task is to get the course running on your machine: Rust, an editor that understands Rust, and `oxido`, the small program that serves this course and runs your project's tests.
 
 ## Install Rust
 
-On the book's [Installation](https://doc.rust-lang.org/book/ch01-01-installation.html) page, copy the command from the Linux and macOS section, paste it into a terminal and press Enter. That's all it takes: when it finishes, it tells you Rust is installed.
+Run the command from the book's [Installation](https://doc.rust-lang.org/book/ch01-01-installation.html) page, the one he uses [when he installs Rust](video:2). Then check that Cargo answers:
 
-Windows has its own steps on the same page, and if anything goes wrong, the page's [Troubleshooting](https://doc.rust-lang.org/book/ch01-01-installation.html#troubleshooting) section is the place to look.
+```console
+$ cargo --version
+```
+
+If the terminal can't find it, it was opened before the install and still has the old `PATH`, which is what happens to him [when `rustc` isn't found](video:7). Open a new terminal. The page's [Troubleshooting](https://doc.rust-lang.org/book/ch01-01-installation.html#troubleshooting) section covers the rest.
 
 ## Set up your editor
 
-We also want a language server, which gives the editor code completion, go to definition and refactoring. The course uses VS Code only because it's what we happen to use. In VS Code, search the Extensions tab for Rust and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer). In another editor, follow rust-analyzer's [setup for other editors](https://rust-analyzer.github.io/book/other_editors.html).
+Install the [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension, as he does [in VS Code](video:3). Other editors can use it too: its manual says [how to set it up](https://rust-analyzer.github.io/book/other_editors.html).
 
-## Your first program
+> **Note:** Since the video, rust-analyzer has become the official Rust extension, so it's the first result when you search for Rust. It also comes with its language server, so VS Code no longer offers to download one.
 
-Let's start with a single Rust file, without [Cargo](https://doc.rust-lang.org/cargo/) for now. Make a folder called `hello`, move into it in the terminal, open it in your editor and create a file called `main.rs`.
+## Start the course
 
-At this point, rust-analyzer may complain that it can't find a workspace. That's only because the folder isn't a Cargo project, so we can ignore it.
+Install `oxido` with Cargo, then let it create your project:
 
-Then type this program into `main.rs`:
-
-```rust
-fn main() {
-    println!("Hello, world!");
-}
+```console
+$ cargo install --locked oxido
+$ oxido init
 ```
 
-`fn main` is the function that runs when the program starts. Inside it, `println!` prints a line. It's a macro, and a later chapter covers macros. The text can be anything you like, and the line ends with a semicolon.
+`cargo install` builds a program and puts it where your terminal finds it; the book comes back to it in chapter 14. `--locked` builds `oxido` with the exact versions of its dependencies that it was released with. `oxido init` creates a `minisql` folder, the database you'll grow from white belt to black belt, as a git repository. It also asks whether to put the project on GitHub, which is up to you.
 
-Save the file. Now let's compile it with `rustc` and run the result.
-
-```sh
-rustc main.rs
-./main
-```
-
-`rustc` produces an executable called `main`, and when we run it, you can see our `Hello, world!`.
-
-With one program written, you could put Rust on your resume and start job hunting, though it may be wise to wait: Rust jobs are still scarce, even if we expect that to change.
-
-## Cargo
-
-A single file is fine for something this small, but real projects have many files and dependencies, and something has to manage them. For Rust, that's Cargo, its build system and package manager. In other low-level languages this is a real pain point; fortunately, Cargo comes with Rust. Let's check that it's installed.
-
-```sh
-cargo --version
-```
-
-It prints a version number, so we're ready to go.
-
-Now let's create a project. We step back out of `hello` and give `cargo new` a name, and it creates a package in a folder of that name.
-
-```sh
-cd ..
-cargo new hello_rust
-```
-
-Cargo has created our package, so let's open the `hello_rust` folder in the editor and look around.
-
-First there's `Cargo.toml`, the package's configuration. Under `[package]` are its name, version and so on, and below that is a `[dependencies]` section, empty for now, where dependencies would go. If you've done web development, it plays the role of `package.json`.
-
-There's also a `.gitignore`, because Cargo makes the project a git repository. You can pick a different version control system when you create a project, but git is the default.
-
-The code lives in `src`, and `main.rs` is already there with a hello world program.
-
-Inside a Cargo project, we build with Cargo instead of calling `rustc` directly. Let's move into the folder and build it.
-
-```sh
-cd hello_rust
-cargo build
-```
-
-Now you can see two new things. `Cargo.lock` pins the exact versions of our dependencies; since we don't have any yet, there isn't much in it.
-
-There's also a `target` folder, and inside `target/debug` is our executable, `hello_rust`, along with other build files.
-
-Let's run it with Cargo.
-
-```sh
-cargo run
-```
-
-There's our `Hello, world!` again.
-
-To see everything else Cargo can do, run `cargo help`.
-
-One command worth knowing right away is `cargo check`: it checks the program for errors without producing an executable, so it's a lot faster than running it.
-
-```sh
-cargo check
-```
-
-That wraps up chapter 1.
+Run `oxido` in the `minisql` folder, and it opens the course in your browser. The course now runs from your machine, and this task is done.

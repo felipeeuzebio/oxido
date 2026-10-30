@@ -1,13 +1,15 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { goldenLesson as lesson } from "../content/golden";
+import { goldenLesson } from "../content/golden";
+import type { Lesson } from "../content/types";
 import { finishLoading } from "../player/fake-youtube";
 
-// The compiler's golden lesson: "Hello, Cargo", the first class of phase 1.
+// The compiler's golden lesson: "Hello, Cargo", the first class of phase 1,
+// whose task is the white belt's stripes 1 and 2.
 const place = { phase: "Phase 1", phaseTitle: "First Steps", label: "Class 1.1" };
 
-async function show() {
+async function show(lesson: Lesson = goldenLesson) {
   vi.resetModules();
   const { LessonView } = await import("./LessonView");
   return render(
@@ -17,9 +19,8 @@ async function show() {
   );
 }
 
-const view = (name: "Video" | "Both" | "Text") => screen.getByRole("radio", { name });
 const playButton = () => screen.queryByRole("button", { name: /Play video/ });
-const text = () => screen.queryByRole("article", { name: "Text lesson" });
+const task = () => screen.getByRole("region", { name: /belt|Drill|Set up/ });
 
 async function startVideo() {
   fireEvent.click(screen.getByRole("button", { name: /Play video/ }));
@@ -30,7 +31,6 @@ async function startVideo() {
 }
 
 beforeEach(() => {
-  localStorage.clear();
   delete window.YT;
   delete window.onYouTubeIframeAPIReady;
   for (const script of document.head.querySelectorAll("script")) script.remove();
@@ -45,31 +45,37 @@ describe("LessonView", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Hello, Cargo");
   });
 
-  it("opens in Both view, with the video and the text", async () => {
+  it("shows the video, then the class's task: its stripes and the brief", async () => {
     await show();
-    expect(view("Both").getAttribute("aria-checked")).toBe("true");
     expect(playButton()).toBeTruthy();
-    expect(text()).toBeTruthy();
+    const region = task();
+    expect(within(region).getByRole("heading", { level: 2 }).textContent).toBe(
+      "White belt, stripes 1 and 2",
+    );
+    const stripes = within(region).getAllByRole("listitem");
+    expect(stripes.map((stripe) => stripe.textContent)).toEqual([
+      "Stripe 1a prompt that reads lines",
+      "Stripe 2.exit ends the program",
+    ]);
+    const brief = within(region).getByRole("article", { name: "Brief" });
+    expect(brief.textContent).toContain("Cargo builds and runs a project.");
   });
 
-  it("shows the text alone in Text view, and takes the player down", async () => {
-    await show();
-    const player = await startVideo();
-    fireEvent.click(view("Text"));
-    expect(text()).toBeTruthy();
-    expect(screen.queryByTitle("YouTube video player")).toBeNull();
-    expect(player.destroyed).toBe(true);
+  it("names a drill as the task, with no stripes", async () => {
+    await show({ ...goldenLesson, task: { kind: "drill", name: "shadowing" } });
+    expect(within(task()).getByRole("heading", { level: 2 }).textContent).toBe("Drill: shadowing");
+    expect(within(task()).queryAllByRole("listitem")).toHaveLength(0);
   });
 
-  it("hides the text in Video view and keeps the video playing", async () => {
+  it("calls class 1's task the setup", async () => {
+    await show({ ...goldenLesson, task: { kind: "setup" } });
+    expect(within(task()).getByRole("heading", { level: 2 }).textContent).toBe("Set up the course");
+  });
+
+  it("keeps the video and the task on one page, with no view to switch to", async () => {
     await show();
-    const player = await startVideo();
-    fireEvent.click(view("Video"));
-    expect(text()).toBeNull();
-    fireEvent.click(view("Both"));
-    expect(text()).toBeTruthy();
-    expect(player.destroyed).toBe(false);
-    expect(screen.getByTitle("YouTube video player")).toBe(player.frame);
+    expect(screen.queryByRole("group", { name: "View" })).toBeNull();
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 
   describe("a hint", () => {
@@ -104,20 +110,9 @@ describe("LessonView", () => {
       act(() => players[0].ready());
       expect(players[0].time).toBe(90);
     });
-
-    it("brings the video back from Text view to play it", async () => {
-      await show();
-      fireEvent.click(view("Text"));
-      fireEvent.click(time());
-      expect(view("Both").getAttribute("aria-checked")).toBe("true");
-      const { players } = finishLoading();
-      await waitFor(() => expect(players).toHaveLength(1));
-      act(() => players[0].ready());
-      expect(players[0].time).toBe(90);
-    });
   });
 
-  it("puts the lesson's chapters on the strip under the video", async () => {
+  it("puts the video's chapters on the strip under it", async () => {
     await show();
     expect(
       screen
@@ -128,14 +123,5 @@ describe("LessonView", () => {
       "Chapter: Your first program, 01:30",
       "Chapter: Your first program, 02:40",
     ]);
-  });
-
-  it("remembers the view for the next class", async () => {
-    const first = await show();
-    fireEvent.click(view("Text"));
-    first.unmount();
-    await show();
-    await waitFor(() => expect(view("Text").getAttribute("aria-checked")).toBe("true"));
-    expect(playButton()).toBeNull();
   });
 });

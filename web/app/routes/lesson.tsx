@@ -1,4 +1,4 @@
-// A class: its video and text lesson, pre-rendered from the compiled content.
+// A class: its video and its task, pre-rendered from the compiled content.
 //
 // routes.ts registers this route only once there are lessons, so it uses React
 // Router's generic types rather than the generated ./+types/lesson.
