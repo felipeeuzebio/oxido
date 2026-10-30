@@ -247,9 +247,19 @@ describe("agent skills", () => {
     expect(literal).toEqual([]);
   });
 
+  // A class is a video and a task (decision D35), so the lesson skill writes
+  // the outline and stops there: the drafting tournament (D28) went with the
+  // text lessons, and so did the references its writers and judges read.
+  it("have the lesson skill write outlines, not lessons", () => {
+    const skill = read(".agents/skills/lesson/SKILL.md");
+    expect(skill).not.toMatch(/tournament|judges?\b|writer agents|text lesson/i);
+    expect(skill).toMatch(/^chapters = \[$/m);
+    expect(existsSync(".agents/skills/lesson/references")).toBe(false);
+  });
+
   it("use other skills only through their instructions, never by importing their files", () => {
-    // The lesson skill names the humanizer and avoid-ai-writing skills in its
-    // SKILL.md; its scripts don't load their code, so each skill updates on its own.
+    // A skill names another in its SKILL.md; its scripts don't load the other's
+    // code, so each skill updates on its own.
     const reaching = skills.flatMap((skill) => {
       const root = `.agents/skills/${skill}`;
       return readdirSync(root, { recursive: true, encoding: "utf8" })
@@ -269,7 +279,7 @@ describe("agent skills", () => {
     ["avoid-ai-writing", "Copyright (c) 2026 Conor Bronsdon"],
   ])("keep the vendored %s skill whole, with its license", (skill, copyright) => {
     // Copied unchanged from upstream (docs/sources.md has the versions), so
-    // they can be diffed against it. The lesson skill calls them; it doesn't copy them.
+    // they can be diffed against it. Agents call them; nothing copies them.
     expect(skills).toContain(skill);
     expect(read(`.agents/skills/${skill}/LICENSE`)).toContain(copyright);
   });

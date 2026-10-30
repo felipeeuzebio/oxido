@@ -144,7 +144,7 @@ Tests first: one shape-check fixture per mismatch, each with its expected error.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done, and the task briefs once P3 is: the kickoff page (with its route and the rail's Kickoff item), 44 outlines, 44 task briefs and 10 quizzes, the briefs and quizzes each with their pt-BR translation, in the same PR when possible. Each outline is written with the `lesson` skill's outline step (decision D24). Once a phase's outlines are written, its stripes are assigned to its classes, and a class left without one gets a split stripe or a drill (decision D35). Briefs go through the Humanizer skill, and every content PR through the content checklist in the PR template.
+Runs in parallel once P1 is done, and the task briefs once P3 is: the kickoff page (with its route and the rail's Kickoff item), 44 outlines, 44 task briefs and 10 quizzes, the briefs and quizzes each with their pt-BR translation, in the same PR when possible. Each outline is written with the `lesson` skill (decision D24). Once a phase's outlines are written, its stripes are assigned to its classes, and a class left without one gets a split stripe or a drill (decision D35). Briefs go through the Humanizer skill, and every content PR through the content checklist in the PR template.
 
 ### P11: Version 1.0
 
