@@ -2,18 +2,8 @@
 // progress: the belts joined end to end (decision D20), the phases, and the
 // lesson to continue with.
 import { phaseNumber } from "../content/phase";
-import type { Course, LessonSummary, Phase } from "../content/types";
-
-/**
- * What the student has done, as the roadmap reads it: how many of each phase's
- * stripes are earned, counted from the first. Empty until progress tracking
- * fills it.
- */
-export interface Progress {
-  stripes: Record<string, number>;
-}
-
-export const NO_PROGRESS: Progress = { stripes: {} };
+import type { Course, LessonSummary } from "../content/types";
+import { lastClass, NO_PROGRESS, type Progress, stripeId } from "../progress/progress";
 
 export type StripeState = "earned" | "next" | "open";
 
@@ -70,27 +60,23 @@ export interface Roadmap {
 }
 
 export function roadmap(course: Course, progress: Progress = NO_PROGRESS): Roadmap {
-  const earnedIn = (phase: Phase) =>
-    Math.min(Math.max(progress.stripes[phase.id] ?? 0, 0), phase.stripes.length);
   const phaseById = new Map(course.phases.map((phase) => [phase.id, phase]));
   const beltOf = new Map(
     course.belts.flatMap((belt) => belt.phases.map((phase) => [phase, belt.id] as const)),
   );
 
-  // Every stripe in course order, numbered within its belt. The first one not
-  // earned is next.
+  // Every stripe in course order, numbered within its belt, earned once its
+  // tests have passed. The first one not earned is next.
   const all = course.belts.flatMap((belt) => {
-    const stripes = belt.phases.flatMap((id) => {
-      const phase = phaseById.get(id);
-      if (!phase) return [];
-      const earned = earnedIn(phase);
-      return phase.stripes.map((text, i) => ({ phase: id, text, earned: i < earned }));
-    });
+    const stripes = belt.phases.flatMap((id) =>
+      (phaseById.get(id)?.stripes ?? []).map((text) => ({ phase: id, text })),
+    );
     return stripes.map((stripe, i) => ({
       ...stripe,
       belt: belt.id,
       number: i + 1,
       of: stripes.length,
+      earned: progress.stripes[stripeId(belt.id, i + 1)] !== undefined,
     }));
   });
   const first = all.find((stripe) => !stripe.earned);
@@ -113,7 +99,7 @@ export function roadmap(course: Course, progress: Progress = NO_PROGRESS): Roadm
   });
 
   const phases = course.phases.map((phase): PhaseView => {
-    const earned = earnedIn(phase);
+    const earned = all.filter((stripe) => stripe.phase === phase.id && stripe.earned).length;
     const total = phase.stripes.length;
     return {
       id: phase.id,
@@ -143,17 +129,29 @@ export function roadmap(course: Course, progress: Progress = NO_PROGRESS): Roadm
     total: belts.reduce((sum, belt) => sum + belt.total, 0),
     started: earned > 0,
     next,
-    resume: resumeAt(course, phases, next?.phase),
+    resume: resumeAt(course, phases, next?.phase, lastClass(progress)),
   };
 }
 
-// The first lesson of the phase the student is in, or of the course while that
-// phase has none. Progress tracking will open the lesson they last had open.
-function resumeAt(course: Course, phases: PhaseView[], current: string | undefined) {
+// The class the student was last in. Before any, or if the course no longer
+// has it, the first lesson of the phase they're in, or of the course while that
+// phase has none.
+function resumeAt(
+  course: Course,
+  phases: PhaseView[],
+  current: string | undefined,
+  last: string | null,
+) {
+  const view = (id: string) => phases.find((phase) => phase.id === id);
+  for (const phase of course.phases) {
+    const lesson = phase.lessons.find((candidate) => candidate.slug === last);
+    const where = view(phase.id);
+    if (lesson && where) return { lesson, phase: where };
+  }
   const withLessons = course.phases.filter((phase) => phase.lessons.length > 0);
   const phase = withLessons.find((candidate) => candidate.id === current) ?? withLessons[0];
-  const view = phases.find((candidate) => candidate.id === phase?.id);
-  return phase && view ? { lesson: phase.lessons[0], phase: view } : null;
+  const where = phase && view(phase.id);
+  return phase && where ? { lesson: phase.lessons[0], phase: where } : null;
 }
 
 /** Book chapters as a reader writes them: [1, 2, 3, 5] is "1–3, 5". */

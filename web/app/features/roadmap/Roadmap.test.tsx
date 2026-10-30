@@ -3,8 +3,8 @@ import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 import golden from "../../../../crates/oxido-content/tests/golden/course.json";
 import type { Course } from "../content/types";
+import { NO_PROGRESS, type Progress } from "../progress/progress";
 import { Roadmap } from "./Roadmap";
-import type { Progress } from "./roadmap";
 
 // The compiler's fixture course: a kickoff, then the white belt (p01, two
 // stripes and both lessons) and the yellow belt (p02, one stripe, no lessons).
@@ -20,9 +20,15 @@ function show(progress?: Progress, of: Course = course) {
 
 const section = (name: string) => screen.getByRole("region", { name });
 
+/** Progress with these stripes earned, by ID ("white.1"). */
+const earned = (...ids: string[]): Progress => ({
+  ...NO_PROGRESS,
+  stripes: Object.fromEntries(ids.map((id) => [id, "2026-10-01T10:00:00.000Z"])),
+});
+
 describe("the roadmap", () => {
   it("names the path from the first belt to the last and counts the stripes earned", () => {
-    show({ stripes: { p01: 1 } });
+    show(earned("white.1"));
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
       "From white belt to yellow belt",
     );
@@ -44,7 +50,7 @@ describe("the roadmap", () => {
     });
 
     it("seals an earned belt and moves the mark to the next", () => {
-      show({ stripes: { p01: 2 } });
+      show(earned("white.1", "white.2"));
       expect(sentences()).toEqual([
         "White belt: 2 of 2 stripes, earned",
         "Yellow belt: 0 of 1 stripe, you are here",
@@ -83,7 +89,7 @@ describe("the roadmap", () => {
     });
 
     it("says continue once a stripe is earned", () => {
-      show({ stripes: { p01: 1 } });
+      show(earned("white.1"));
       expect(within(section("Hello, Cargo")).getByText("Continue")).toBeTruthy();
     });
 
@@ -123,14 +129,14 @@ describe("the roadmap", () => {
     });
 
     it("counts a started phase's stripes and calls it in progress", () => {
-      show({ stripes: { p01: 1 } });
+      show(earned("white.1"));
       const p01 = cards()[1];
       expect(within(p01).getByText("In progress")).toBeTruthy();
       expect(within(p01).getByText("1 of 2 stripes")).toBeTruthy();
     });
 
     it("calls a phase done once its stripes are earned", () => {
-      show({ stripes: { p01: 2 } });
+      show(earned("white.1", "white.2"));
       expect(within(cards()[1]).getByText("Done")).toBeTruthy();
     });
   });
