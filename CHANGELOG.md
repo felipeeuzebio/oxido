@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/felipeeuzebio/oxido/compare/v0.9.0...v0.10.0) (2026-10-30)
+
+
+### Features
+
+* **compiler:** take chapters from the outline and tasks from lessons ([#45](https://github.com/felipeeuzebio/oxido/issues/45)) ([4b62f15](https://github.com/felipeeuzebio/oxido/commit/4b62f15c4ccc215a677ea1d0370cc388fd9b9e64))
+
 ## [0.9.0](https://github.com/felipeeuzebio/oxido/compare/v0.8.0...v0.9.0) (2026-10-13)
 
 
