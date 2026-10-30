@@ -1,6 +1,6 @@
 # Platform roadmap
 
-The platform is what students use to take the course: `oxido`, a small local server they run in their minisql folder, which serves the course in their own browser. The same frontend is also published as a website for reading, watching and quizzes. This roadmap is about building that platform. The course itself is planned in [roadmap-course.md](roadmap-course.md).
+The platform is what students use to take the course: `oxido`, a small local server they run in their minisql folder, which serves the course in their own browser. The same frontend is also published as a website for watching, reading the tasks and taking quizzes. This roadmap is about building that platform. The course itself is planned in [roadmap-course.md](roadmap-course.md).
 
 ## Test-driven, phase by phase
 
@@ -51,16 +51,18 @@ Tests first: component tests that render a fixture course; a Playwright test tha
 
 ### P3: Lesson page
 
+The lesson page shows one class: Bogdan's video, then its task (decision D35). It was first built with a text lesson beside the video, which this phase takes out.
+
 Done when:
-- The video loads only when the student presses play (facade), through a typed wrapper around the YouTube IFrame API, and unmounts in the text-only view. ✅
+- The video loads only when the student presses play (facade), through a typed wrapper around the YouTube IFrame API. ✅
 - YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules); the saved position and note markers sit in a strip under it (decision D16).
-- The text lesson renders next to it with Video / Both / Text views, and the playing video stays in view while the text scrolls (decision D33). ✅
-- Each section of the text shows its time in the video, from the outline, and plays the video from there; the strip under the player marks the sections as chapters (decision D34). ✅
+- The class's task brief sits beside the video on wide screens and under it below `lg`, where the playing video stays pinned while the brief scrolls (decisions D33 and D35). The text lesson, the Video / Both / Text switch and the `sections` front matter are gone, and lesson 1's text is replaced by its brief, the setup.
+- The outline names the video's chapters, and the strip under the player shows them (decisions D34 and D35). A hint in the brief names an outline point and plays the video from that point's time. The content compiler reads the new front matter, which names the class's stripes or drill, and fails on a stripe that `course.toml` doesn't list or an outline point that doesn't exist.
 - Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links"). ✅
 - YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Checked by hand before the phase (architecture.md, "YouTube embeds"): they do, as long as the player's iframe sends a referrer. ✅
 - Every page carries a content security policy that allows YouTube's player and thumbnails and, of inline scripts, only those the page ships (architecture.md, "Security"). ✅
 
-Tests first: the player wrapper against a fake YouTube API, including that the player's iframe keeps a referrer and that time during an ad doesn't count as watched; an e2e test where clicking a timestamp seeks the player.
+Tests first: the player wrapper against a fake YouTube API, including that the player's iframe keeps a referrer and that time during an ad doesn't count as watched; compiler fixtures for the new front matter, the outline's chapters and a hint that names a missing point; an e2e test where clicking a hint seeks the player.
 
 ### P4: Progress tracking
 
@@ -68,9 +70,9 @@ The SQLite store and its API exist since P0; this phase connects them to the UI 
 
 Done when:
 - One storage interface in the frontend with two implementations: the `oxido` API, and browser storage on the website. The page picks one with `/api/health` at startup.
-- Progress rules: video watched at 90% (or marked), text read when the end is reached (or marked), quiz done or marked done, a stripe earned when its test group passes, a belt earned when all of its stripes are.
-- Resume where the student left off: the roadmap's belt, phase cards and Continue card show the student's progress, and the Continue card opens the lesson they last had open, with its video and text progress bars.
-- Export and import progress and notes as a file, including between the website and `oxido` (decision D18): the export is a copy of the SQLite database, and import merges instead of replacing. Schema version 2 adds global note IDs, deleted-note markers and per-value timestamps, and rebuilds the tables it touches as `STRICT` (decision D19).
+- Progress rules: video watched at 90% (or marked), a class's task done when its stripes are earned or its drill passes (marked by hand on the website, where tests can't run; decision D35), quiz done or marked done, a stripe earned when its test group passes, a belt earned when all of its stripes are.
+- Resume where the student left off: the roadmap's belt, phase cards and Continue card show the student's progress, and the Continue card opens the lesson they last had open, with its video's progress bar and its task's state.
+- Export and import progress and notes as a file, including between the website and `oxido` (decision D18): the export is a copy of the SQLite database, and import merges instead of replacing. Schema version 2 adds global note IDs, deleted-note markers and per-value timestamps, drops the text-read flag (decision D35), and rebuilds the tables it touches as `STRICT` (decision D19).
 
 Tests first: progress rules as pure functions; one contract test suite that runs against both implementations; merge tests where each side has newer changes, a deleted note, and a file from a newer schema.
 
@@ -86,12 +88,13 @@ Tests first: page flow component tests; an e2e test that finishes a quiz with on
 
 ### P6: Notes
 
+Notes pin to a time in the video. Notes on paragraphs went with the text lessons (decision D35).
+
 Done when:
 - Video notes are saved at the current timestamp and seek the player when clicked.
-- Text notes anchor to a paragraph ID plus a quote selector (prefix, exact, suffix), survive edits to the lesson, and fall back to an "unplaced notes" list instead of disappearing.
 - Notes export to Markdown, per lesson.
 
-Tests first: re-anchoring tests for edited, moved and deleted paragraphs.
+Tests first: a note keeps the time it was saved at and seeks the player there; the Markdown export of a lesson's notes, in time order.
 
 ### P7: Quiz code editor
 
@@ -104,21 +107,24 @@ Done when:
 
 Tests first: runner integration test against a real crate (CI); unit tests for timeouts and cancellation.
 
-### P8: Build steps and stripe tests
+### P8: Tasks, stripe tests and drills
+
+Each class's task is one or more stripes or a drill (decision D35). This phase makes them run.
 
 Done when:
 - `course/minisql/` has a starter, a reference solution and a stripe test file per stripe (`tests/stripe_NN.rs`) for each belt.
-- `oxido init` creates the starter in a new folder with an `oxido.toml` (the file `oxido` looks for to find the project), runs `git init` with a first commit, and offers to put it on GitHub, public or private (decision D17). `oxido check` runs the current stripe in the terminal.
-- `oxido` watches the student's files, reruns the current stripe's tests and `cargo clippy` on save (stale runs cancelled), parses the output, records stripe passes, and pushes results to the page with server-sent events.
-- The build step page shows Tests, Problems (clippy) and Output tabs. File and line references are `vscode://file/<path>:<line>` links, so the browser opens VS Code and `oxido` starts no process for it.
-- CI proves every reference solution passes its stripe tests and every starter fails them.
-- Build joins the rail.
+- `course/drills/` has a starter, a reference solution and tests for each drill. Each drill is its own workspace (an empty `[workspace]` table), so `minisql`'s workspace never takes it in.
+- `oxido init` creates the starter in a new folder with an `oxido.toml` (the file `oxido` looks for to find the project) and the drills' starters in `drills/`, runs `git init` with a first commit, and offers to put it on GitHub, public or private (decision D17). `oxido check` runs the current task's tests in the terminal. Class 1's task, the setup, is done once `oxido` serves the new project.
+- `oxido` watches the student's files, reruns the current task's tests (the class open in the browser, or else the first task not done) and `cargo clippy` on save (stale runs cancelled), parses the output, records stripe and drill passes, and pushes results to the page with server-sent events.
+- With `oxido`, the lesson page shows the task's Tests, Problems (clippy) and Output tabs under its brief. File and line references are `vscode://file/<path>:<line>` links, so the browser opens VS Code and `oxido` starts no process for it.
+- CI proves every reference solution passes its tests and every starter fails them, drills included.
+- Build joins the rail and opens the current task.
 
-Tests first: the CI check above is written before any belt content; the test-output parser gets fixture outputs from real `cargo test` runs.
+Tests first: the CI check above is written before any belt or drill content; the test-output parser gets fixture outputs from real `cargo test` runs.
 
 ### P9: Translations (en, pt-BR)
 
-Lessons and quizzes are translated by hand, with Claude's help (decision D23). This phase builds the checks that keep translations correct, and the language switch.
+Task briefs and quizzes are translated by hand, with Claude's help (decision D23). This phase builds the checks that keep translations correct, and the language switch.
 
 Done when:
 - English content lives in `content/en/` and each translation in a folder named after its language, such as `content/pt-BR/`, with the same file names. Phase titles and stripe descriptions from `course.toml` are translated in `content/pt-BR/course.toml`, keyed by phase ID.
@@ -128,17 +134,17 @@ Done when:
   - a paragraph's inline code spans or link targets differ;
   - a code block differs once comments are removed (blocks without comments, like program output, must match exactly).
 - Each translated file records a fingerprint of the English file it was made from (`source` in its front matter). When the English file changes, CI adds a warning naming the stale translations, without failing. Run locally, the check lists them with the English diff since each was made: it finds the version with that fingerprint in git history.
-- A lesson that has no translation is shown in English, with a short notice.
-- The app switches language at runtime without calling any AI and remembers the choice (`oxido:lang`). Until the student picks one, it follows the browser's language. Notes stay attached because paragraph IDs are shared across languages.
+- A task brief that has no translation is shown in English, with a short notice.
+- The app switches language at runtime without calling any AI and remembers the choice (`oxido:lang`). Until the student picks one, it follows the browser's language.
 - Interface text (buttons, menus, messages) comes from one typed dictionary per language in `web/app/features/i18n/`, so a key missing from pt-BR fails `bun run check`. No i18n library.
 - Code blocks carry `translate="no"`. A student who reads the course through the browser's own page translation, in a language we don't ship, still sees the code unchanged.
-- The terms in [glossary-pt-BR.md](glossary-pt-BR.md) are decided before the first translated lesson.
+- The terms in [glossary-pt-BR.md](glossary-pt-BR.md) are decided before the first translated brief.
 
 Tests first: one shape-check fixture per mismatch, each with its expected error. The fixtures cover a missing paragraph, a renamed identifier in inline code, a changed string literal in a code block, a changed correct answer, and a translated comment, which must pass. A staleness test edits the English fixture and expects the warning.
 
 ### P10: Content production
 
-Runs in parallel once P1 is done: the kickoff page (with its route and the rail's Kickoff item), 44 text lessons, 10 quizzes and 11 build steps, each with its pt-BR translation, in the same PR when possible. Each lesson is drafted with the `lesson` skill (decisions D24 and D28), which ends with a pass of the Humanizer skill, and its PR goes through the content checklist in the PR template.
+Runs in parallel once P1 is done, and the task briefs once P3 is: the kickoff page (with its route and the rail's Kickoff item), 44 outlines, 44 task briefs and 10 quizzes, the briefs and quizzes each with their pt-BR translation, in the same PR when possible. Each outline is written with the `lesson` skill's outline step (decision D24). Once a phase's outlines are written, its stripes are assigned to its classes, and a class left without one gets a split stripe or a drill (decision D35). Briefs go through the Humanizer skill, and every content PR through the content checklist in the PR template.
 
 ### P11: Version 1.0
 

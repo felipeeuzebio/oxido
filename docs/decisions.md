@@ -22,7 +22,7 @@ Small runtime, documented Tauri setup. Biome handles formatting and linting for 
 
 No AI in the app. Code blocks are never sent to the translator; comments are translated only when the code stays identical and parses. Reviewed in PRs like any other content.
 
-## D6. Text lessons follow the video, in new words (2026-09-25)
+## D6. Text lessons follow the video, in new words (2026-09-25, replaced by D35)
 
 Lessons keep Bogdan's teachings exactly (order, claims, including mistakes) but are written fresh, with new examples. No transcript text in the repository.
 
@@ -103,7 +103,7 @@ D5's build-time pipeline was set aside. It would have parsed the Markdown, hidde
 
 Also considered were a small translation model shipped with `oxido` and a hook for the student's own AI provider. Both were set aside to keep AI out of the app. If more languages or contributors arrive, a pipeline can still be added on top of the same checks.
 
-## D24. Lessons drafted with an agent skill, from a committed outline (2026-09-27)
+## D24. Lessons drafted with an agent skill, from a committed outline (2026-09-27, lesson part replaced by D35)
 
 Each lesson is drafted with the `lesson` skill (`.agents/skills/lesson/`), one class per run, in an agent session on the maintainer's machine, where the transcripts are. The skill first writes an outline of the video: Bogdan's points in order, in new words, with timestamps, notes on anything he gets wrong, his asides (jokes, reactions, how he frames a point, as `Aside:` lines, so the writers get his personality without the transcript), and the Rust features the video introduces. Then it writes the lesson from the outline. Both are committed, the outline in `content/outlines/`, and reviewed in one PR. The outline is what the lesson gets checked against: the Claude review in CI never sees the transcript, so without it nothing after the local session could check that a lesson follows the video. The skill's `scripts/transcript-overlap.ts` flags any run of 8 or more words that the outline or the lesson shares with the transcript.
 
@@ -139,7 +139,7 @@ Each branch allows one merge method, so the merge button can't be used the wrong
 
 Until now `main` was the only long-lived branch. Also considered: running release-please on `main`, so an urgent fix could go straight to `main` without the unreleased work on `develop`. That needs a merge from `main` back into `develop` after every release, as a merge commit, so `develop` would have to allow merge commits too, and any PR into it could land as all of its commits by mistake. Before 1.0, shipping a fix together with the rest of `develop` costs less.
 
-## D28. Lessons drafted as a tournament (2026-10-02)
+## D28. Lessons drafted as a tournament (2026-10-02, replaced by D35)
 
 The `lesson` skill drafts each lesson as a tournament, once its outline is written. Three writer agents draft the lesson from the outline alone, each with a different aim: the leanest lesson that still sounds like him, the closest to how he talks, and the closest to how he demonstrates. They never see the transcript, the session or an earlier version of the lesson. A gate then checks each draft: the `avoid-ai-writing` skill in detect mode, the transcript-overlap script, and `cargo xtask content` with `check-code`. Three judges rank the drafts without knowing who wrote which: one for voice (how well it teaches the way Bogdan does, in the course's own register, against the skill's voice sheet), one for fidelity to the outline (every point, in order, nothing added), and one that plays a beginner and follows each draft literally. Fidelity is a gate; among the drafts that pass it, the voice judge's top draft wins, since lessons kept reading like a careful engineer's tutorial rather than like him. The winner gets the judges' fixes and a pass of the `humanizer` skill, with the voice sheet's sample as its writing sample so it matches his voice instead of going neutral, and `avoid-ai-writing`'s mechanical check confirms that the pass left code and structure alone. Both are third-party skills (MIT), kept whole in `.agents/skills/` with their licenses and copied unchanged, so they can be updated from upstream. The `lesson` skill's instructions name them; none of its scripts load their files (`tooling.test.ts` checks). D24 still holds: the outline comes first, and a merged lesson is never regenerated.
 
@@ -147,7 +147,7 @@ Why: one agent drafting alone grades its own work. On lesson 1, its drafts drift
 
 The tournament came from a separate, general skill for project-based coding courses, folded into the `lesson` skill so drafting has one set of rules. Its teaching template (predict-the-output prompts, tracing questions, Parsons problems, exercises and retrieval questions) was cut: a lesson is the video in text form, and those activities belong in the quizzes and the build steps.
 
-## D29. The official book is the model for the lessons' content and register (2026-10-07)
+## D29. The official book is the model for the lessons' content and register (2026-10-07, replaced by D35)
 
 Bogdan's videos are tied to the official book more closely than to any other version: he follows its chapters in order and demonstrates its own examples on screen (`first_word`, `Rectangle`, the `Summary` trait with `Tweet` and `NewsArticle`, `longest`, the cons list, the blog post), teaches through the compiler errors it shows, and draws the diagrams it draws. Even his ownership video expands the book's own framing: garbage collection, managing memory yourself, and Rust's "third approach". What he adds is delivery: the live demo, pros-and-cons tables, an occasional example of his own, and jokes. So the official book is the model for a lesson's facts, terms, order, examples and framing, and its register, friendly and direct with "we" and "let's", is the register lessons write in: a notch more formal than his speech, in the course's own voice rather than a copy of his.
 
@@ -175,7 +175,7 @@ Ctrl+K, or ⌘K, opens a command palette that lists the pages, every written les
 
 Also considered: single-key shortcuts such as `g r` for the roadmap and `g l` for a lesson, with a `?` sheet listing them. They would fire while students type notes or code, WCAG 2.1.4 asks for a way to turn them off or remap them, and the palette reaches the same places. Previous and next lesson keys can come with the lesson page if it needs them.
 
-## D33. Lesson views: one grid, and the playing video pinned on narrow screens (2026-10-09)
+## D33. Lesson views: one grid, and the playing video pinned on narrow screens (2026-10-09, view switch replaced by D35)
 
 The lesson page shows Video, Both or Text, and the choice is remembered in the browser (`oxido:view`). Both and Video are the same two-column grid with the text column hidden in Video, so switching between them keeps the video playing: YouTube's player reloads, and restarts the video, whenever its iframe moves to another parent. That's why the views don't use `Resizable` panels, which design.md listed: the panels would differ between views. Text takes the player down.
 
@@ -183,9 +183,26 @@ Where the text runs below the video (below Tailwind's `lg` breakpoint), the vide
 
 Also considered: a floating player in a corner, which at YouTube's minimum size covers most of a phone's width and sits over the text being read; and no mini player at all, which leaves students scrolling back up to see the video.
 
-## D34. Video times come from the outline: each section's time, and chapters on the strip (2026-10-09)
+## D34. Video times come from the outline: each section's time, and chapters on the strip (2026-10-09, section times replaced by D35)
 
 The outline already records when Bogdan makes each point, taken from the transcript (D24). A lesson's front matter lists the outline point each part starts at, `sections = [1, 2, 3, 4, 9]`: the opening text, then each `##` section. The compiler takes each part's time from that point and checks the list: one point per part, points the outline has, in the video's order. It also checks the outline's times: numbered in order, following the video, inside its length, which the outline now records as `duration`. Nobody types a time into a lesson. Each section heading shows its time and plays the video from there, and the strip under the player is split into the parts as chapters, the way YouTube splits its progress bar: a segment per part that thickens and names the chapter under the pointer or on focus, and that scrubs: the video plays from where a click or a drag lets go. With the length known at build time, the strip shows the chapters before the video has loaded.
 
 Also considered: times typed into the lesson's Markdown (`[2:47](#t=2:47)`), which nothing filled in and which would drift from the outline; a marker on each paragraph, which follows the video more closely but puts a marker in every paragraph; and marking the part being played, or scrolling the text along with the video, which are left out for now.
 
+## D35. A task after each video instead of a text lesson (2026-10-30)
+
+This replaces D6, D28, D29 and the lesson part of D24, and changes parts of D33 and D34. A class is now Bogdan's video followed by a task that puts it to use, without a text lesson.
+
+The lessons repeated what students already had. Each one followed its video point by point with the official book as its model (D29), and the videos follow the book as well, so a student met the same material three times. They were also the most expensive part of the course: only one of the 44 had been written, each took about seven agent runs (D28) and then a translation (D23), and retelling someone else's video in new words without copying it needed the strictest rules in the repository. Most of the tasks were planned already, since D9 sized the stripes at roughly one per video.
+
+How a class works now:
+
+- Each class has one task: one or more stripes of its belt, or a drill where minisql has no natural use for the topic (so far unsafe Rust and procedural macros). Class 1's task is the setup: install Rust and `oxido`, then run `oxido init`. Stripes are assigned to classes as the outlines are written. Where a phase has more classes than stripes, a stripe is split or a class gets a drill, so D9's counts may move.
+- A task uses only what the videos up to and including its class have taught, which the outlines' "Introduces" lists record.
+- The brief says what to build and what the tests check. It doesn't teach the topic again or show the solution. Its hints point at the book's section and at moments in the video: a hint names an outline point, and the compiler turns it into a link that plays the video from that point's time. When something he shows has changed since the video, or he gets something wrong, the brief says so in a short, clearly marked note.
+- A drill is a small crate in `drills/<name>/` in the student's project: a function stubbed out with `todo!()` and its tests, 10 to 20 minutes of work. Each drill is its own workspace (an empty `[workspace]` table), so the workspace minisql becomes at purple belt never takes it in. `oxido` runs a drill's tests the way it runs a stripe's. A passed drill completes its class but earns no stripe, so a belt still means minisql works. Tests check behavior only, so a student who passes the unsafe drill without a raw pointer still passes.
+- A class is done when its task passes. On the website, where tests can't run, the student marks it done.
+
+The outlines stay (D24): his points in order, in new words, with their times. Besides checking the tasks, they now give the strip under the player its chapters. The outline names each chapter and the point it starts at, so D34's rule holds and nobody types a time. The lesson page keeps its name and route. It loses the Video / Both / Text switch (D33); the grid stays, with the brief beside the video on wide screens and under it below `lg`, where the playing video stays pinned. Quizzes, notes on video times, the export file and translations by hand (D23) stay, and translations now cover the briefs, the quizzes and `course.toml`. Lesson 1's text goes, along with the `sections` front matter, notes pinned to paragraphs, the "text read" progress flag and the `lesson` skill's drafting tournament. The skill keeps its outline step.
+
+Also considered: keeping the text lessons with the tasks after them, which keeps every cost above for material the video and the book already cover; and linking the book's section in place of the text, with no task, which leaves the project as a separate step at the end of each phase.
