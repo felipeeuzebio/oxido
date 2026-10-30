@@ -7,9 +7,9 @@ const platform = [
   "core", //     crates/oxido-core (pure logic: no I/O)
   "ui", //       shared React components, layout, theming
   "roadmap", //  home screen: belts, phases, "Continue"
-  "lesson", //   lesson page: video player + text lesson
+  "lesson", //   lesson page: video player + the class's task
   "quiz", //     quiz engine and results page
-  "notes", //    video and paragraph notes
+  "notes", //    notes on the video
   "progress", // progress tracking and export/import
   "storage", //  SQLite store (oxido) and browser storage (website)
   "editor", //   CodeMirror editor and the clippy runner
@@ -21,7 +21,7 @@ const platform = [
 /** Course content */
 const content = [
   "compiler", // crates/oxido-content and cargo xtask: the content compiler and its commands
-  "content", // lessons, their outlines, quizzes and course.toml
+  "content", // task briefs, outlines, quizzes and course.toml
   "minisql", // the Mini SQL project: reference solutions and belt tests
 ];
 

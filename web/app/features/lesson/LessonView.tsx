@@ -1,4 +1,4 @@
-import { type MouseEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import {
   Breadcrumb,
@@ -8,125 +8,66 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "../content/types";
 import { type SeekRequest, VideoPlayer } from "../player/VideoPlayer";
 import type { LessonPlace } from "./place";
-import { browserStorage, isView, savedView, saveView, VIEWS, type View } from "./views";
-
-const NAMES: Record<View, string> = { video: "Video", both: "Both", text: "Text" };
-
-const WIDTH: Record<View, string> = { video: "max-w-5xl", both: "max-w-7xl", text: "max-w-3xl" };
+import { TaskBrief } from "./TaskBrief";
 
 /**
- * A class: the video, the text lesson, or both side by side. Both and Video
- * share one layout that only changes its columns, so switching between them
- * keeps the video playing; YouTube's player would restart if its iframe moved.
- * Text takes the player down. Below lg the video sits above the text, and once
- * it has started it stays pinned to the top while the text scrolls under it
- * (decision D33).
+ * A class: the video, then its task (decision D35), side by side on wide
+ * screens. Below lg the video sits above the task, and once it has started it
+ * stays pinned to the top while the brief scrolls under it (decision D33).
  */
 export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPlace }) {
-  const [view, setView] = useState<View>("both");
   const [started, setStarted] = useState(false);
   const [seek, setSeek] = useState<SeekRequest>();
 
-  // Pre-rendered pages can't read the browser's storage, so the saved view
-  // applies once the page is running.
-  useEffect(() => {
-    setView(savedView(browserStorage()));
-  }, []);
-
-  const pick = (next: string) => {
-    // Pressing the selected view again unselects it in a ToggleGroup; keep it.
-    if (!isView(next)) return;
-    if (next === "text") setStarted(false);
-    setView(next);
-    saveView(next, browserStorage());
-  };
-
-  // A hint (the compiler's data-seek link, from `[text](video:N)`) plays the
-  // video from its moment. From Text view it brings the video back, for this
-  // class only.
-  const playFrom = (event: MouseEvent<HTMLElement>) => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-seek]");
-    if (!link) return;
-    event.preventDefault();
-    const seconds = Number(link.dataset.seek);
-    if (view === "text") setView("both");
+  // A hint in the brief plays the video from its moment, starting it if needed.
+  const playFrom = (seconds: number) => {
     setStarted(true);
     setSeek({ seconds });
   };
 
   return (
-    <div
-      className={cn("mx-auto flex w-full flex-col gap-8 px-4 py-8 md:px-10 md:py-12", WIDTH[view])}
-    >
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <Breadcrumb aria-label="Breadcrumb">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/">Roadmap</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem title={place.phaseTitle}>{place.phase}</BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{place.label}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h1 className="text-3xl font-bold md:text-4xl">{lesson.title}</h1>
-        </div>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          aria-label="View"
-          value={view}
-          onValueChange={pick}
-        >
-          {VIEWS.map((option) => (
-            <ToggleGroupItem key={option} value={option} className="px-4">
-              {NAMES[option]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 md:px-10 md:py-12">
+      <header className="flex flex-col gap-2">
+        <Breadcrumb aria-label="Breadcrumb">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Roadmap</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem title={place.phaseTitle}>{place.phase}</BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{place.label}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <h1 className="text-3xl font-bold md:text-4xl">{lesson.title}</h1>
       </header>
 
-      <div className={cn("grid gap-8", view === "both" && "lg:grid-cols-2 lg:items-start")}>
-        {view !== "text" && (
-          <div
-            key="video"
-            className={cn(
-              "lg:sticky lg:top-6",
-              started &&
-                "max-lg:sticky max-lg:top-0 max-lg:z-10 max-lg:border-b max-lg:bg-background max-lg:py-2",
-            )}
-          >
-            <VideoPlayer
-              video={lesson.video}
-              title={lesson.title}
-              duration={lesson.duration}
-              chapters={lesson.chapters}
-              onStart={() => setStarted(true)}
-              seek={seek}
-            />
-          </div>
-        )}
-        {/* biome-ignore lint/a11y/useKeyWithClickEvents: only the links inside react, and Enter on a link fires click too */}
-        <article
-          key="text"
-          aria-label="Text lesson"
-          hidden={view === "video"}
-          className="lesson flex min-w-0 flex-col gap-4"
-          onClick={playFrom}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: the content compiler's output; it escapes raw HTML in lessons (crates/oxido-content)
-          dangerouslySetInnerHTML={{ __html: lesson.html }}
-        />
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
+        <div
+          className={cn(
+            "lg:sticky lg:top-6",
+            started &&
+              "max-lg:sticky max-lg:top-0 max-lg:z-10 max-lg:border-b max-lg:bg-background max-lg:py-2",
+          )}
+        >
+          <VideoPlayer
+            video={lesson.video}
+            title={lesson.title}
+            duration={lesson.duration}
+            chapters={lesson.chapters}
+            onStart={() => setStarted(true)}
+            seek={seek}
+          />
+        </div>
+        <TaskBrief task={lesson.task} html={lesson.html} onPlayFrom={playFrom} />
       </div>
     </div>
   );

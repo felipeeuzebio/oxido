@@ -88,9 +88,12 @@ impl<'a> Writer<'a> {
             Node::Heading(heading) => {
                 let id = self.lesson.headings[self.headings].id.clone();
                 self.headings += 1;
-                out.push_str(&format!("<h{} id=\"{}\">", heading.depth, escape(&id)));
+                // The lesson page's h2 is the task's title, so the brief's
+                // sections sit a level under it: `##` is an h3.
+                let level = (heading.depth + 1).min(6);
+                out.push_str(&format!("<h{level} id=\"{}\">", escape(&id)));
                 self.inlines(&heading.children, out);
-                out.push_str(&format!("</h{}>", heading.depth));
+                out.push_str(&format!("</h{level}>"));
             }
             Node::Code(code) => {
                 let (language, _) = code_info(code.lang.as_deref(), code.meta.as_deref());

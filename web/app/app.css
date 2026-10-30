@@ -311,6 +311,17 @@
   .lesson .new-tab {
     @apply sr-only;
   }
+  /* A brief's sections, `##` in its Markdown: a level under the task's title
+     in the card's header, and a step below it in size. */
+  .lesson h3 {
+    @apply mt-2 text-lg font-bold;
+  }
+  /* A note in a brief (a blockquote starting with **Note:**) says where the
+     video has changed or gets something wrong (decision D35), set off by a
+     rule on its left. */
+  .lesson blockquote {
+    @apply border-l-2 pl-4;
+  }
   /* A hint links a moment in the video and shows its time after the text, in
      the timestamps' mono and --info (decision D35). */
   .lesson .video-time {

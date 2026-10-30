@@ -46,9 +46,9 @@ The scope is optional. When present, it must be one of these; any other scope fa
 | `core` | `crates/oxido-core` |
 | `ui` | shared React components, layout, theming |
 | `roadmap` | home screen: belts, phases, "Continue" |
-| `lesson` | lesson page: video player and text lesson |
+| `lesson` | lesson page: video player and the class's task |
 | `quiz` | quiz engine and results page |
-| `notes` | video and paragraph notes |
+| `notes` | notes on the video |
 | `progress` | progress tracking, export and import |
 | `storage` | the SQLite store in `oxido` and browser storage on the website |
 | `editor` | CodeMirror editor and the clippy runner |
@@ -56,7 +56,7 @@ The scope is optional. When present, it must be one of these; any other scope fa
 | `i18n` | translation checks, language switching and interface text. Translated lessons and quizzes themselves are `content` |
 | `web` | the hosted website (GitHub Pages): its build, base path and browser storage. Code in the `web/` folder otherwise takes the scope of what it is (`ui`, `lesson`, `quiz` and so on) |
 | `compiler` | the content compiler (`crates/oxido-content`) and `cargo xtask` (`crates/xtask`) |
-| `content` | lessons, their outlines, quizzes, `course.toml` |
+| `content` | task briefs, outlines, quizzes, `course.toml` |
 | `minisql` | the Mini SQL project: starters, solutions, belt tests |
 | `ci` | GitHub workflows |
 | `release` | release-please, bundling, signing |
@@ -67,7 +67,7 @@ The scope is optional. When present, it must be one of these; any other scope fa
 
 - Leave the scope out when the change spans several areas or none fits (`refactor: move the frontend into web/`), and when it would only repeat the type (`ci: ...`, not `ci(ci): ...`).
 - A file under `web/app/features/quiz/` is `quiz`, not `web`.
-- A new or edited lesson, quiz or translation is `content`. The checks and interface text around translations are `i18n`.
+- A new or edited brief, outline, quiz or translation is `content`. The checks and interface text around translations are `i18n`.
 - Dependency updates are `chore(deps): bump <name> to <version>`, development dependencies included. `deps-dev` is not a scope.
 
 ## Body

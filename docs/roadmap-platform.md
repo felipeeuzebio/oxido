@@ -49,14 +49,14 @@ Done when:
 
 Tests first: component tests that render a fixture course; a Playwright test that goes home → lesson → back.
 
-### P3: Lesson page
+### P3: Lesson page (done)
 
 The lesson page shows one class: Bogdan's video, then its task (decision D35). It was first built with a text lesson beside the video, which this phase takes out.
 
 Done when:
 - The video loads only when the student presses play (facade), through a typed wrapper around the YouTube IFrame API. ✅
-- YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules); the saved position and note markers sit in a strip under it (decision D16).
-- The class's task brief sits beside the video on wide screens and under it below `lg`, where the playing video stays pinned while the brief scrolls (decisions D33 and D35). The text lesson, the Video / Both / Text switch and the `sections` front matter are gone, and lesson 1's text is replaced by its brief, the setup.
+- YouTube's own controls stay, and nothing is drawn over the player (YouTube's embed rules, decision D16): what Oxidō adds sits in the strip under it. The strip's markers for the saved position and for notes come with progress tracking and notes (P4, P6). ✅
+- The class's task brief sits beside the video on wide screens and under it below `lg`, where the playing video stays pinned while the brief scrolls (decisions D33 and D35). The text lesson, the Video / Both / Text switch and the `sections` front matter are gone, and lesson 1's text is replaced by its brief, the setup. ✅
 - The outline names the video's chapters, and the strip under the player shows them (decisions D34 and D35). A hint in the brief names an outline point and plays the video from that point's time. The content compiler reads the new front matter, which names the class's stripes or drill, and fails on a stripe that `course.toml` doesn't list or an outline point that doesn't exist. ✅
 - Done early: inline code in the text sits on its own chip, and links that leave the course open in a new tab and say so to screen readers (design.md, "Code" and "Links"). ✅
 - YouTube embeds play when the page is served by `oxido` on 127.0.0.1 and from GitHub Pages. Checked by hand before the phase (architecture.md, "YouTube embeds"): they do, as long as the player's iframe sends a referrer. ✅
@@ -71,7 +71,7 @@ The SQLite store and its API exist since P0; this phase connects them to the UI 
 Done when:
 - One storage interface in the frontend with two implementations: the `oxido` API, and browser storage on the website. The page picks one with `/api/health` at startup.
 - Progress rules: video watched at 90% (or marked), a class's task done when its stripes are earned or its drill passes (marked by hand on the website, where tests can't run; decision D35), quiz done or marked done, a stripe earned when its test group passes, a belt earned when all of its stripes are.
-- Resume where the student left off: the roadmap's belt, phase cards and Continue card show the student's progress, and the Continue card opens the lesson they last had open, with its video's progress bar and its task's state.
+- Resume where the student left off: the roadmap's belt, phase cards and Continue card show the student's progress, and the Continue card opens the lesson they last had open, with its video's progress bar and its task's state. The strip under the player marks the saved position.
 - Export and import progress and notes as a file, including between the website and `oxido` (decision D18): the export is a copy of the SQLite database, and import merges instead of replacing. Schema version 2 adds global note IDs, deleted-note markers and per-value timestamps, drops the text-read flag (decision D35), and rebuilds the tables it touches as `STRICT` (decision D19).
 
 Tests first: progress rules as pure functions; one contract test suite that runs against both implementations; merge tests where each side has newer changes, a deleted note, and a file from a newer schema.
@@ -91,7 +91,7 @@ Tests first: page flow component tests; an e2e test that finishes a quiz with on
 Notes pin to a time in the video. Notes on paragraphs went with the text lessons (decision D35).
 
 Done when:
-- Video notes are saved at the current timestamp and seek the player when clicked.
+- Video notes are saved at the current timestamp, show as markers on the strip under the player, and seek the player when clicked.
 - Notes export to Markdown, per lesson.
 
 Tests first: a note keeps the time it was saved at and seeks the player there; the Markdown export of a lesson's notes, in time order.

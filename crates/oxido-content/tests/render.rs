@@ -38,7 +38,7 @@ fn gives_every_heading_a_unique_id() {
         .map(|heading| heading.id.as_str())
         .collect();
     assert_eq!(ids, ["your-first-program", "your-first-program-2"]);
-    assert!(html("01-hello").contains(r#"<h2 id="your-first-program-2">"#));
+    assert!(html("01-hello").contains(r#"<h3 id="your-first-program-2">"#));
 }
 
 #[test]
@@ -107,12 +107,14 @@ fn links_a_hint_to_its_moment_in_the_video() {
 }
 
 #[test]
-fn leaves_headings_without_a_time() {
+fn puts_the_briefs_sections_a_level_under_the_tasks_heading() {
+    // The lesson page's h2 is the task's title, so a `##` in the brief is an h3.
     let html = html("01-hello");
     assert!(
-        html.contains(r#"<h2 id="your-first-program">Your first program</h2>"#),
+        html.contains(r#"<h3 id="your-first-program">Your first program</h3>"#),
         "{html}"
     );
+    assert!(!html.contains("<h2"), "{html}");
     assert!(!html.contains("section-time"), "{html}");
 }
 

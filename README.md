@@ -7,7 +7,7 @@
 
 # Oxidō
 
-Oxidō is a project-based remix of Let's Get Rusty's Rust course. The name is _oxide_ (rust) plus _-dō_, "the way," as in judo, aikido and kendo. You watch Bogdan's videos on _The Rust Programming Language_, read a matching text lesson, and use each chapter to grow one project: minisql, a small SQL database that starts as a terminal prompt and ends as a multithreaded server.
+Oxidō is a project-based remix of Let's Get Rusty's Rust course. The name is _oxide_ (rust) plus _-dō_, "the way," as in judo, aikido and kendo. You watch Bogdan's videos on _The Rust Programming Language_, and after each one you put it to use on one project: minisql, a small SQL database that starts as a terminal prompt and ends as a multithreaded server.
 
 You take the course in your own browser. Run `oxido` in your minisql folder: it opens the course, keeps your progress, and reruns the current stripe's tests every time you save, a bit like rustlings with a web page. You write minisql in whatever editor you already use. If you only want to read and watch, the same course is on the website, and you don't have to install anything for that. It comes in a light and a dark theme and follows your system setting unless you pick one.
 
@@ -42,11 +42,11 @@ Each belt is split into stripes, from 4 to 6 depending on how much the belt cove
 
 ## How a class works
 
-Each class starts with Bogdan's video, embedded in the page. A text lesson follows with the same teachings in the same order, written fresh with real-world examples.
+Each class starts with Bogdan's video, embedded in the page. Beside it is your task: a short brief for the stripe or stripes of minisql that use what the video taught, or a small drill when minisql has no use for the topic. Hints in the brief jump to the moment in the video where he shows what you need. When the task's tests pass, you earn its stripes.
 
-Some classes end with a quiz. You see your results at the end, with the correct answer shown for anything you missed, and you can skip a quiz or mark it done whenever you like. Questions about code have a small editor, and `oxido` checks your answer with clippy. Each phase ends with a build step: you add a feature to minisql, and when its tests pass you earn the next stripe.
+Some classes end with a quiz. You see your results at the end, with the correct answer shown for anything you missed, and you can skip a quiz or mark it done whenever you like. Questions about code have a small editor, and `oxido` checks your answer with clippy.
 
-Your progress, your quiz results and the notes you take on video timestamps or paragraphs stay on your machine, in a small SQLite file inside your project's `.oxido/` folder.
+Your progress, your quiz results and the notes you take on video timestamps stay on your machine, in a small SQLite file inside your project's `.oxido/` folder.
 
 ## Status
 
