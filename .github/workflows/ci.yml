@@ -64,8 +64,10 @@ jobs:
       - run: cargo nextest run --workspace --locked
       - run: cargo test --workspace --doc --locked
       # The course itself: content/ passes every check of the content compiler,
-      # and every `rust` block in the lessons builds (or fails) as marked.
-      - run: cargo xtask content --out target/content-check
+      # and every `rust` block in the lessons builds (or fails) as marked. The
+      # course compiles into the runner's temp folder, since rust-cache saves
+      # target/ with only Cargo's files left in it (tooling.test.ts).
+      - run: cargo xtask content --out "$RUNNER_TEMP/content-check"
       - run: cargo xtask check-code
 
   msrv:
