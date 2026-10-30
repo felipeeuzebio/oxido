@@ -8,7 +8,7 @@
 # ///
 """
 Dump the transcripts of every video in Let's Get Rusty's "The Rust Lang Book"
-playlist so they can be used as reference material for Oxidō's text lessons.
+playlist so they can be used as reference material for Oxidō's outlines.
 
 Run from the repository root with uv, which installs the packages listed
 above on the first run:
@@ -177,7 +177,7 @@ def main() -> None:
     (out / "playlist.json").write_text(json.dumps(videos, ensure_ascii=False, indent=2), encoding="utf-8")
     ok = sum(1 for v in videos if str(v.get("status", "")).startswith("ok"))
     print(f"\nDone: {ok}/{len(videos)} transcripts in {out.resolve()}")
-    print("Draft a lesson from them with the lesson skill: .agents/skills/lesson/SKILL.md")
+    print("Write each class's outline from them with the lesson skill: .agents/skills/lesson/SKILL.md")
 
 
 if __name__ == "__main__":
