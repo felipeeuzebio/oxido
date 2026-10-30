@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/felipeeuzebio/oxido/compare/v0.12.0...v0.13.0) (2026-10-30)
+
+
+### Features
+
+* **progress:** add the progress rules and use them on the roadmap ([#52](https://github.com/felipeeuzebio/oxido/issues/52)) ([a944439](https://github.com/felipeeuzebio/oxido/commit/a944439b76d151c7d94cd42fbbaa0e9160f3887e))
+
 ## [0.12.0](https://github.com/felipeeuzebio/oxido/compare/v0.11.0...v0.12.0) (2026-10-30)
 
 
