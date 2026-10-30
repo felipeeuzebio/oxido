@@ -46,6 +46,10 @@ Write `content/outlines/NN-<slug>.md`, with the playlist position and a short sl
 video = "<videoId>"
 title = "<the video's title>"
 duration = "<m:ss>"
+chapters = [
+  { point = 1, title = "<the video's first part, from the start>" },
+  { point = <n>, title = "<each part where he moves to a new topic>" },
+]
 +++
 
 1. [mm:ss] <one point Bogdan makes, in your own words>
@@ -59,7 +63,8 @@ duration = "<m:ss>"
 - <each Rust feature or tool this video teaches for the first time, e.g. `&mut`, `cargo test`>
 ```
 
-- One line per point, in the video's order, with the time he makes it, read from the transcript's timings. Cover every point he teaches, including asides that teach something. `duration` is the video's length, the transcript JSON's `duration` in m:ss. The compiler checks that the times follow the video and end before it does, and the lesson's sections take their times from these points, so get them right.
+- One line per point, in the video's order, with the time he makes it, read from the transcript's timings. Cover every point he teaches, including asides that teach something. `duration` is the video's length, the transcript JSON's `duration` in m:ss. The compiler checks that the times follow the video and end before it does, and the chapters and the lesson's `video:N` hints take their times from these points, so get them right.
+- `chapters` are the video's parts, each starting at the point where he moves to a new topic. The strip under the player shows them the way YouTube shows chapters, so name each one for what a student would look for ("Install Rust", "Cargo"). The first starts at point 1.
 - Record his claims as he states them, mistakes included. Flag a mistake with a `Note:` line under the point; don't fix the point itself.
 - Record how he says it, too: each joke, reaction or framing that shows his personality ("luckily, Rust has this built in", a joke about putting Rust on your resume) goes in an `Aside:` line under its point, described in new words. Leave out channel talk (subscribe, see you next time). Writers never see the transcript, so this is the only way his personality reaches them.
 - Describe his code; don't reproduce it.

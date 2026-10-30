@@ -4,7 +4,9 @@
 mod common;
 
 use common::{compiled, edit, errors, lines, valid};
-use oxido_content::{CodeMode, Options, code_blocks, compile, fingerprint};
+use oxido_content::{
+    CodeMode, Compiled, Lesson, Options, Stripe, Task, code_blocks, compile, fingerprint,
+};
 
 const HELLO: &str = "en/p01/01-hello.md";
 const VARIABLES: &str = "en/p01/02-variables.md";
@@ -15,6 +17,14 @@ fn complete() -> Options {
         complete: true,
         ..Options::default()
     }
+}
+
+fn lesson<'a>(compiled: &'a Compiled, slug: &str) -> &'a Lesson {
+    compiled
+        .lessons
+        .iter()
+        .find(|lesson| lesson.slug == slug)
+        .expect("the fixture course has this lesson")
 }
 
 #[test]
@@ -232,27 +242,267 @@ fn rejects_a_link_to_a_heading_that_doesnt_exist() {
 
 const OUTLINE: &str = "outlines/01-hello.md";
 
+/// The chapters in the fixture outline's front matter.
+const CHAPTERS: &str = "chapters = [
+  { point = 1, title = \"Hello, Cargo\" },
+  { point = 2, title = \"Your first program\" },
+  { point = 3, title = \"Your first program\" },
+]
+";
+
 #[test]
-fn gives_each_part_of_a_lesson_its_time_in_the_video() {
+fn takes_the_chapters_from_the_outline() {
     let compiled = compiled(&valid());
-    let hello = compiled
-        .lessons
-        .iter()
-        .find(|lesson| lesson.slug == "01-hello")
-        .unwrap();
+    let hello = lesson(&compiled, "01-hello");
     assert_eq!(hello.duration, 928);
     let chapters: Vec<_> = hello
         .chapters
         .iter()
-        .map(|chapter| (chapter.title.as_str(), chapter.id.as_deref(), chapter.start))
+        .map(|chapter| (chapter.title.as_str(), chapter.start))
         .collect();
     assert_eq!(
         chapters,
         [
-            ("Hello, Cargo", None, 10),
-            ("Your first program", Some("your-first-program"), 90),
-            ("Your first program", Some("your-first-program-2"), 160),
+            ("Hello, Cargo", 10),
+            ("Your first program", 90),
+            ("Your first program", 160),
         ]
+    );
+}
+
+#[test]
+fn rejects_an_outline_without_chapters() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, CHAPTERS, "");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md: the front matter has no chapters: name each chapter and the point it starts at, as chapters = [{ point = 1, title = \"…\" }]"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_chapters_that_dont_start_at_the_first_point() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        OUTLINE,
+        "  { point = 1, title = \"Hello, Cargo\" },\n",
+        "",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:5: the first chapter starts at point 2: start it at point 1, so the chapters cover the whole video"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_chapter_at_a_point_the_outline_doesnt_have() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "point = 3", "point = 9");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:5: chapter “Your first program” starts at point 9, but the outline has points 1 to 3"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_chapters_out_of_the_videos_order() {
+    let mut sources = valid();
+    edit(&mut sources, OUTLINE, "point = 2", "point = 4");
+    edit(&mut sources, OUTLINE, "point = 3", "point = 2");
+    edit(&mut sources, OUTLINE, "point = 4", "point = 3");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "outlines/01-hello.md:5: chapter “Your first program” starts at point 2, but the chapter before it starts at point 3: chapters follow the video"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn gives_each_lesson_its_task() {
+    let compiled = compiled(&valid());
+    assert_eq!(
+        lesson(&compiled, "01-hello").task,
+        Task::Stripes {
+            belt: "white".into(),
+            stripes: vec![
+                Stripe {
+                    number: 1,
+                    title: "a prompt that reads lines".into(),
+                },
+                Stripe {
+                    number: 2,
+                    title: ".exit ends the program".into(),
+                },
+            ],
+        }
+    );
+    assert_eq!(
+        lesson(&compiled, "02-variables").task,
+        Task::Drill {
+            name: "shadowing".into(),
+        }
+    );
+}
+
+#[test]
+fn gives_class_1_the_setup_as_its_task() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "stripes = [1, 2]", "setup = true");
+    assert_eq!(lesson(&compiled(&sources), "01-hello").task, Task::Setup);
+}
+
+#[test]
+fn numbers_stripes_as_their_belt_does() {
+    // Purple, brown and black each span two phases, so a phase's stripes go on
+    // from the earlier phase's on the same belt, as in the stripe tests' names.
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        "course.toml",
+        "[[belts]]\nid = \"yellow\"\nphases = [\"p02\"]\n\n",
+        "",
+    );
+    edit(
+        &mut sources,
+        "course.toml",
+        "phases = [\"p01\"]",
+        "phases = [\"p02\", \"p01\"]",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: stripe 1 isn't one of phase p01's: they're the white belt's stripes 2 to 3"
+        ),
+        "{errors}"
+    );
+
+    edit(&mut sources, HELLO, "stripes = [1, 2]", "stripes = [2, 3]");
+    let compiled = compiled(&sources);
+    let Task::Stripes { stripes, .. } = &lesson(&compiled, "01-hello").task else {
+        panic!("expected stripes");
+    };
+    let numbers: Vec<_> = stripes.iter().map(|stripe| stripe.number).collect();
+    assert_eq!(numbers, [2, 3]);
+}
+
+#[test]
+fn rejects_a_lesson_without_a_task() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "stripes = [1, 2]\n", "");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: the front matter has no task: set stripes = [1, 2] (stripes of its belt), drill = \"name\" or setup = true"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_lesson_with_more_than_one_task() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        HELLO,
+        "stripes = [1, 2]\n",
+        "stripes = [1, 2]\nsetup = true\n",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: the front matter sets more than one task: keep one of stripes, drill and setup"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_stripe_its_phase_doesnt_have() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "stripes = [1, 2]", "stripes = [1, 3]");
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/01-hello.md: stripe 3 isn't one of phase p01's: they're the white belt's stripes 1 to 2"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_stripe_given_to_two_lessons() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        VARIABLES,
+        "drill = \"shadowing\"",
+        "stripes = [2]",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/02-variables.md: the white belt's stripe 2 is already the task of en/p01/01-hello.md"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_drill_name_that_isnt_one() {
+    let mut sources = valid();
+    edit(
+        &mut sources,
+        VARIABLES,
+        "drill = \"shadowing\"",
+        "drill = \"Shadow ing\"",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/02-variables.md: drill = \"Shadow ing\" isn't a drill name: use lowercase letters, digits and -"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn rejects_the_setup_in_two_lessons() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "stripes = [1, 2]", "setup = true");
+    edit(
+        &mut sources,
+        VARIABLES,
+        "drill = \"shadowing\"",
+        "setup = true",
+    );
+    let errors = errors(&sources, &Options::default());
+    assert!(
+        errors.contains(
+            "en/p01/02-variables.md: the setup is already the task of en/p01/01-hello.md"
+        ),
+        "{errors}"
+    );
+}
+
+#[test]
+fn fails_on_a_stripe_no_class_sets_when_the_course_must_be_complete() {
+    let errors = errors(&valid(), &complete());
+    assert!(
+        errors
+            .contains("course.toml: the yellow belt's stripe 1 (rows) isn't the task of any class"),
+        "{errors}"
     );
 }
 
@@ -268,9 +518,31 @@ fn rejects_a_time_written_by_hand() {
     let errors = errors(&sources, &Options::default());
     assert!(
         errors.contains(
-            "lessons don't write times: each section gets its time from the outline point it starts at (sections, in the front matter)"
+            "lessons don't write times: link a moment in the video by its outline point, as [text](video:4)"
         ),
         "{errors}"
+    );
+}
+
+#[test]
+fn rejects_a_hint_to_a_point_the_outline_doesnt_have() {
+    let mut sources = valid();
+    edit(&mut sources, HELLO, "(video:2)", "(video:9)");
+    let missing = errors(&sources, &Options::default());
+    assert!(
+        missing.contains(
+            "en/p01/01-hello.md:8: video:9 links point 9, but outlines/01-hello.md has points 1 to 3"
+        ),
+        "{missing}"
+    );
+
+    edit(&mut sources, HELLO, "(video:9)", "(video:two)");
+    let malformed = errors(&sources, &Options::default());
+    assert!(
+        malformed.contains(
+            "en/p01/01-hello.md:8: video:two isn't a point: link one by its number, as video:4"
+        ),
+        "{malformed}"
     );
 }
 
@@ -289,7 +561,7 @@ fn rejects_an_outline_point_without_a_time() {
     let errors = errors(&sources, &Options::default());
     assert!(
         errors.contains(
-            "outlines/01-hello.md:8: point 2 has no time: start it with [m:ss], when he makes it in the video"
+            "outlines/01-hello.md:13: point 2 has no time: start it with [m:ss], when he makes it in the video"
         ),
         "{errors}"
     );
@@ -302,7 +574,7 @@ fn rejects_outline_points_out_of_the_videos_order() {
     let errors = errors(&sources, &Options::default());
     assert!(
         errors.contains(
-            "outlines/01-hello.md:8: point 2 starts at 00:05, before point 1 (00:10): the points follow the video"
+            "outlines/01-hello.md:13: point 2 starts at 00:05, before point 1 (00:10): the points follow the video"
         ),
         "{errors}"
     );
@@ -315,7 +587,7 @@ fn rejects_an_outline_point_after_the_video_ends() {
     let errors = errors(&sources, &Options::default());
     assert!(
         errors.contains(
-            "outlines/01-hello.md:9: point 3 starts at 16:00, after the video ends (15:28)"
+            "outlines/01-hello.md:14: point 3 starts at 16:00, after the video ends (15:28)"
         ),
         "{errors}"
     );
@@ -327,74 +599,7 @@ fn rejects_outline_points_numbered_out_of_order() {
     edit(&mut sources, OUTLINE, "2. [01:30]", "4. [01:30]");
     let errors = errors(&sources, &Options::default());
     assert!(
-        errors.contains("outlines/01-hello.md:8: point 4 comes after point 1: number the points 1, 2, 3 in order"),
-        "{errors}"
-    );
-}
-
-#[test]
-fn rejects_a_lesson_without_sections() {
-    let mut sources = valid();
-    edit(&mut sources, HELLO, "sections = [1, 2, 3]\n", "");
-    let errors = errors(&sources, &Options::default());
-    assert!(
-        errors.contains(
-            "en/p01/01-hello.md: the front matter has no sections: list the outline point each part of the lesson starts at, the opening text first, then each ## section"
-        ),
-        "{errors}"
-    );
-}
-
-#[test]
-fn rejects_sections_that_dont_match_the_lessons_parts() {
-    let mut sources = valid();
-    edit(
-        &mut sources,
-        HELLO,
-        "sections = [1, 2, 3]",
-        "sections = [1, 2]",
-    );
-    let errors = errors(&sources, &Options::default());
-    assert!(
-        errors.contains(
-            "en/p01/01-hello.md: sections lists 2 points, but the lesson has 3 parts: the opening text and 2 ## sections"
-        ),
-        "{errors}"
-    );
-}
-
-#[test]
-fn rejects_a_section_at_a_point_the_outline_doesnt_have() {
-    let mut sources = valid();
-    edit(
-        &mut sources,
-        HELLO,
-        "sections = [1, 2, 3]",
-        "sections = [1, 2, 9]",
-    );
-    let errors = errors(&sources, &Options::default());
-    assert!(
-        errors.contains(
-            "en/p01/01-hello.md: sections names point 9, but outlines/01-hello.md has points 1 to 3"
-        ),
-        "{errors}"
-    );
-}
-
-#[test]
-fn rejects_sections_out_of_the_videos_order() {
-    let mut sources = valid();
-    edit(
-        &mut sources,
-        HELLO,
-        "sections = [1, 2, 3]",
-        "sections = [1, 3, 2]",
-    );
-    let errors = errors(&sources, &Options::default());
-    assert!(
-        errors.contains(
-            "en/p01/01-hello.md: sections follow the video: point 2 can't come after point 3"
-        ),
+        errors.contains("outlines/01-hello.md:13: point 4 comes after point 1: number the points 1, 2, 3 in order"),
         "{errors}"
     );
 }
@@ -475,7 +680,7 @@ fn rejects_unknown_front_matter_fields() {
     let mut sources = valid();
     edit(&mut sources, HELLO, "title = ", "tittle = \"x\"\ntitle = ");
     let errors = errors(&sources, &Options::default());
-    assert!(errors.contains("en/p01/01-hello.md:2: unknown field `tittle`, expected one of `title`, `video`, `outline`, `sections`"), "{errors}");
+    assert!(errors.contains("en/p01/01-hello.md:2: unknown field `tittle`, expected one of `title`, `video`, `outline`, `stripes`, `drill`, `setup`"), "{errors}");
 }
 
 #[test]

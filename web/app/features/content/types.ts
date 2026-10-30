@@ -47,16 +47,33 @@ export interface Lesson extends LessonSummary {
   html: string;
   /** The video's length in seconds, from its outline. */
   duration: number;
-  /** Where each part of the lesson starts in the video (decision D34). */
+  /** The video's chapters, as its outline names them (decision D35). */
   chapters: Chapter[];
+  /** What the class asks of the student once the video is done (decision D35). */
+  task: Task;
 }
 
-/** A part of the lesson: the opening text (no heading, so no ID), then each `##` section. */
+/** A chapter of the video and when it starts. */
 export interface Chapter {
   title: string;
-  id: string | null;
   /** Seconds into the video. */
   start: number;
+}
+
+/**
+ * What a class asks of the student after the video (decision D35): stripes of
+ * its belt, numbered as the belt numbers them; a drill, for a topic minisql has
+ * no use for; or, in class 1, the setup.
+ */
+export type Task =
+  | { kind: "stripes"; belt: string; stripes: Stripe[] }
+  | { kind: "drill"; name: string }
+  | { kind: "setup" };
+
+export interface Stripe {
+  number: number;
+  /** What the stripe adds, as course.toml describes it. */
+  title: string;
 }
 
 export interface Heading {

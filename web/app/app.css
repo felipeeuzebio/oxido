@@ -311,12 +311,10 @@
   .lesson .new-tab {
     @apply sr-only;
   }
-  /* A ## section, with its time in the video on the right (decision D34). */
-  .lesson .section-head {
-    @apply flex items-baseline justify-between gap-4;
-  }
-  .lesson .section-time {
-    @apply shrink-0 font-mono text-sm text-info tabular-nums no-underline hover:underline;
+  /* A hint links a moment in the video and shows its time after the text, in
+     the timestamps' mono and --info (decision D35). */
+  .lesson .video-time {
+    @apply ms-1.5 font-mono text-sm text-info tabular-nums;
   }
   pre.code {
     @apply overflow-x-auto rounded-lg border border-code-border bg-code p-4 font-mono text-sm leading-relaxed text-code-foreground;

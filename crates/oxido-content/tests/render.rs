@@ -94,16 +94,26 @@ fn opens_links_that_leave_the_course_in_a_new_tab() {
 }
 
 #[test]
-fn puts_each_sections_time_in_the_video_beside_its_heading() {
+fn links_a_hint_to_its_moment_in_the_video() {
     let html = html("01-hello");
     assert!(
         html.contains(concat!(
-            r#"<div class="section-head"><h2 id="your-first-program">Your first program</h2>"#,
-            r##"<a class="section-time" href="#t=90" data-seek="90" "##,
-            r#"aria-label="Watch “Your first program” in the video, from 01:30">01:30</a></div>"#
+            r##"<a class="video-link" href="#t=90" data-seek="90" "##,
+            r#"aria-label="the demo, in the video from 01:30">"#,
+            r#"the demo<span class="video-time">01:30</span></a>"#
         )),
         "{html}"
     );
+}
+
+#[test]
+fn leaves_headings_without_a_time() {
+    let html = html("01-hello");
+    assert!(
+        html.contains(r#"<h2 id="your-first-program">Your first program</h2>"#),
+        "{html}"
+    );
+    assert!(!html.contains("section-time"), "{html}");
 }
 
 #[test]

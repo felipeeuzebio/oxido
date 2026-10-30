@@ -1,11 +1,11 @@
 +++
 title = "Hello, Cargo"
 video = "helloVideo1"
-outline = "sha256:dccd19568119a9c648758d964f8dd15024c49c7dae683b7183559f720d2ca7be"
-sections = [1, 2, 3]
+outline = "sha256:36612c1e11fa2ac4ac56f9eb43bd06fb97e043c30ee0b9f5b621177e33ed8ef1"
+stripes = [1, 2]
 +++
 
-Cargo builds and runs a project. A tag like <b>this</b> stays plain text.
+Cargo builds and runs a project. A tag like <b>this</b> stays plain text. Watch [the demo](video:2) first.
 
 ## Your first program
 

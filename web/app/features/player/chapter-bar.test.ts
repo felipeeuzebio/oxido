@@ -3,9 +3,9 @@ import { filled, segmentAt, segments } from "./chapter-bar";
 
 // Lesson 1's first chapters, in a 7:10 video.
 const CHAPTERS = [
-  { title: "Getting started", id: null, start: 28 },
-  { title: "Install Rust", id: "install-rust", start: 52 },
-  { title: "Cargo", id: "cargo", start: 234 },
+  { title: "Getting started", start: 28 },
+  { title: "Install Rust", start: 52 },
+  { title: "Cargo", start: 234 },
 ];
 
 describe("segments", () => {

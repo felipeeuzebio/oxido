@@ -2,6 +2,11 @@
 video = "helloVideo1"
 title = "Hello, Cargo"
 duration = "15:28"
+chapters = [
+  { point = 1, title = "Hello, Cargo" },
+  { point = 2, title = "Your first program" },
+  { point = 3, title = "Your first program" },
+]
 +++
 
 1. [00:10] Cargo creates, builds and runs a project.

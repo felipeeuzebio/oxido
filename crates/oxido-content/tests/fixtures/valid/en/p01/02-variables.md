@@ -1,8 +1,8 @@
 +++
 title = "Variables"
 video = "shadowVid02"
-outline = "sha256:e7aff42fca542840356565a974d34bdb217688208feba9234996436169bca57c"
-sections = [1]
+outline = "sha256:434d647992088c95b5c8841df9fe49cf8717523b71e127d46225eb38a995199f"
+drill = "shadowing"
 +++
 
 ## Shadowing

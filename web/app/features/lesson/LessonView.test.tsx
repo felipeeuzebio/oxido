@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import lesson from "../../../../crates/oxido-content/tests/golden/lesson.json";
+import { goldenLesson as lesson } from "../content/golden";
 import { finishLoading } from "../player/fake-youtube";
 
 // The compiler's golden lesson: "Hello, Cargo", the first class of phase 1.
@@ -72,10 +72,9 @@ describe("LessonView", () => {
     expect(screen.getByTitle("YouTube video player")).toBe(player.frame);
   });
 
-  describe("a section's time", () => {
-    // The golden lesson's first section, "Your first program", starts at 01:30.
-    const time = () =>
-      screen.getByRole("link", { name: "Watch “Your first program” in the video, from 01:30" });
+  describe("a hint", () => {
+    // The golden lesson's hint, "the demo", links outline point 2, at 01:30.
+    const time = () => screen.getByRole("link", { name: "the demo, in the video from 01:30" });
 
     it("starts the video from that moment", async () => {
       await show();

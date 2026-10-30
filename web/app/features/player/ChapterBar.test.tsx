@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { ChapterBar } from "./ChapterBar";
 
 const CHAPTERS = [
-  { title: "Getting started", id: null, start: 28 },
-  { title: "Install Rust", id: "install-rust", start: 52 },
-  { title: "Cargo", id: "cargo", start: 234 },
+  { title: "Getting started", start: 28 },
+  { title: "Install Rust", start: 52 },
+  { title: "Cargo", start: 234 },
 ];
 
 function show(time = 0) {
