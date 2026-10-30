@@ -71,7 +71,7 @@ A server on 127.0.0.1 can still be reached by any page open in the student's bro
 3. **Origin check.** Pages served from other ports on 127.0.0.1 count as the same site, so they do get the cookie. Writes (`PUT`, `POST`, `DELETE`) are therefore refused when their `Origin` isn't oxido's own (browsers always send it on cross-origin writes, including `Origin: null`), and oxido never sends CORS headers, so other origins can't read API responses. `oxido serve --dev` also accepts Vite's dev server.
 4. **No framing.** Every response has `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'` and `X-Content-Type-Options: nosniff`, so no other page can frame oxido and trick a click.
 
-`OXIDO_TOKEN` fixes the launch token for automated tests; students never need it. Ids from the API (class, quiz, stripe, paragraph) are limited to letters, digits, `.`, `-` and `_`, and can't start with `.` or `-`, so they can't climb directories or pass for command-line options when P8 hands them to cargo. When P8 adds test runs, the store lock must not be held while cargo runs.
+`OXIDO_TOKEN` fixes the launch token for automated tests; students never need it. Ids from the API (class, quiz, stripe) are limited to letters, digits, `.`, `-` and `_`, and can't start with `.` or `-`, so they can't climb directories or pass for command-line options when P8 hands them to cargo. When P8 adds test runs, the store lock must not be held while cargo runs.
 
 ### Storage
 
@@ -79,10 +79,12 @@ One SQLite file per student project, `.oxido/oxido.db`, next to a `.gitignore` t
 
 | Table | Holds |
 |---|---|
-| `class_progress` | video position, video watched, text lesson read |
-| `quiz_results` | latest and best score, done |
+| `class_progress` | video position, video watched, and the task marked done by hand on the website, each with the time it last changed |
+| `quiz_results` | latest score and when it was made, best score, done and when |
 | `stripe_passes` | when each stripe's tests first passed |
-| `notes` | notes pinned to a video time or a text paragraph |
+| `notes` | notes pinned to a time in the video, each with a global ID; a deleted note stays as a marker without its text |
+
+Schema version 2 gave each value its own time and each note its global ID, so an import can merge value by value (decision D18), and rebuilt those three tables as `STRICT` (decision D19). It dropped the text lessons' read flag and the notes on their paragraphs (decision D35).
 
 Queries are plain SQL through rusqlite, with no ORM (decision D19), and rows are read by column name. The schema version is SQLite's `user_version`. `MIGRATIONS` in `crates/oxido/src/store.rs` lists one SQL batch per version, applied in a transaction. Released migrations are never edited, only added to. A database written by a newer `oxido` is refused with a message to update.
 
@@ -93,10 +95,9 @@ Queries are plain SQL through rusqlite, with no ORM (decision D19), and rows are
 | `GET /api/health` | `{status, version}`; no session needed |
 | `GET /api/progress` | everything: classes, quizzes, stripes |
 | `PUT /api/classes/{id}/video` | `{seconds?, watched?}`, saved together |
-| `PUT /api/classes/{id}/text` | `{read}` |
 | `PUT /api/quizzes/{id}` | `{correct, total}` and/or `{done: true}`, saved together; the best score resets if the quiz changes size |
-| `GET`, `POST /api/classes/{id}/notes` | list notes, add `{anchor, body}` |
-| `PUT`, `DELETE /api/notes/{id}` | edit `{body}`, delete |
+| `GET`, `POST /api/classes/{id}/notes` | list notes, add `{anchor: {kind: "video", seconds}, body}` |
+| `PUT`, `DELETE /api/notes/{id}` | edit `{body}`, delete (the note stays as a marker) |
 
 Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies and paths that don't parse), 401 (no session), 403 (host or origin), 404 (missing note or unknown API route), 415 (not JSON) or 500.
 

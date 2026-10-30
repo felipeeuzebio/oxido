@@ -122,14 +122,14 @@ async fn raw_api(
 async fn write_from(origin: &str) -> StatusCode {
     let app = app();
     let cookie = login(&app).await;
-    let request = Request::put("/api/classes/3.4/text")
+    let request = Request::put("/api/classes/3.4/video")
         .header(header::HOST, HOST)
         .header(header::ORIGIN, origin)
         .header(header::COOKIE, cookie);
     raw_api(
         &app,
         request,
-        Some(("application/json", r#"{"read":true}"#.into())),
+        Some(("application/json", r#"{"seconds":1}"#.into())),
     )
     .await
     .0
@@ -344,16 +344,24 @@ async fn saves_and_returns_class_progress() {
         .api("PUT", "/api/classes/3.4/video", Some(video))
         .await;
     assert_eq!(status, StatusCode::NO_CONTENT);
-    let (status, _) = client
-        .api("PUT", "/api/classes/3.4/text", Some(json!({"read": true})))
-        .await;
-    assert_eq!(status, StatusCode::NO_CONTENT);
 
     let (status, progress) = client.api("GET", "/api/progress", None).await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(progress["classes"]["3.4"]["video_seconds"], 391);
     assert_eq!(progress["classes"]["3.4"]["video_watched"], true);
-    assert_eq!(progress["classes"]["3.4"]["text_read"], true);
+    assert_eq!(progress["classes"]["3.4"]["task_marked"], false);
+    assert!(progress["classes"]["3.4"].get("text_read").is_none());
+}
+
+#[tokio::test]
+async fn the_text_lessons_read_route_is_gone() {
+    // The text lessons went with decision D35, and so did marking one read.
+    let (status, error) = client()
+        .await
+        .api("PUT", "/api/classes/3.4/text", Some(json!({"read": true})))
+        .await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    assert!(error["error"].is_string());
 }
 
 #[tokio::test]
@@ -411,10 +419,10 @@ async fn invalid_input_is_a_400_with_a_message() {
             "id",
         ),
         (
-            "PUT",
-            "/api/classes/3.4/text",
-            json!({"read": "yes"}),
-            "read",
+            "POST",
+            "/api/classes/3.4/notes",
+            json!({"anchor": {"kind": "paragraph", "id": "p-get"}, "body": "x"}),
+            "paragraph",
         ),
     ];
     for (method, path, body, mentions) in cases {
@@ -434,11 +442,11 @@ async fn malformed_requests_still_get_a_json_error() {
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert!(error["error"].is_string());
 
-    let request = Request::put("/api/classes/3.4/text")
+    let request = Request::put("/api/classes/3.4/video")
         .header(header::HOST, HOST)
         .header(header::ORIGIN, ORIGIN)
         .header(header::COOKIE, &client.cookie);
-    let (status, error) = raw_api(&client.app, request, Some(("text/plain", "read".into()))).await;
+    let (status, error) = raw_api(&client.app, request, Some(("text/plain", "1".into()))).await;
     assert_eq!(status, StatusCode::UNSUPPORTED_MEDIA_TYPE);
     assert!(error["error"].is_string());
 }

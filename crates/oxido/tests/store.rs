@@ -69,16 +69,65 @@ fn keeps_the_latest_video_position_and_the_watched_flag() {
     let class = &store.progress().unwrap().classes["3.4"];
     assert_eq!(class.video_seconds, 391);
     assert!(class.video_watched);
-    assert!(!class.text_read);
+    assert!(!class.task_marked);
 }
 
 #[test]
-fn text_lessons_can_be_marked_read_and_unread() {
-    let store = store();
-    store.set_text_read("1.1", true).unwrap();
-    assert!(store.progress().unwrap().classes["1.1"].text_read);
-    store.set_text_read("1.1", false).unwrap();
-    assert!(!store.progress().unwrap().classes["1.1"].text_read);
+fn each_value_keeps_the_time_it_last_changed() {
+    // An imported file merges value by value, the newer change winning
+    // (decision D18), so a row that holds several values keeps a time for each.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    let store = Store::open(&path).unwrap();
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let at = |sql: &str| -> Option<String> { conn.query_row(sql, [], |row| row.get(0)).unwrap() };
+    let class = |column: &str| {
+        at(&format!(
+            "SELECT {column} FROM class_progress WHERE class_id = '3.4'"
+        ))
+    };
+    let quiz = |column: &str| {
+        at(&format!(
+            "SELECT {column} FROM quiz_results WHERE quiz_id = 'quiz-01'"
+        ))
+    };
+
+    store.save_video_position("3.4", 120).unwrap();
+    let position = class("video_seconds_at");
+    assert!(position.is_some());
+    assert_eq!(class("video_watched_at"), None);
+    std::thread::sleep(std::time::Duration::from_millis(5));
+    store.mark_video_watched("3.4").unwrap();
+    assert_eq!(class("video_seconds_at"), position);
+    assert!(class("video_watched_at") > position);
+
+    store.record_quiz("quiz-01", 3, 5).unwrap();
+    let attempt = quiz("last_at");
+    assert!(attempt.is_some());
+    assert_eq!(quiz("done_at"), None);
+    std::thread::sleep(std::time::Duration::from_millis(5));
+    store.mark_quiz_done("quiz-01").unwrap();
+    assert_eq!(quiz("last_at"), attempt);
+    assert!(quiz("done_at") > attempt);
+}
+
+#[test]
+fn the_tables_schema_2_rebuilt_are_strict() {
+    // Decision D19: tables created or rebuilt from schema version 2 on are STRICT.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    Store::open(&path).unwrap();
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    for table in ["class_progress", "quiz_results", "notes"] {
+        let strict: bool = conn
+            .query_row(
+                "SELECT strict FROM pragma_table_list WHERE name = ?1",
+                [table],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert!(strict, "{table}");
+    }
 }
 
 #[test]
@@ -160,11 +209,7 @@ fn notes_can_be_added_listed_edited_and_deleted() {
         .add_note(video_note("3.4", 167, "HashMap needs a use line"))
         .unwrap();
     let second = store
-        .add_note(NewNote {
-            class_id: "3.4".into(),
-            anchor: Anchor::Paragraph { id: "p-get".into() },
-            body: "get returns an Option".into(),
-        })
+        .add_note(video_note("3.4", 240, "get returns an Option"))
         .unwrap();
     store
         .add_note(video_note("1.1", 10, "another class"))
@@ -173,7 +218,7 @@ fn notes_can_be_added_listed_edited_and_deleted() {
     let notes = store.notes("3.4").unwrap();
     assert_eq!(notes.len(), 2);
     assert_eq!(notes[0].id, first.id);
-    assert_eq!(notes[1].anchor, Anchor::Paragraph { id: "p-get".into() });
+    assert_eq!(notes[1].anchor, Anchor::Video { seconds: 240 });
 
     let edited = store
         .update_note(second.id, "get returns Option<&V>")
@@ -209,7 +254,7 @@ fn rejects_empty_notes_and_malformed_ids() {
         Err(StoreError::Invalid(_))
     ));
     assert!(matches!(
-        store.set_text_read("../etc", true),
+        store.mark_video_watched("../etc"),
         Err(StoreError::Invalid(_))
     ));
 }
@@ -336,4 +381,123 @@ fn inspecting_never_creates_a_database() {
     let path = dir.path().join("oxido.db");
     assert!(oxido::store::inspect(&path).is_err());
     assert!(!path.exists());
+}
+
+#[test]
+fn migration_2_keeps_progress_and_video_notes_with_the_time_of_each_value() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    // A database as a schema-1 oxido left it.
+    {
+        let conn = rusqlite::Connection::open(&path).unwrap();
+        conn.execute_batch(include_str!("fixtures/schema-1.sql"))
+            .unwrap();
+        conn.execute_batch(
+            "INSERT INTO class_progress (class_id, video_seconds, video_watched, text_read, updated_at)
+             VALUES ('3.4', 391, 1, 1, '2026-09-20T10:00:00.000Z'),
+                    ('3.5', 0, 0, 1, '2026-09-21T10:00:00.000Z');
+             INSERT INTO quiz_results (quiz_id, last_correct, best_correct, total, done, updated_at)
+             VALUES ('quiz-01', 3, 4, 5, 1, '2026-09-22T10:00:00.000Z');
+             INSERT INTO stripe_passes (stripe_id, first_passed_at)
+             VALUES ('white.1', '2026-09-23T10:00:00.000Z');
+             INSERT INTO notes (class_id, anchor_kind, anchor, body)
+             VALUES ('3.4', 'video', '42', 'moves, not copies'),
+                    ('3.4', 'paragraph', 'p-borrow', 'one &mut at a time');",
+        )
+        .unwrap();
+    }
+
+    let store = Store::open(&path).unwrap();
+    assert_eq!(store.schema_version().unwrap(), 2);
+    let progress = store.progress().unwrap();
+    // The read flag went with the text lessons (decision D35), and so did a
+    // class it was all there was to.
+    assert_eq!(progress.classes.keys().collect::<Vec<_>>(), ["3.4"]);
+    let class = &progress.classes["3.4"];
+    assert_eq!(
+        (class.video_seconds, class.video_watched, class.task_marked),
+        (391, true, false)
+    );
+    let quiz = &progress.quizzes["quiz-01"];
+    assert_eq!(
+        (quiz.last_correct, quiz.best_correct, quiz.total, quiz.done),
+        (3, 4, 5, true)
+    );
+    assert_eq!(progress.stripes["white.1"], "2026-09-23T10:00:00.000Z");
+
+    // Notes on the text lessons' paragraphs went with them too.
+    let notes = store.notes("3.4").unwrap();
+    let bodies: Vec<_> = notes.iter().map(|n| n.body.as_str()).collect();
+    assert_eq!(bodies, ["moves, not copies"]);
+    assert_eq!(notes[0].anchor, Anchor::Video { seconds: 42 });
+
+    // Schema 1 kept one time per row; each value it held takes that time.
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let times: [Option<String>; 4] = conn
+        .query_row(
+            "SELECT c.video_seconds_at, c.video_watched_at, q.last_at, q.done_at
+             FROM class_progress c, quiz_results q WHERE c.class_id = '3.4'",
+            [],
+            |row| Ok([row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?]),
+        )
+        .unwrap();
+    assert_eq!(
+        times,
+        [
+            Some("2026-09-20T10:00:00.000Z".to_string()),
+            Some("2026-09-20T10:00:00.000Z".to_string()),
+            Some("2026-09-22T10:00:00.000Z".to_string()),
+            Some("2026-09-22T10:00:00.000Z".to_string()),
+        ]
+    );
+    let uid: String = conn
+        .query_row("SELECT uid FROM notes", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(uid.len(), 32);
+}
+
+#[test]
+fn every_note_gets_its_own_global_id() {
+    // Notes from two machines are told apart by this ID when a file is imported.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    let store = Store::open(&path).unwrap();
+    store.add_note(video_note("3.4", 1, "one")).unwrap();
+    store.add_note(video_note("3.4", 2, "two")).unwrap();
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let uids: Vec<String> = conn
+        .prepare("SELECT uid FROM notes ORDER BY id")
+        .unwrap()
+        .query_map([], |row| row.get(0))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert_eq!(uids.len(), 2);
+    assert_ne!(uids[0], uids[1]);
+    assert!(uids.iter().all(|uid| uid.len() == 32));
+}
+
+#[test]
+fn a_deleted_note_leaves_a_marker_without_its_text() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oxido.db");
+    let store = Store::open(&path).unwrap();
+    let note = store.add_note(video_note("3.4", 42, "secret")).unwrap();
+    store.delete_note(note.id).unwrap();
+
+    assert!(store.notes("3.4").unwrap().is_empty());
+    assert!(matches!(
+        store.delete_note(note.id),
+        Err(StoreError::NoteNotFound(_))
+    ));
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let (body, deleted): (String, Option<String>) = conn
+        .query_row(
+            "SELECT body, deleted_at FROM notes WHERE id = ?1",
+            [note.id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(body, "");
+    assert!(deleted.is_some());
 }

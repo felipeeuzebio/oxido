@@ -12,15 +12,15 @@ test("the launch link opens a session once, then progress can be saved", async (
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   const progress = await page.evaluate(async () => {
-    const put = await fetch("/api/classes/3.4/text", {
+    const put = await fetch("/api/classes/3.4/video", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ read: true }),
+      body: JSON.stringify({ seconds: 391 }),
     });
     if (put.status !== 204) throw new Error(`PUT failed: ${put.status}`);
     return (await fetch("/api/progress")).json();
   });
-  expect(progress.classes["3.4"].text_read).toBe(true);
+  expect(progress.classes["3.4"].video_seconds).toBe(391);
 
   // Someone else opening the same link later (from history, say) gets nothing.
   const other = await browser.newPage();
