@@ -46,6 +46,17 @@ describe("GitHub workflows", () => {
     expect(ci).toMatch(/sha256sum --check --strict/);
   });
 
+  // Before saving target/, rust-cache deletes the files Cargo didn't make but
+  // keeps their folders. A course compiled there came back from the cache as
+  // empty folders, which `cargo xtask content` refuses to replace.
+  it("compile the course check outside target/, which rust-cache saves", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).toContain('cargo xtask content --out "$RUNNER_TEMP/content-check"');
+    for (const { name, text } of workflows) {
+      expect(text, name).not.toMatch(/--out "?target\//);
+    }
+  });
+
   // Work lands on develop, the default branch; main holds what has been
   // released (docs/conventions.md, decision D27).
   it("run CI on pushes to both long-lived branches", () => {
