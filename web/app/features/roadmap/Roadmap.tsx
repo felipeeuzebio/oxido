@@ -1,8 +1,9 @@
 import type { Course } from "../content/types";
+import type { Progress } from "../progress/progress";
 import { ContinueCard } from "./ContinueCard";
 import { LongBelt } from "./LongBelt";
 import { PhaseCards } from "./PhaseCards";
-import { type Progress, roadmap } from "./roadmap";
+import { roadmap } from "./roadmap";
 
 /** The home screen: the Continue card, the long belt and the phases (design.md, "Belts"). */
 export function Roadmap({ course, progress }: { course: Course; progress?: Progress }) {

@@ -13,8 +13,8 @@ interface ContinueCardProps {
 
 /**
  * The lesson to open next, and the stripe the student is working towards.
- * Until progress tracking lands, that's the first lesson of the phase with
- * the next stripe; the video and text progress bars come with it.
+ * That's the class the student was last in or, before any, the first lesson
+ * of the phase with the next stripe.
  */
 export function ContinueCard({ resume: { lesson, phase }, next, started }: ContinueCardProps) {
   const where = [
