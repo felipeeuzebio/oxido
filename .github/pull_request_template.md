@@ -12,5 +12,5 @@
 ## Checklist
 
 - [ ] Docs updated (`docs/`, `CLAUDE.md`) if behavior or structure changed
-- [ ] For content changes: the text lesson follows the video's teachings in order and copies no transcript text
+- [ ] For content changes: the outline follows the video in order, the brief uses only what the videos so far have taught, and nothing copies transcript text
 - [ ] For translations: I read the whole translation, and any new term is in the glossary

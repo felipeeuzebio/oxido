@@ -30,7 +30,7 @@ Add a short paragraph after it for each of these that applies. Reviewers send th
 - **A decision in `docs/decisions.md` changes.** Say so explicitly, name the decision (`D12`) and what replaces it.
 - **Breaking change.** Say what breaks and what users or contributors do about it.
 - **Docs.** Name the docs updated with the change.
-- **Lesson.** Name the video it follows and its outline in `content/outlines/`. Say that it teaches the outline's points in the same order, that any correction is a clearly marked note after the point, and that it copies no transcript text.
+- **Class content.** Name the video and its outline in `content/outlines/`. For an outline, say that it lists the video's points in order, in new words. For a task's brief, say which stripes or drill it sets, that it uses only what the videos up to its class have taught, and that any correction of the video is a clearly marked note. Say that nothing copies transcript text.
 - **Translation.** Say which English file it follows and list any terms added to `docs/glossary-pt-BR.md`.
 
 ### Tests first
@@ -80,6 +80,6 @@ Covered by "shows the correct answer under a wrong one" in
 ## Checklist
 
 - [ ] Docs updated (`docs/`, `CLAUDE.md`) if behavior or structure changed
-- [ ] For content changes: the text lesson follows the video's teachings in order and copies no transcript text
+- [ ] For content changes: the outline follows the video in order, the brief uses only what the videos so far have taught, and nothing copies transcript text
 - [ ] For translations: I read the whole translation, and any new term is in the glossary
 ```

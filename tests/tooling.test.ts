@@ -103,6 +103,29 @@ describe("GitHub workflows", () => {
   });
 });
 
+describe("pull requests", () => {
+  // The course has no text lessons (decision D35), so the Claude review and the
+  // template's content checkbox hold briefs and outlines to CLAUDE.md's rules.
+  it("check course content against the rules for tasks and outlines", () => {
+    const files = [".github/workflows/claude-review.yml", ".github/pull_request_template.md"];
+    for (const file of files) {
+      const text = read(file);
+      expect(text, file).not.toMatch(/text lesson/);
+      expect(text, file).toMatch(/brief/);
+      expect(text, file).toMatch(/outline/);
+    }
+  });
+
+  // pr-instructions.md shows the template to tools that draft a PR from the
+  // diff alone, so its checkboxes are the template's, word for word.
+  it("show the template's checkboxes in the PR instructions", () => {
+    const boxes = (text: string) => text.match(/^- \[ \] .+$/gm) ?? [];
+    expect(boxes(read(".github/pr-instructions.md"))).toEqual(
+      boxes(read(".github/pull_request_template.md")),
+    );
+  });
+});
+
 describe("end-to-end tests", () => {
   it("compile their fixture course outside web/.content, which the dev server reads", () => {
     const config = read("web/playwright.config.ts");
