@@ -1,5 +1,6 @@
 // The roadmap: where the student is on the path from white belt to black belt.
 import { readCourse } from "@/features/content/content.server";
+import { useProgress } from "@/features/progress/ProgressProvider";
 import { Roadmap } from "@/features/roadmap/Roadmap";
 import type { Route } from "./+types/home";
 
@@ -9,5 +10,6 @@ export function loader() {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  return <Roadmap course={loaderData} />;
+  const { progress } = useProgress();
+  return <Roadmap course={loaderData} progress={progress} />;
 }

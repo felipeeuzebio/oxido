@@ -2,6 +2,7 @@ import { type APIRequestContext, type BrowserContext, expect, test } from "@play
 import { contract } from "../app/features/storage/contract";
 import { createOxidoStorage, type Http } from "../app/features/storage/oxido";
 import { E2E_TOKEN } from "../playwright.config";
+import { load } from "./hydrated";
 
 /** oxido's API through a context's own cookies, as its page would call it. */
 const http = (request: APIRequestContext, origin: string): Http => ({
@@ -56,6 +57,26 @@ test.describe("a session", () => {
       await run(createOxidoStorage(http(context.request, baseURL ?? "")));
     });
   }
+
+  test("the roadmap's Continue card opens the class the student was last in", async ({
+    baseURL,
+  }) => {
+    const origin = baseURL ?? "";
+    const saved = await context.request.fetch("/api/classes/02-variables/video", {
+      method: "PUT",
+      data: { seconds: 20 },
+      headers: { origin },
+    });
+    expect(saved.status()).toBe(204);
+    const page = await context.newPage();
+    await load(page, "/");
+    await expect(page.getByRole("link", { name: "Open the lesson" })).toHaveAttribute(
+      "href",
+      "/lesson/p01/02-variables",
+    );
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await page.close();
+  });
 });
 
 test("without the launch link, the page loads but progress stays locked", async ({ page }) => {
@@ -64,4 +85,8 @@ test("without the launch link, the page loads but progress stays locked", async 
 
   const status = await page.evaluate(async () => (await fetch("/api/progress")).status);
   expect(status).toBe(401);
+  // The page says why nothing is saved, and how to fix it, in oxido's words.
+  await expect(page.getByRole("alert")).toContainText(
+    "Open the link oxido printed in your terminal",
+  );
 });

@@ -1,5 +1,7 @@
 import type { MouseEvent } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Task } from "../content/types";
 import { beltColor } from "../roadmap/belt-color";
@@ -12,6 +14,9 @@ interface TaskBriefProps {
   html: string;
   /** Plays the video from a moment, in seconds. */
   onPlayFrom: (seconds: number) => void;
+  done: boolean;
+  /** Marks the task done or not by hand: only on the website, where tests can't run. */
+  onMark?: (marked: boolean) => void;
 }
 
 /**
@@ -19,7 +24,7 @@ interface TaskBriefProps {
  * its stripes or drill, then the brief. A hint in the brief (the compiler's
  * data-seek link, from `[text](video:N)`) plays the video from its moment.
  */
-export function TaskBrief({ task, html, onPlayFrom }: TaskBriefProps) {
+export function TaskBrief({ task, html, onPlayFrom, done, onMark }: TaskBriefProps) {
   const playFrom = (event: MouseEvent<HTMLElement>) => {
     const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-seek]");
     if (!link) return;
@@ -31,7 +36,10 @@ export function TaskBrief({ task, html, onPlayFrom }: TaskBriefProps) {
     <section aria-labelledby="task-title" className="min-w-0">
       <Card>
         <CardHeader className="gap-3">
-          <p className="text-sm font-bold text-primary-muted-foreground">Your task</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-bold text-primary-muted-foreground">Your task</p>
+            {done && <Badge variant="success">Done</Badge>}
+          </div>
           <h2 id="task-title" className="text-2xl font-bold">
             {taskTitle(task)}
           </h2>
@@ -64,6 +72,13 @@ export function TaskBrief({ task, html, onPlayFrom }: TaskBriefProps) {
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </CardContent>
+        {onMark && (
+          <CardFooter>
+            <Button variant={done ? "outline" : "default"} onClick={() => onMark(!done)}>
+              {done ? "Mark as not done" : "Mark as done"}
+            </Button>
+          </CardFooter>
+        )}
       </Card>
     </section>
   );

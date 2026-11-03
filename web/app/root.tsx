@@ -22,6 +22,8 @@ import { CommandPalette } from "@/features/palette/CommandPalette";
 import { paletteGroups } from "@/features/palette/entries";
 import { SearchButton } from "@/features/palette/SearchButton";
 import { usePalette } from "@/features/palette/use-palette";
+import { ProgressAlert } from "@/features/progress/ProgressAlert";
+import { ProgressProvider } from "@/features/progress/ProgressProvider";
 import { railItems } from "@/features/rail/items";
 import { Rail, TabBar } from "@/features/rail/Rail";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -107,6 +109,10 @@ function Shell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-1">{actions}</div>
         </header>
         <main id="main" tabIndex={-1} data-focus-target>
+          {/* Shown only when the progress can't load or save; empty, it takes no room. */}
+          <div className="px-4 pt-4 empty:hidden md:px-10 md:pt-6">
+            <ProgressAlert />
+          </div>
           {children}
         </main>
       </div>
@@ -123,9 +129,11 @@ function Shell({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <Shell>
-      <Outlet />
-    </Shell>
+    <ProgressProvider>
+      <Shell>
+        <Outlet />
+      </Shell>
+    </ProgressProvider>
   );
 }
 

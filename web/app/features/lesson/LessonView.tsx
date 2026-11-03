@@ -11,6 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { Lesson } from "../content/types";
 import { type SeekRequest, VideoPlayer } from "../player/VideoPlayer";
+import { useProgress } from "../progress/ProgressProvider";
+import { isTaskDone } from "../progress/progress";
 import type { LessonPlace } from "./place";
 import { TaskBrief } from "./TaskBrief";
 
@@ -22,6 +24,9 @@ import { TaskBrief } from "./TaskBrief";
 export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPlace }) {
   const [started, setStarted] = useState(false);
   const [seek, setSeek] = useState<SeekRequest>();
+  const { progress, state, markTask } = useProgress();
+  // On the website tests can't run, so the student marks the task done by hand.
+  const canMark = state.status === "ready" && state.target === "website";
 
   // A hint in the brief plays the video from its moment, starting it if needed.
   const playFrom = (seconds: number) => {
@@ -67,7 +72,13 @@ export function LessonView({ lesson, place }: { lesson: Lesson; place: LessonPla
             seek={seek}
           />
         </div>
-        <TaskBrief task={lesson.task} html={lesson.html} onPlayFrom={playFrom} />
+        <TaskBrief
+          task={lesson.task}
+          html={lesson.html}
+          onPlayFrom={playFrom}
+          done={isTaskDone(lesson.task, lesson.slug, progress)}
+          onMark={canMark ? (marked) => markTask(lesson.slug, marked) : undefined}
+        />
       </div>
     </div>
   );
