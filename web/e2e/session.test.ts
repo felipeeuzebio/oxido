@@ -85,8 +85,8 @@ test("without the launch link, the page loads but progress stays locked", async 
 
   const status = await page.evaluate(async () => (await fetch("/api/progress")).status);
   expect(status).toBe(401);
-  // The page says why nothing is saved, and how to fix it.
+  // The page says why nothing is saved, and how to fix it, in oxido's words.
   await expect(page.getByRole("alert")).toContainText(
-    "Open the link oxido printed in your terminal.",
+    "Open the link oxido printed in your terminal",
   );
 });
