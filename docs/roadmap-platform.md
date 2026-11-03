@@ -69,7 +69,7 @@ Tests first: the player wrapper against a fake YouTube API, including that the p
 The SQLite store and its API exist since P0; this phase connects them to the UI and adds the website's version.
 
 Done when:
-- One storage interface in the frontend with two implementations: the `oxido` API, and browser storage on the website. The page picks one with `/api/health` at startup.
+- One storage interface in the frontend with two implementations: the `oxido` API, and browser storage on the website. The page picks one with `/api/health` at startup. ✅
 - Progress rules: video watched at 90% (or marked), a class's task done when its stripes are earned or its drill passes (marked by hand on the website, where tests can't run; decision D35), quiz done or marked done, a stripe earned when its test group passes, a belt earned when all of its stripes are.
 - Resume where the student left off: the roadmap's belt, phase cards and Continue card show the student's progress, and the Continue card opens the lesson they last had open, with its video's progress bar and its task's state. The strip under the player marks the saved position.
 - Export and import progress and notes as a file, including between the website and `oxido` (decision D18): the export is a copy of the SQLite database, and import merges instead of replacing. Schema version 2 adds global note IDs, deleted-note markers and per-value timestamps, drops the text-read flag (decision D35), and rebuilds the tables it touches as `STRICT` (decision D19).

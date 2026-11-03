@@ -1,19 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createBrowserStorage, type Shelf } from "./browser";
 import { contract } from "./contract";
+import { memoryShelf as memory } from "./memory-shelf";
 import { StorageError } from "./storage";
-
-/** A stand-in for the browser's localStorage. */
-function memory(): Shelf & { items: Map<string, string> } {
-  const items = new Map<string, string>();
-  return {
-    items,
-    getItem: (key) => items.get(key) ?? null,
-    setItem: (key, value) => {
-      items.set(key, value);
-    },
-  };
-}
 
 describe("the website's browser storage", () => {
   describe("keeps the storage contract", () => {

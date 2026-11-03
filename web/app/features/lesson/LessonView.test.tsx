@@ -4,20 +4,37 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { goldenLesson } from "../content/golden";
 import type { Lesson } from "../content/types";
 import { finishLoading } from "../player/fake-youtube";
+import { NO_PROGRESS, type Progress } from "../progress/progress";
+import { createBrowserStorage } from "../storage/browser";
+import { memoryShelf } from "../storage/memory-shelf";
+import type { CourseStorage, OxidoStorage } from "../storage/storage";
 
 // The compiler's golden lesson: "Hello, Cargo", the first class of phase 1,
 // whose task is the white belt's stripes 1 and 2.
 const place = { phase: "Phase 1", phaseTitle: "First Steps", label: "Class 1.1" };
 
-async function show(lesson: Lesson = goldenLesson) {
+async function show(lesson: Lesson = goldenLesson, pick?: () => Promise<CourseStorage>) {
   vi.resetModules();
   const { LessonView } = await import("./LessonView");
+  // Imported after the reset too, so the page and the provider share one context.
+  const { ProgressProvider } = await import("../progress/ProgressProvider");
+  const page = <LessonView lesson={lesson} place={place} />;
   return render(
     <MemoryRouter>
-      <LessonView lesson={lesson} place={place} />
+      {pick ? <ProgressProvider pick={pick}>{page}</ProgressProvider> : page}
     </MemoryRouter>,
   );
 }
+
+/** oxido's storage holding this progress, as the stripes' tests would leave it. */
+const oxidoWith = (progress: Progress): OxidoStorage => ({
+  target: "oxido",
+  progress: async () => progress,
+  saveVideo: async () => {},
+  saveQuiz: async () => {},
+});
+
+const PASSED = "2026-10-01T10:00:00.000Z";
 
 const playButton = () => screen.queryByRole("button", { name: /Play video/ });
 const task = () => screen.getByRole("region", { name: /belt|Drill|Set up/ });
@@ -70,6 +87,23 @@ describe("LessonView", () => {
   it("calls class 1's task the setup", async () => {
     await show({ ...goldenLesson, task: { kind: "setup" } });
     expect(within(task()).getByRole("heading", { level: 2 }).textContent).toBe("Set up the course");
+  });
+
+  describe("the task's state", () => {
+    it("shows the task done once its stripes are earned, with nothing to mark", async () => {
+      const earned = { ...NO_PROGRESS, stripes: { "white.1": PASSED, "white.2": PASSED } };
+      await show(goldenLesson, async () => oxidoWith(earned));
+      expect(await within(task()).findByText("Done")).toBeTruthy();
+      expect(within(task()).queryByRole("button", { name: /Mark as/ })).toBeNull();
+    });
+
+    it("lets a student on the website mark the task done, and take the mark back", async () => {
+      await show(goldenLesson, async () => createBrowserStorage(memoryShelf()));
+      fireEvent.click(await within(task()).findByRole("button", { name: "Mark as done" }));
+      expect(await within(task()).findByText("Done")).toBeTruthy();
+      fireEvent.click(within(task()).getByRole("button", { name: "Mark as not done" }));
+      await waitFor(() => expect(within(task()).queryByText("Done")).toBeNull());
+    });
   });
 
   it("keeps the video and the task on one page, with no view to switch to", async () => {
