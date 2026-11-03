@@ -73,6 +73,20 @@ fn keeps_the_latest_video_position_and_the_watched_flag() {
 }
 
 #[test]
+fn a_class_knows_when_its_progress_last_changed() {
+    // The Continue card opens the class whose progress changed last.
+    let store = store();
+    assert!(!store.progress().unwrap().classes.contains_key("3.4"));
+    store.save_video_position("3.4", 120).unwrap();
+    let first = store.progress().unwrap().classes["3.4"].last_at.clone();
+    assert!(first.is_some());
+    std::thread::sleep(std::time::Duration::from_millis(5));
+    store.mark_video_watched("3.4").unwrap();
+    let after = store.progress().unwrap().classes["3.4"].last_at.clone();
+    assert!(after > first);
+}
+
+#[test]
 fn each_value_keeps_the_time_it_last_changed() {
     // An imported file merges value by value, the newer change winning
     // (decision D18), so a row that holds several values keeps a time for each.

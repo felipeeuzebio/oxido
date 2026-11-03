@@ -93,19 +93,21 @@ Queries are plain SQL through rusqlite, with no ORM (decision D19), and rows are
 | Method and path | Does |
 |---|---|
 | `GET /api/health` | `{status, version}`; no session needed |
-| `GET /api/progress` | everything: classes, quizzes, stripes |
+| `GET /api/progress` | everything: classes (with `lastAt`, when the class's progress last changed), quizzes, stripes |
 | `PUT /api/classes/{id}/video` | `{seconds?, watched?}`, saved together |
 | `PUT /api/quizzes/{id}` | `{correct, total}` and/or `{done: true}`, saved together; the best score resets if the quiz changes size |
 | `GET`, `POST /api/classes/{id}/notes` | list notes, add `{anchor: {kind: "video", seconds}, body}` |
 | `PUT`, `DELETE /api/notes/{id}` | edit `{body}`, delete (the note stays as a marker) |
 
-Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies and paths that don't parse), 401 (no session), 403 (host or origin), 404 (missing note or unknown API route), 415 (not JSON) or 500.
+Answers are JSON in camelCase, like the rest of the frontend's data (`videoSeconds`, `lastAt`). Errors come back as `{"error": "..."}` with 400 (invalid input, including bodies and paths that don't parse), 401 (no session), 403 (host or origin), 404 (missing note or unknown API route), 415 (not JSON) or 500.
 
 ## Frontend
 
 React 19 with React Router 8 in framework mode, `ssr: false`: a static single-page app whose pages are pre-rendered to HTML at build time. Vite 8 builds it (Rolldown and Oxc), with the React Compiler handling memoization. `BASE_PATH` sets the path prefix for GitHub Pages; the local server uses `/`.
 
 Errors anywhere in the app, from a missing page to a crash, land on the root `ErrorBoundary` in `root.tsx`, which shows the error page (`features/errors/`, see design.md, "Errors"). Unknown paths reach it because `oxido` answers them with the SPA fallback page and the Pages workflow copies that page to `404.html`.
+
+Progress goes through one storage interface, `CourseStorage` in `web/app/features/storage/`, with one implementation per target. At startup the page asks `/api/health` (`pick.ts`): when `oxido` answers, `oxido.ts` reads and saves progress through the API; otherwise this is the website, and `browser.ts` keeps it in `localStorage` under `oxido:progress`, with a time for each value, as the progress file does, so an export file can carry it (decision D18). The website's storage refuses what `oxido` refuses, and adds one thing `oxido` doesn't have: marking a class's task done by hand, since tests can't run there. `contract.ts` lists what both do; Vitest runs it against the browser storage, and `web/e2e/session.test.ts` against `oxido`, on the real server.
 
 During development, `bun run dev:all` runs two scripts with `bun run --parallel`: `dev:oxido` (`oxido serve --dev` on the sandbox project) and `dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878. Ctrl+C stops both, and so does either one failing.
 
@@ -119,7 +121,7 @@ Light and dark, switched by one toggle; until it's pressed, the app follows the 
 2. **Lesson page.** Video ID → YouTube player facade (loads on play) → IFrame API for time and seeking. Beside it, the class's task and its brief's HTML, whose hints (`data-seek` links) seek the player.
 3. **Quiz code editor.** CodeMirror 6, only on quiz questions with code. `oxido` writes the snippet into a scratch crate in the user's cache folder and runs `cargo clippy` or `cargo run` with a timeout → cargo's JSON messages → `oxido_core::diagnostics::parse_cargo_messages` → editor markers.
 4. **Stripes.** The student edits minisql in their own editor. `oxido` watches the files, reruns the current stripe's tests on save (`cargo test --test stripe_NN`), parses the output and pushes results to the page with server-sent events (P8). libtest's JSON output is still nightly-only, so the plain output is parsed.
-5. **Progress and notes.** Page events (video position, text read, quiz finished) → `/api` → SQLite. Stripe passes are recorded by `oxido` itself.
+5. **Progress and notes.** Page events (video position, video watched, quiz finished) → the storage interface → `/api` → SQLite, or `localStorage` on the website. Stripe passes are recorded by `oxido` itself.
 
 ## YouTube embeds
 

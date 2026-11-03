@@ -140,16 +140,22 @@ pub struct Progress {
     pub stripes: BTreeMap<String, String>,
 }
 
+// The API's JSON is camelCase, like the rest of the frontend's data.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ClassProgress {
     pub video_seconds: u32,
     pub video_watched: bool,
     /// The class's task marked done by hand. Only the website, where tests
     /// can't run, sets it; it's kept so an export file carries it both ways.
     pub task_marked: bool,
+    /// When any of the above last changed (RFC 3339, UTC), so the Continue
+    /// card can open the class the student was last in; `None` if none has.
+    pub last_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuizProgress {
     pub last_correct: u32,
     pub best_correct: u32,
@@ -172,6 +178,7 @@ pub struct NewNote {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Note {
     pub id: i64,
     pub class_id: String,
@@ -215,7 +222,10 @@ impl Store {
         let mut progress = Progress::default();
 
         let mut classes = self.conn.prepare(
-            "SELECT class_id, video_seconds, video_watched, task_marked FROM class_progress",
+            "SELECT class_id, video_seconds, video_watched, task_marked,
+               nullif(max(coalesce(video_seconds_at, ''), coalesce(video_watched_at, ''),
+                          coalesce(task_marked_at, '')), '') AS last_at
+             FROM class_progress",
         )?;
         for row in classes.query_map([], |r| {
             Ok((
@@ -224,6 +234,7 @@ impl Store {
                     video_seconds: r.get("video_seconds")?,
                     video_watched: r.get("video_watched")?,
                     task_marked: r.get("task_marked")?,
+                    last_at: r.get("last_at")?,
                 },
             ))
         })? {

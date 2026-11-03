@@ -347,9 +347,11 @@ async fn saves_and_returns_class_progress() {
 
     let (status, progress) = client.api("GET", "/api/progress", None).await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(progress["classes"]["3.4"]["video_seconds"], 391);
-    assert_eq!(progress["classes"]["3.4"]["video_watched"], true);
-    assert_eq!(progress["classes"]["3.4"]["task_marked"], false);
+    // The API speaks camelCase, like the rest of the frontend.
+    assert_eq!(progress["classes"]["3.4"]["videoSeconds"], 391);
+    assert_eq!(progress["classes"]["3.4"]["videoWatched"], true);
+    assert_eq!(progress["classes"]["3.4"]["taskMarked"], false);
+    assert!(progress["classes"]["3.4"]["lastAt"].is_string());
     assert!(progress["classes"]["3.4"].get("text_read").is_none());
 }
 
@@ -372,7 +374,7 @@ async fn records_quiz_results() {
     assert_eq!(status, StatusCode::NO_CONTENT);
 
     let (_, progress) = client.api("GET", "/api/progress", None).await;
-    assert_eq!(progress["quizzes"]["2"]["best_correct"], 7);
+    assert_eq!(progress["quizzes"]["2"]["bestCorrect"], 7);
     assert_eq!(progress["quizzes"]["2"]["done"], true);
 }
 
