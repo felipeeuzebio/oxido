@@ -202,9 +202,16 @@ async fn accepts_localhost_as_a_host_name() {
 }
 
 #[tokio::test]
-async fn the_api_needs_a_session() {
-    let (status, _, _) = open(&app(), "/api/progress").await;
+async fn the_api_needs_a_session_and_says_how_to_get_one() {
+    let (status, _, body) = open(&app(), "/api/progress").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
+    // The page shows this to the student. The link scrolls away in a busy
+    // terminal, and running oxido again opens the course with a new one.
+    let error: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(
+        error["error"],
+        "open the link oxido printed in your terminal, or run oxido again in your project folder to open the course with a new one"
+    );
 }
 
 #[tokio::test]

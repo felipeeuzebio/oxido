@@ -190,9 +190,11 @@ async fn security_headers(request: Request, next: Next) -> Response {
 
 async fn require_session(State(state): State<AppState>, request: Request, next: Next) -> Response {
     if !has_session(&state, request.headers()) {
+        // The page shows this to the student. Running oxido again in the project
+        // finds the server that's running and opens the course with a new link.
         return error(
             StatusCode::UNAUTHORIZED,
-            "open the link oxido printed in your terminal",
+            "open the link oxido printed in your terminal, or run oxido again in your project folder to open the course with a new one",
         );
     }
     let writes = !matches!(*request.method(), Method::GET | Method::HEAD);
