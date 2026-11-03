@@ -50,6 +50,7 @@ async fn running_oxido() -> u16 {
         extra_origins: vec![],
         instance: INSTANCE.into(),
         launch_file: None,
+        dev_ui: None,
     };
     let app = router(AppState::new(
         Store::open_in_memory().unwrap(),

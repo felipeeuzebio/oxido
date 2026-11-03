@@ -55,6 +55,10 @@ pub struct Config {
     pub instance: String,
     /// Where to keep the next unused launch link (`<project>/.oxido/launch`).
     pub launch_file: Option<PathBuf>,
+    /// With `--dev`, the origin of Vite's dev server, which serves the UI from
+    /// source: pages and the launch link's redirect go there, and oxido keeps
+    /// only the API.
+    pub dev_ui: Option<String>,
 }
 
 #[derive(Clone)]
@@ -74,6 +78,7 @@ struct Inner {
     cookie_name: String,
     hosts: Vec<String>,
     origins: Vec<String>,
+    dev_ui: Option<String>,
     assets: Box<dyn AssetSource>,
 }
 
@@ -95,6 +100,7 @@ impl AppState {
                 cookie_name: format!("oxido_session_{port}"),
                 hosts,
                 origins,
+                dev_ui: config.dev_ui,
                 assets: Box::new(assets),
             }),
         };
@@ -243,6 +249,10 @@ async fn serve_ui(State(state): State<AppState>, uri: Uri) -> Response {
     {
         return response;
     }
+    // With `--dev`, pages come from Vite, so a build days old never shows.
+    if state.inner.dev_ui.is_some() {
+        return Redirect::to(&page_url(&state, uri.path())).into_response();
+    }
 
     let path = uri.path().trim_start_matches('/');
     let assets = &state.inner.assets;
@@ -294,18 +304,25 @@ fn start_session(state: &AppState, uri: &Uri, token: &str) -> Option<Response> {
         "{}={}; HttpOnly; SameSite=Strict; Path=/; Max-Age={SESSION_MAX_AGE_SECS}",
         state.inner.cookie_name, state.inner.session_secret
     );
-    // Only ever redirect within oxido: "//evil.example" would leave the site.
-    let path = uri.path();
-    let target = if path.starts_with('/') && !path.starts_with("//") {
-        path
-    } else {
-        "/"
-    };
-    let mut response = Redirect::to(target).into_response();
+    let mut response = Redirect::to(&page_url(state, uri.path())).into_response();
     response
         .headers_mut()
         .insert(header::SET_COOKIE, HeaderValue::from_str(&cookie).ok()?);
     Some(response)
+}
+
+/// Where a page is: on oxido, or with `--dev` on Vite. Only ever within that
+/// site: "//evil.example" would leave it, so it becomes "/".
+fn page_url(state: &AppState, path: &str) -> String {
+    let path = if path.starts_with('/') && !path.starts_with("//") {
+        path
+    } else {
+        "/"
+    };
+    match &state.inner.dev_ui {
+        Some(vite) => format!("{vite}{path}"),
+        None => path.to_string(),
+    }
 }
 
 /// `assets/app.js`, `favicon.png` and `zen.woff2` are files; `lesson/3.4` is a

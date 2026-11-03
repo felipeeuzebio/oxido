@@ -109,7 +109,7 @@ Errors anywhere in the app, from a missing page to a crash, land on the root `Er
 
 Progress goes through one storage interface, `CourseStorage` in `web/app/features/storage/`, with one implementation per target. At startup the page asks `/api/health` (`pick.ts`): when `oxido` answers, `oxido.ts` reads and saves progress through the API; otherwise this is the website, and `browser.ts` keeps it in `localStorage` under `oxido:progress`, with a time for each value, as the progress file does, so an export file can carry it (decision D18). The website's storage refuses what `oxido` refuses, and adds one thing `oxido` doesn't have: marking a class's task done by hand, since tests can't run there. `contract.ts` lists what both do; Vitest runs it against the browser storage, and `web/e2e/session.test.ts` against `oxido`, on the real server.
 
-During development, `bun run dev:all` runs two scripts with `bun run --parallel`: `dev:oxido` (`oxido serve --dev` on the sandbox project) and `dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878. Ctrl+C stops both, and so does either one failing.
+During development, `bun run dev:all` runs two scripts with `bun run --parallel`: `dev:oxido` (`oxido serve --dev` on the sandbox project) and `dev`, which serves the UI on port 5173 and proxies `/api` to `oxido` on 7878. With `--dev`, `oxido` keeps only the API: its launch link sets the session cookie and redirects to the same path on Vite, and any page asked of it redirects there too, so the build in `web/build/client`, however old, never shows. The cookie holds for `127.0.0.1` on any port, so Vite's pages have the session. Ctrl+C stops both, and so does either one failing.
 
 ## Theme
 
