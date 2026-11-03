@@ -27,11 +27,23 @@ fn config() -> Config {
         extra_origins: vec![],
         instance: INSTANCE.into(),
         launch_file: None,
+        dev_ui: None,
     }
 }
 
 fn app() -> Router {
     app_with(config())
+}
+
+/// Vite's dev server, which `oxido serve --dev` sends pages to.
+const VITE: &str = "http://127.0.0.1:5173";
+
+fn dev_app() -> Router {
+    app_with(Config {
+        extra_origins: vec![VITE.into()],
+        dev_ui: Some(VITE.into()),
+        ..config()
+    })
 }
 
 fn app_with(config: Config) -> Router {
@@ -298,6 +310,54 @@ async fn a_wrong_token_starts_no_session() {
 async fn the_launch_link_only_redirects_within_oxido() {
     let (_, headers, _) = open(&app(), &format!("//evil.example/x?token={TOKEN}")).await;
     assert_eq!(headers[header::LOCATION], "/");
+}
+
+// `oxido serve --dev`, under `bun run dev:all`: one link signs in and goes on
+// to Vite, which serves the UI from source.
+
+#[tokio::test]
+async fn in_dev_mode_the_launch_link_signs_in_and_goes_on_to_vite() {
+    let (status, headers, _) =
+        open(&dev_app(), &format!("/lesson/p01/01-hello?token={TOKEN}")).await;
+    assert!(status.is_redirection());
+    assert_eq!(
+        headers[header::LOCATION],
+        "http://127.0.0.1:5173/lesson/p01/01-hello"
+    );
+    let cookie = headers[header::SET_COOKIE].to_str().unwrap();
+    assert!(
+        cookie.starts_with(&format!("{COOKIE_NAME}={SECRET}")),
+        "{cookie}"
+    );
+}
+
+#[tokio::test]
+async fn in_dev_mode_pages_come_from_vite_so_an_old_build_never_shows() {
+    let app = dev_app();
+    for path in ["/", "/lesson/p01/01-hello", "/assets/app-1234.js"] {
+        let (status, headers, _) = open(&app, path).await;
+        assert!(status.is_redirection(), "{path}");
+        assert_eq!(headers[header::LOCATION], format!("{VITE}{path}"), "{path}");
+    }
+    // A used launch link goes on to Vite too, without its token.
+    let (_, headers, _) = open(&app, "/?token=used-already").await;
+    assert_eq!(headers[header::LOCATION], format!("{VITE}/"));
+}
+
+#[tokio::test]
+async fn in_dev_mode_the_api_is_still_oxidos() {
+    let app = dev_app();
+    let cookie = login(&app).await;
+    let request = get("/api/progress").header(header::COOKIE, cookie);
+    let (status, headers, _) = send(&app, request.body(Body::empty()).unwrap()).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(headers[header::CONTENT_TYPE], "application/json");
+}
+
+#[tokio::test]
+async fn in_dev_mode_redirects_never_leave_for_another_site() {
+    let (_, headers, _) = open(&dev_app(), &format!("//evil.example/x?token={TOKEN}")).await;
+    assert_eq!(headers[header::LOCATION], format!("{VITE}/"));
 }
 
 #[tokio::test]

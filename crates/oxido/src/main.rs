@@ -40,7 +40,8 @@ struct ServeArgs {
     /// Don't open the browser.
     #[arg(long)]
     no_open: bool,
-    /// Also accept the Vite dev server (http://127.0.0.1:5173), for working on oxido itself.
+    /// Work on the frontend with Vite (http://127.0.0.1:5173): pages and the launch link go
+    /// there, and Vite's pages may call the API.
     #[arg(long)]
     dev: bool,
 }
@@ -99,6 +100,9 @@ fn doctor(args: &DoctorArgs) -> ExitCode {
     }
 }
 
+/// Vite's dev server (`web/vite.config.ts`), which `--dev` sends pages to.
+const VITE: &str = "http://127.0.0.1:5173";
+
 async fn serve(args: ServeArgs) -> anyhow::Result<()> {
     let project = oxido::project::find(&args.project)?;
     let launch_file = oxido::launch::path(&project);
@@ -135,10 +139,7 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
     let port = listener.local_addr()?.port();
 
     let extra_origins = if args.dev {
-        vec![
-            "http://127.0.0.1:5173".into(),
-            "http://localhost:5173".into(),
-        ]
+        vec![VITE.into(), "http://localhost:5173".into()]
     } else {
         vec![]
     };
@@ -149,14 +150,19 @@ async fn serve(args: ServeArgs) -> anyhow::Result<()> {
         extra_origins,
         instance: oxido::random_token()?,
         launch_file: Some(launch_file.clone()),
+        dev_ui: args.dev.then(|| VITE.to_string()),
     };
     let state = AppState::new(store, config, EmbeddedAssets);
-    if EmbeddedAssets::is_empty() {
+    // With --dev, Vite serves the pages, so oxido's own copy doesn't matter.
+    if !args.dev && EmbeddedAssets::is_empty() {
         tracing::warn!("the web UI isn't built: run `bun run build`, then rebuild oxido");
     }
 
     let url = format!("http://127.0.0.1:{port}/?token={launch_token}");
     println!("Oxidō is running at {url}");
+    if args.dev {
+        println!("Open that link: it signs you in and takes you to Vite at {VITE}/");
+    }
     println!("Press Ctrl+C to stop.");
     if !args.no_open && webbrowser::open(&url).is_err() {
         println!("Couldn't open a browser; open the link above yourself.");

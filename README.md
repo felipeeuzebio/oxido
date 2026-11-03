@@ -61,7 +61,7 @@ bun install                          # also installs the git hooks
 bun run build && cargo run -p oxido -- serve --project dev/sandbox  # the app as students get it
 ```
 
-For frontend work with hot reload, run `bun run dev:all`. It starts `oxido` on the sandbox project and Vite together; open the link `oxido` prints once, which starts a session, then work on http://127.0.0.1:5173. Ctrl+C stops both.
+For frontend work with hot reload, run `bun run dev:all`. It starts `oxido` on the sandbox project and Vite together. Open the link `oxido` prints: it starts a session and takes you to Vite at http://127.0.0.1:5173. Ctrl+C stops both.
 
 | Task                                        | Command                                                 |
 | ------------------------------------------- | ------------------------------------------------------- |
