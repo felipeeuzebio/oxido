@@ -17,7 +17,7 @@ How to write the title and description of a pull request in this repository. The
 
 ## Description
 
-Follow the template and keep its three sections and checkboxes in order.
+Follow the template's sections, in order.
 
 ### What and why
 
@@ -35,15 +35,18 @@ Add a short paragraph after it for each of these that applies. Reviewers send th
 
 ### Tests first
 
-Under the checkboxes, name the tests that cover the change (test names or files). For a PR with no behavior change (docs, refactor, CI), say so and name what still covers it.
+Name the tests that cover the change (test names or files). For a PR with no behavior change (docs, refactor, CI), say so and name what still covers it. There are no boxes for writing the tests first or for passing them: the review checks the first, and CI runs every check.
 
-### Checklist
+### For the maintainer
 
-Keep every item, including those that don't apply to this PR.
+Keep a box only when it applies: the content box when the PR changes an outline, a brief or a quiz, and the translation box for a translation. Delete the section when neither does. These are the template's boxes:
+
+- [ ] For content changes: the outline follows the video in order, the brief uses only what the videos so far have taught, and nothing copies transcript text
+- [ ] For translations: I read the whole translation, and any new term is in the glossary
 
 ## Checkboxes
 
-Leave every checkbox unticked. Each one is the author's own statement ("I wrote...", "I read the whole translation"), and the author ticks it after checking.
+The template only has boxes for what the maintainer alone can check: content against the video, and a whole translation read through. Leave them unticked; the maintainer ticks each one after checking. Don't add boxes for what the author or CI already checks, such as tests passing or docs updated.
 
 ## Style
 
@@ -71,15 +74,6 @@ answer under each wrong one. Closes #12.
 
 ## Tests first
 
-- [ ] I wrote or updated tests before the implementation, and they failed without it
-- [ ] `cargo test`, `bun run test` and `bun run check` pass locally
-
 Covered by "shows the correct answer under a wrong one" in
 `web/app/features/quiz/results.test.tsx`.
-
-## Checklist
-
-- [ ] Docs updated (`docs/`, `CLAUDE.md`) if behavior or structure changed
-- [ ] For content changes: the outline follows the video in order, the brief uses only what the videos so far have taught, and nothing copies transcript text
-- [ ] For translations: I read the whole translation, and any new term is in the glossary
 ```

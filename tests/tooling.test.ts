@@ -116,6 +116,16 @@ describe("pull requests", () => {
     }
   });
 
+  // CI runs every check and the review reads the diff, so the template keeps
+  // boxes only for what the maintainer alone can check.
+  it("keep checkboxes only for what the maintainer has to check", () => {
+    const boxes = read(".github/pull_request_template.md").match(/^- \[ \] .+$/gm) ?? [];
+    expect(boxes.map((box) => box.replace(/:.*/, ""))).toEqual([
+      "- [ ] For content changes",
+      "- [ ] For translations",
+    ]);
+  });
+
   // pr-instructions.md shows the template to tools that draft a PR from the
   // diff alone, so its checkboxes are the template's, word for word.
   it("show the template's checkboxes in the PR instructions", () => {
