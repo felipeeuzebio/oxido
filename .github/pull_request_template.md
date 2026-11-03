@@ -6,11 +6,11 @@
 
 ## Tests first
 
-- [ ] I wrote or updated tests before the implementation, and they failed without it
-- [ ] `cargo test`, `bun run test` and `bun run check` pass locally
+<!-- Name the tests that cover the change (test names or files). For a PR with no behavior change, say so and name what still covers it. CI runs every check, so there's nothing to tick here. -->
 
-## Checklist
+## For the maintainer
 
-- [ ] Docs updated (`docs/`, `CLAUDE.md`) if behavior or structure changed
+<!-- Keep only the boxes that apply, and delete this section when none does. The maintainer ticks a box after checking. -->
+
 - [ ] For content changes: the outline follows the video in order, the brief uses only what the videos so far have taught, and nothing copies transcript text
 - [ ] For translations: I read the whole translation, and any new term is in the glossary
